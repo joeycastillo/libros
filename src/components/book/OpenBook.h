@@ -15,8 +15,6 @@
 #define OPENBOOK_USES_IO_EXPANDER (0)
 #endif
 
-#define OPENBOOK_KNOWN_HARDWARE 1
-
 #define OPENBOOK_NOT_PRESENT (-1)
 
 #define OPENBOOK_BUTTONMASK_LEFT (1)
@@ -31,6 +29,7 @@
 
 
 #if defined(ODDLY_SPECIFIC_OPEN_BOOK)
+#define OPENBOOK_KNOWN_HARDWARE 1
 #define OPENBOOK_DISPLAY_BUS (&SPI1)
 #define OPENBOOK_SRCS (-1) // RAM chip acting wacky on one of the prototype boards, disabling for now (53)
 #define OPENBOOK_ECS (44)
@@ -65,6 +64,7 @@
 #endif
 
 #elif defined(ADAFRUIT_FEATHER_M4_EXPRESS) // e-book wing on Feather M4
+#define OPENBOOK_KNOWN_HARDWARE 1
 #define OPENBOOK_DISPLAY_BUS (&SPI)
 #define OPENBOOK_SRCS (-1)
 #define OPENBOOK_ECS (9)
