@@ -155,7 +155,7 @@ size_t BabelDevice::utf8_parse(char * string, BABEL_CODEPOINT *buf) {
 }
 
 void BabelDevice::to_uppercase(BABEL_CODEPOINT *buf, size_t len) {
-    for (int i = 0; i < len; i++) {
+    for (size_t i = 0; i < len; i++) {
         uint16_t extendedInfo = this->fetch_glyph_extended_info(buf[i]);
         if (BABEL_EXTENDED_GET_HAS_UPPERCASE_MAPPING(extendedInfo)) {
             BABEL_CODEPOINT uppercaseCodepoint = this->uppercase_mapping_for_codepoint(buf[i]);
@@ -165,7 +165,7 @@ void BabelDevice::to_uppercase(BABEL_CODEPOINT *buf, size_t len) {
 }
 
 void BabelDevice::to_lowercase(BABEL_CODEPOINT *buf, size_t len) {
-    for (int i = 0; i < len; i++) {
+    for (size_t i = 0; i < len; i++) {
         uint16_t extendedInfo = this->fetch_glyph_extended_info(buf[i]);
         if (BABEL_EXTENDED_GET_HAS_LOWERCASE_MAPPING(extendedInfo)) {
             BABEL_CODEPOINT lowercaseCodepoint = this->lowercase_mapping_for_codepoint(buf[i]);
@@ -221,7 +221,7 @@ BABEL_CODEPOINT BabelDevice::lowercase_mapping_for_codepoint(BABEL_CODEPOINT cod
 
 int16_t BabelDevice::word_wrap_position(BABEL_CODEPOINT *buf, size_t len, int16_t line_width) {
     size_t wrap_candidate = 0;
-    int16_t position_in_string = 0;
+    size_t position_in_string = 0;
     int16_t cursor_location = 0;
     bool wrapped = true;
     
