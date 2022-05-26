@@ -75,7 +75,7 @@ void setup() {
     buttonConfig.lock_pin = 12;
     book->configureButtons(LOW, buttonConfig);
 #else
-    if (!book->getSD()->begin(38)) Serial.println("No SD?");
+    book->configureSD(38, &SPI);
     book->configureScreen(-1, 39, 40, 41, 42, &SPI, 300, 400);
     book->configureBabel(44);
 #endif
