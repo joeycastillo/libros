@@ -56,20 +56,24 @@ void setup() {
     Serial.begin(115200);
     Serial.println("MVBook Demo!");
 
-    pinMode(13, INPUT_PULLUP);
-    pinMode(14, INPUT_PULLUP);
-    pinMode(15, INPUT_PULLUP);
-    pinMode(18, INPUT_PULLUP);
-    pinMode(19, INPUT_PULLUP);
-    pinMode(20, INPUT_PULLUP);
-    pinMode(21, INPUT_PULLUP);
-
 #ifdef ARDUINO_ARCH_RP2040
     MbedSPI* SPI0 = new MbedSPI(4, 3, 2);
     MbedSPI* SPI1 = new MbedSPI(12, 11, 10);
     book->configureScreen(-1, 9, 8, 7, 6, SPI1, 300, 400);
     book->configureSD(5, SPI0);
     book->configureBabel(1, SPI0);
+
+    OpenBookButtonConfig buttonConfig;
+    buttonConfig.left_pin = 13;
+    buttonConfig.down_pin = 21;
+    buttonConfig.up_pin = 19;
+    buttonConfig.right_pin = 20;
+    buttonConfig.select_pin = 14;
+    buttonConfig.previous_pin = 18;
+    buttonConfig.next_pin = 15;
+    buttonConfig.cd_pin = -1;
+    buttonConfig.lock_pin = 12;
+    book->configureButtons(LOW, buttonConfig);
 #else
     if (!book->getSD()->begin(38)) Serial.println("No SD?");
     book->configureScreen(-1, 39, 40, 41, 42, &SPI, 300, 400);
@@ -115,18 +119,7 @@ void setup() {
 }
 
 void loop() {
-    buttons = 0;
-#ifdef ARDUINO_ARCH_RP2040
-    if (digitalRead(14) == 0) buttons |= OPENBOOK_BUTTONMASK_SELECT;
-    if (digitalRead(15) == 0) buttons |= OPENBOOK_BUTTONMASK_NEXT;
-    if (digitalRead(18) == 0) buttons |= OPENBOOK_BUTTONMASK_PREVIOUS;
-    if (digitalRead(13) == 0) buttons |= OPENBOOK_BUTTONMASK_LEFT;
-    if (digitalRead(20) == 0) buttons |= OPENBOOK_BUTTONMASK_RIGHT;
-    if (digitalRead(19) == 0) buttons |= OPENBOOK_BUTTONMASK_UP;
-    if (digitalRead(21) == 0) buttons |= OPENBOOK_BUTTONMASK_DOWN;
-    if (digitalRead(12) == 0) buttons |= OPENBOOK_BUTTONMASK_LOCK;
-#else
-#endif
+    buttons = book->readButtons();
     if (buttons & OPENBOOK_BUTTONMASK_LOCK) {
         doLock();
     } else if(currentBook == NULL) {

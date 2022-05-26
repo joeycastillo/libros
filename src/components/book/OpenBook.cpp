@@ -38,35 +38,22 @@ bool OpenBook::configureScreen(int8_t srcs, int8_t ecs, int8_t edc, int8_t erst,
 }
 
 /**
- @brief Configures the buttons for devices with a shift register.
- @param latch Latch pin for the shift register
- @param data Data out pin for the shift register
- @param clock Clock pin for the shift register
- @returns true as long as you passed in valid pins.
- @note This is currently the button solution for the Open Book. The Lock button
-       is NOT on the shift register, though; it's on a SAMD51 interrupt pin, and
-       SD Card Detect is on the shift register. This feels very inelegant and I
-       may rework this in the final revision.
+ @brief Configures the buttons.
 */
-bool OpenBook::configureShiftButtons(int8_t active, int8_t latch, int8_t data, int8_t clock, int8_t lockButton) {
-    if (latch < 0 || data < 0 || clock < 0) return false;
+bool OpenBook::configureButtons(int8_t active, OpenBookButtonConfig config) {
+    int8_t pull = active ? INPUT_PULLDOWN : INPUT_PULLUP;
+    if (config.left_pin != -1) pinMode(config.left_pin, pull);
+    if (config.down_pin != -1) pinMode(config.down_pin, pull);
+    if (config.up_pin != -1) pinMode(config.up_pin, pull);
+    if (config.right_pin != -1) pinMode(config.right_pin, pull);
+    if (config.select_pin != -1) pinMode(config.select_pin, pull);
+    if (config.previous_pin != -1) pinMode(config.previous_pin, pull);
+    if (config.next_pin != -1) pinMode(config.next_pin, pull);
+    if (config.cd_pin != -1) pinMode(config.cd_pin, pull);
+    if (config.lock_pin != -1) pinMode(config.lock_pin, pull);
 
-    pinMode(latch, OUTPUT);
-    digitalWrite(latch, HIGH);
-    pinMode(data, INPUT);
-    pinMode(clock, OUTPUT);
-    digitalWrite(clock, HIGH);
-    pinMode(lockButton, INPUT_PULLUP);
-
+    this->buttonConfig = config;
     this->activeState = active;
-    this->buttonLatch = latch;
-    this->buttonData = data;
-    this->buttonClock = clock;
-    this->buttonInterrupt = lockButton;
-    // todo: implement an interrupt handler when lock button is pressed
-
-    // sometimes the first read returns a garbage value, so get that out of the way now.
-    this->readButtonRegister();
 
     return true;
 }
@@ -79,7 +66,6 @@ bool OpenBook::configureShiftButtons(int8_t active, int8_t latch, int8_t data, i
        the port expander, including the Lock button.
 */
 bool OpenBook::configureI2CButtons(int8_t active, int8_t interrupt) {
-#if OPENBOOK_USES_IO_EXPANDER
     Adafruit_MCP23008 *ioExpander = new Adafruit_MCP23008();
     ioExpander->begin();
     for (int i = 0; i <= 7; i++) {
@@ -97,9 +83,6 @@ bool OpenBook::configureI2CButtons(int8_t active, int8_t interrupt) {
     // also add interrupt feature to https://github.com/adafruit/Adafruit-MCP23008-library
 
     return true;
-#endif
-
-    return false;
 }
 
 /**
@@ -137,23 +120,19 @@ bool OpenBook::configureSD(int8_t sdcs, SPIClass *spi) {
 */
 uint8_t OpenBook::readButtons() {
     uint8_t buttonState = 0;
-#if OPENBOOK_USES_IO_EXPANDER
     if(this->ioExpander != NULL) {
         // read from I2C
         buttonState = this->ioExpander->readGPIO();
+    } else {
+        if ((this->buttonConfig.select_pin != -1) && digitalRead(this->buttonConfig.select_pin)) buttonState |= OPENBOOK_BUTTONMASK_SELECT;
+        if ((this->buttonConfig.next_pin != -1) && digitalRead(this->buttonConfig.next_pin)) buttonState |= OPENBOOK_BUTTONMASK_NEXT;
+        if ((this->buttonConfig.previous_pin != -1) && digitalRead(this->buttonConfig.previous_pin)) buttonState |= OPENBOOK_BUTTONMASK_PREVIOUS;
+        if ((this->buttonConfig.left_pin != -1) && digitalRead(this->buttonConfig.left_pin)) buttonState |= OPENBOOK_BUTTONMASK_LEFT;
+        if ((this->buttonConfig.right_pin != -1) && digitalRead(this->buttonConfig.right_pin)) buttonState |= OPENBOOK_BUTTONMASK_RIGHT;
+        if ((this->buttonConfig.up_pin != -1) && digitalRead(this->buttonConfig.up_pin)) buttonState |= OPENBOOK_BUTTONMASK_UP;
+        if ((this->buttonConfig.down_pin != -1) && digitalRead(this->buttonConfig.down_pin)) buttonState |= OPENBOOK_BUTTONMASK_DOWN;
+        if ((this->buttonConfig.lock_pin != -1) && digitalRead(this->buttonConfig.lock_pin)) buttonState |= OPENBOOK_BUTTONMASK_LOCK;
     }
-#else
-    if (this->buttonData > 0) {
-        // read from shift register
-        buttonState = this->readButtonRegister();
-        // clear high bit which is the SD card detect
-        buttonState &= 0x7f;
-        // and replace high bit with state of the lock button
-        if (this->buttonInterrupt >= 0 && !digitalRead(this->buttonInterrupt)) {
-            buttonState |= 0x80; // set high bit if lock button is low (pressed)
-        }
-    }
-#endif
     if (this->activeState == LOW) return ~buttonState; // low buttons are pressed, high buttons are being pulled up.
     else return buttonState; // high buttons are pressed, low buttons are being pulled down.
 }
@@ -175,34 +154,6 @@ OpenBookSDCardState OpenBook::sdCardState() {
     #endif
 
     return OPEN_BOOK_SD_CARD_UNKNOWN;
-}
-
-/**
- @brief Private method to read button states from the shift register.
- @returns a bitmask with the state of the shift register.
-*/
-uint8_t OpenBook::readButtonRegister() {
-    uint8_t registerData = 0;
-
-    // pulse the latch to load the current state into the shift register.
-    digitalWrite(this->buttonLatch, LOW);
-    delayMicroseconds(1);
-    digitalWrite(this->buttonLatch, HIGH);
-    delayMicroseconds(1);
-
-    for(int i = 0; i < 8; i++) {
-        // left shift the bits read so far...
-        registerData <<= 1;
-        // ...then read the next state into the low bit of the byte...
-        registerData |= digitalRead(this->buttonData);
-        // ...and finally pulse clock to shift the next state into buttonData.
-        digitalWrite(this->buttonClock, HIGH);
-        delayMicroseconds(1);
-        digitalWrite(this->buttonClock, LOW);
-        delayMicroseconds(1);
-    }
-
-    return registerData;
 }
 
 /**
