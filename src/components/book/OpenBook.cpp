@@ -122,48 +122,6 @@ bool OpenBook::configureBabel(int8_t bcs, SPIClass *spi) {
     return true;
 }
 
-/**
- @brief Configures pins for audio input and output.
- @param left DAC pin for the left or mono channel.
- @param right DAC pin for the right channel, or OPENBOOK_NOT_PRESENT if using
-              the wing where audio output is mono.
- @param inlineMic analog pin for raw input from the inline mic, or
-                  OPENBOOK_NOT_PRESENT if not available. Useful for getting
-                  presses on the inline button. Android-compatible headsets have
-                  three additional voltage levels you can read for additional
-                  functionality: https://source.android.com/devices/accessories/headset/plug-headset-spec
- @param amplifiedMic analog pin with amplified mic input, coming from the
-                     MAX4466, or OPENBOOK_NOT_PRESENT if this is not available.
-                     Wing users can plug an Adafruit or Sparkfun electret mic
-                     breakout board into a STEMMA port, and get amplified mic
-                     input that way; pass in A1 or A2, depending on the port you
-                     are using.
- @returns true as long as at least one audio pin was configured.
-*/
-bool OpenBook::configureAudio(int8_t left, int8_t right, int8_t inlineMic, int8_t amplifiedMic) {
-    int8_t channels = 0;
-    if(left >= 0) {
-        channels++;
-    }
-    if(right >= 0) {
-        channels++;
-    }
-    if(inlineMic >= 0) {
-        pinMode(inlineMic, INPUT);
-    }
-    if(amplifiedMic >= 0) {
-        pinMode(amplifiedMic, INPUT);
-    }
-
-    this->leftOutput = left;
-    this->rightOutput = right;
-    this->micInput = inlineMic;
-    this->amplifiedInput = amplifiedMic;
-    this->outputChannels = channels;
-
-    return channels || (inlineMic >= 0) || (amplifiedMic >= 0);
-}
-
 bool OpenBook::configureSD(int8_t sdcs, SPIClass *spi) {
     this->sd = new SdFat(spi);
     if (!this->sd->begin(sdcs)) return false;

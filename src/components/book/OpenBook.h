@@ -105,13 +105,11 @@ public:
     bool configureShiftButtons(int8_t active = OPENBOOK_BUTTON_ACTIVE, int8_t latch = OPENBOOK_BUTTON_LATCH, int8_t data = OPENBOOK_BUTTON_DATA, int8_t clock = OPENBOOK_BUTTON_CLOCK, int8_t lockButton = OPENBOOK_BUTTON_LOCK);
     bool configureI2CButtons(int8_t active = OPENBOOK_BUTTON_ACTIVE, int8_t interrupt = OPENBOOK_BUTTON_INTERRUPT);
     bool configureBabel(int8_t bcs = OPENBOOK_BCS);
-    bool configureAudio(int8_t left = OPENBOOK_AUDIO_L, int8_t right = OPENBOOK_AUDIO_R, int8_t inlineMic = OPENBOOK_MIC_RAW, int8_t amplifiedMic = OPENBOOK_MIC_AMPLIFIED);
 #else
     bool configureScreen(int8_t srcs, int8_t ecs, int8_t edc, int8_t erst, int8_t ebsy, SPIClass *spi, int width, int height);
     bool configureShiftButtons(int8_t active, int8_t latch, int8_t data, int8_t clock, int8_t lockButton);
     bool configureI2CButtons(int8_t active, int8_t interrupt);
     bool configureBabel(int8_t bcs, SPIClass *spi);
-    bool configureAudio(int8_t left, int8_t right, int8_t inlineMic, int8_t amplifiedMic);
     bool configureSD(int8_t sdcs, SPIClass *spi);
 #endif // OPENBOOK_KNOWN_HARDWARE
 
