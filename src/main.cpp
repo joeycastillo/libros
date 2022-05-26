@@ -65,9 +65,10 @@ void setup() {
 
 #ifdef ARDUINO_ARCH_RP2040
     if (!SD.begin(5)) Serial.println("No SD?");
+    MbedSPI* SPI0 = new MbedSPI(4, 3, 2);
     MbedSPI* SPI1 = new MbedSPI(12, 11, 10);
     book->configureScreen(-1, 9, 8, 7, 6, SPI1, 300, 400);
-    book->configureBabel(1);
+    book->configureBabel(1, SPI0);
 #else
     if (!SD.begin(38)) Serial.println("No SD?");
     book->configureScreen(-1, 39, 40, 41, 42, &SPI, 300, 400);

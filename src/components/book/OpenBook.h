@@ -109,7 +109,7 @@ public:
     bool configureScreen(int8_t srcs, int8_t ecs, int8_t edc, int8_t erst, int8_t ebsy, SPIClass *spi, int width, int height);
     bool configureShiftButtons(int8_t active, int8_t latch, int8_t data, int8_t clock, int8_t lockButton);
     bool configureI2CButtons(int8_t active, int8_t interrupt);
-    bool configureBabel(int8_t bcs);
+    bool configureBabel(int8_t bcs, SPIClass *spi);
     bool configureAudio(int8_t left, int8_t right, int8_t inlineMic, int8_t amplifiedMic);
 #endif // OPENBOOK_KNOWN_HARDWARE
 

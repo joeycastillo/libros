@@ -112,10 +112,10 @@ bool OpenBook::configureI2CButtons(int8_t active, int8_t interrupt) {
        there, we assume you've closed the jumper. Pass in a different value for
        Babel Chip Select if you've wired it to a different GPIO.
 */
-bool OpenBook::configureBabel(int8_t bcs) {
+bool OpenBook::configureBabel(int8_t bcs, SPIClass *spi) {
     if (this->display == NULL || bcs < 0) return false;
 
-    BabelTypesetterGFX *typesetter = new BabelTypesetterGFX(this->display, bcs, &SPI);
+    BabelTypesetterGFX *typesetter = new BabelTypesetterGFX(this->display, bcs, spi);
     typesetter->begin();
     this->typesetter = typesetter;
 
