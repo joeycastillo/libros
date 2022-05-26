@@ -58,7 +58,6 @@ public:
     */
     virtual void drawFillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color);
 
-    /**
     /*!
      @brief sets cursor position
      @param x x coordinate
@@ -67,28 +66,24 @@ public:
     /**************************************************************************/
     void setCursor(int16_t x, int16_t y);
 
-    /**
     /*!
      @brief gets cursor X position
     */
     /**************************************************************************/
     int16_t getCursorX();
 
-    /**
     /*!
      @brief gets cursor Y position
     */
     /**************************************************************************/
     int16_t getCursorY();
 
-    /**
     /*!
      @brief resets cursor position to origin of layout area
     */
     /**************************************************************************/
     void resetCursor();
 
-    /**
     /*!
      @brief sets the area where glyphs can be drawn
      @param x x origin of layout rect
@@ -99,7 +94,8 @@ public:
     */
     /**************************************************************************/
     void setLayoutArea(int16_t x, int16_t y, int16_t w, int16_t h);
-    /**
+
+    /*!
      @brief Draws a glyph at the given coordinates.
      @param x X coordinate of the glyph.
      @param y Y coordinate of the glyph.
@@ -109,14 +105,16 @@ public:
      @note This method simply draws the glyph; it does not touch layout direction or cursor position.
     */
     int drawGlyph(int16_t x, int16_t y, BabelGlyph glyph, uint16_t color, uint8_t size);
-    /**
+
+    /*!
      @brief Writes a glyph at the current cursor position
      @param codepoint The codepoint you wish to draw. Not UTF-8. Not UTF-16. The codepoint itself.
      @returns the number 1 if a codepoint was written, 0 if one was not.
      @note This method handles newlines and direction changes, and updates the current cursor position. It might move 8 or 16 pixels to the right, OR it might move to the left side of the next line if the text wrapped. But it could also move to the right side of the next line if the layout direction changed to RTL mode.
     */
     size_t writeCodepoint(BABEL_CODEPOINT codepoint);
-    /**
+
+    /*!
      @brief Writes a series of glyphs at the current cursor position. It will not currently wrap, but will advance the line for newlines, and automatically change the layout mode to RTL or LTR as appropriate.
      @param codepoints An array of codepoints that you wish to draw
      @param len The number of codepoints in the array
@@ -124,7 +122,8 @@ public:
      @note This method handles newlines and direction changes, and updates the current cursor position. It might move 8 or 16 pixels to the right, OR it might move to the left side of the next line if the text wrapped. But it could also move to the right side of the next line if the layout direction changed to RTL mode.
     */
     size_t writeCodepoints(BABEL_CODEPOINT codepoints[], size_t len);
-    /**
+
+    /*!
      @brief Prints a UTF-8 string at the current cursor position. It will not currently wrap, but will advance the line for newlines, and automatically change the layout mode to RTL or LTR as appropriate.
      @param utf8String a NULL-terminated UTF-8 string
      @returns the number of codepoints printed
@@ -132,14 +131,12 @@ public:
     */
     size_t print(char * utf8String);
 
-    /**
     /*!
      @brief access to the Babel abstraction, for things like getting glyphs, case mapping, word wrapping, etc.
     */
     /**************************************************************************/
     BabelDevice *getBabel();
 
-    /**
     /*!
      @brief sets text color
      @param textColor the color you want to set
@@ -147,7 +144,6 @@ public:
     /**************************************************************************/
     void setTextColor(uint16_t textColor);
 
-    /**
     /*!
      @brief sets text size
      @param textSize a size multiplier (2x, 3x, etc)
@@ -155,7 +151,6 @@ public:
     /**************************************************************************/
     void setTextSize(uint16_t textSize);
 
-    /**
     /*!
      @brief sets or unsets italic mode
      @param italic true if the text should be drawn in italic, false for non-italic
@@ -164,7 +159,6 @@ public:
     /**************************************************************************/
     void setItalic(bool italic);
 
-    /**
     /*!
      @brief sets or unsets bold mode
      @param bold true if the text should be drawn in bold, false for non-bold
@@ -173,7 +167,6 @@ public:
     /**************************************************************************/
     void setBold(bool bold);
 
-    /**
     /*!
      @brief sets the line width for word wrapping
      @param lineWidth 0 to disable word wrapping, or the max width in pixels of a line
