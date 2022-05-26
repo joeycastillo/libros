@@ -51,7 +51,7 @@ void doReader() {
             file.read(line, len);
             line[len] = 0;
             typesetter->print(line);
-            typesetter->print("\n");
+            typesetter->print((char *)"\n");
             free(line);
 
             if (atEnd) {

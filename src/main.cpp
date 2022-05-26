@@ -91,13 +91,11 @@ void setup() {
 
     File root = SD.open("/");
 
-    int i = 0;
     File entry = root.openNextFile();
     Serial.println("Adding files...");
     while (entry) {
         if (!entry.isDirectory()) {
             uint64_t magic = 0;
-            uint8_t terminator = 0;
             entry.read((void *)&magic, 8);
             if (magic == 5426643222204338255) { // the string "OPENBOOK"
               Serial.println(entry.name());

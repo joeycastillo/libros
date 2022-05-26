@@ -20,7 +20,7 @@ public:
         if (fullRefresh) {
             // render page indicator at bottom
             BabelTypesetter *typesetter = book->getTypesetter();
-            char buf[20];
+            char buf[35];
             sprintf(buf, "\n%d to %d of %d", menuOffset + 1, lastItem, menu.get_num_components());
             typesetter->setCursor(32, 360);
             typesetter->print(buf);
@@ -67,17 +67,17 @@ public:
         typesetter->setBold(true);
         typesetter->setItalic(false);
         typesetter->print(title);
-        typesetter->print("\n");
+        typesetter->print((char *)"\n");
         typesetter->setBold(false);
         typesetter->setItalic(true);
         typesetter->print(author);
         typesetter->setItalic(false);
-        typesetter->print("\n");
+        typesetter->print((char *)"\n");
         if (menu_item.is_current()) {
             selectionIndicatorOrigin = startY;
             selectionIndicatorHeight = typesetter->getCursorY() - startY + 2;
         }
-        typesetter->print("\n");
+        typesetter->print((char *)"\n");
 
         free(title);
         free(author);

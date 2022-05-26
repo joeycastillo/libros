@@ -532,8 +532,6 @@ void OpenBook_IL0398::powerDown()
 */
 /**************************************************************************/
 void OpenBook_IL0398::setWindow(uint16_t x, uint16_t y, uint16_t w, uint16_t h) {
-    uint16_t xe = (x + w - 1) | 0x0007; // byte boundary inclusive (last byte)
-    uint16_t ye = y + h - 1;
     uint8_t buf[9];
     buf[0] = x >> 8;
     buf[1] = x & 0xf8; // x should be a multiple of 8, the last 3 bits will always be ignored
