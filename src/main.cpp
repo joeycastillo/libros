@@ -120,6 +120,7 @@ void loop() {
     if (digitalRead(20) == 0) buttons |= OPENBOOK_BUTTONMASK_PREVIOUS;
     if (digitalRead(19) == 0) buttons |= OPENBOOK_BUTTONMASK_UP;
     if (digitalRead(21) == 0) buttons |= OPENBOOK_BUTTONMASK_DOWN;
+    if (digitalRead(12) == 0) buttons |= OPENBOOK_BUTTONMASK_LOCK;
 #else
 #endif
     if (buttons & OPENBOOK_BUTTONMASK_LOCK) {
