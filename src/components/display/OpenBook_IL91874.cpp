@@ -16,6 +16,7 @@
 
 #include "OpenBook_IL91874.h"
 #include "Adafruit_EPD.h"
+#include "drivers/Adafruit_IL91874.h"
 
 #define BUSY_WAIT 500
 

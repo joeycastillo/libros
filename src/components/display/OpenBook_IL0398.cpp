@@ -14,6 +14,7 @@
  */
 
 #include "OpenBook_IL0398.h"
+#include "drivers/Adafruit_IL0398.h"
 
 #define BUSY_WAIT 500
 
