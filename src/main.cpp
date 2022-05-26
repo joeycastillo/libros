@@ -56,10 +56,12 @@ void setup() {
     Serial.begin(115200);
     Serial.println("MVBook Demo!");
 
-    pinMode(14, INPUT_PULLUP);
     pinMode(13, INPUT_PULLUP);
-    pinMode(20, INPUT_PULLUP);
+    pinMode(14, INPUT_PULLUP);
+    pinMode(15, INPUT_PULLUP);
+    pinMode(18, INPUT_PULLUP);
     pinMode(19, INPUT_PULLUP);
+    pinMode(20, INPUT_PULLUP);
     pinMode(21, INPUT_PULLUP);
 
 #ifdef ARDUINO_ARCH_RP2040
@@ -98,9 +100,9 @@ void setup() {
             uint64_t magic = 0;
             entry.read((void *)&magic, 8);
             if (magic == 5426643222204338255) { // the string "OPENBOOK"
-              Serial.println(entry.name());
               char *filename = (char *)malloc(128);
               entry.getName(filename, 128);
+              Serial.println(filename);
               MenuItem *item = new MenuItem(filename, &open_file);
               ms.get_root_menu().add_item(item);
             }
@@ -116,8 +118,10 @@ void loop() {
     buttons = 0;
 #ifdef ARDUINO_ARCH_RP2040
     if (digitalRead(14) == 0) buttons |= OPENBOOK_BUTTONMASK_SELECT;
-    if (digitalRead(13) == 0) buttons |= OPENBOOK_BUTTONMASK_NEXT;
-    if (digitalRead(20) == 0) buttons |= OPENBOOK_BUTTONMASK_PREVIOUS;
+    if (digitalRead(15) == 0) buttons |= OPENBOOK_BUTTONMASK_NEXT;
+    if (digitalRead(18) == 0) buttons |= OPENBOOK_BUTTONMASK_PREVIOUS;
+    if (digitalRead(13) == 0) buttons |= OPENBOOK_BUTTONMASK_LEFT;
+    if (digitalRead(20) == 0) buttons |= OPENBOOK_BUTTONMASK_RIGHT;
     if (digitalRead(19) == 0) buttons |= OPENBOOK_BUTTONMASK_UP;
     if (digitalRead(21) == 0) buttons |= OPENBOOK_BUTTONMASK_DOWN;
     if (digitalRead(12) == 0) buttons |= OPENBOOK_BUTTONMASK_LOCK;
