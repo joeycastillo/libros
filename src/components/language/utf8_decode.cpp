@@ -53,7 +53,7 @@
 
 
 static int the_index = 0;
-static size_t the_length = 0;
+static int the_length = 0;
 static int the_char = 0;
 static int the_byte = 0;
 static char* the_input;
@@ -127,7 +127,10 @@ BABEL_CODEPOINT utf8_decode_next(void) {
     int c;  /* the first byte of the character */
     int c1; /* the first continuation character */
     int c2; /* the second continuation character */
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-but-set-variable"
     int c3; /* the third continuation character */
+#pragma GCC diagnostic pop
     int r;  /* the result */
     
     if (the_index >= the_length) {

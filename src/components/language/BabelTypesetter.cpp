@@ -180,7 +180,6 @@ size_t BabelTypesetter::writeCodepoint(BABEL_CODEPOINT codepoint) {
         return 1;
     } else {
         // word wrap should go here
-        int advance;
         if (BABEL_INFO_GET_MARK_IS_NON_SPACING(glyph.info) && this->hasLastGlyph) {
             // Draw over the last glyph, and do not add to advance
             drawGlyph(this->lastGlyphPosition.x, this->lastGlyphPosition.y, glyph, this->textColor, this->textSize);
@@ -210,7 +209,6 @@ size_t BabelTypesetter::writeCodepoints(BABEL_CODEPOINT codepoints[], size_t len
     } else {
         // TODO: make word wrapping a boolean and just use page margins.
         size_t pos = 0;
-        int loop = 0;
         while (pos < len) {
             bool write_newline = false;
             int32_t num_glyphs_to_draw = this->babelDevice->word_wrap_position(codepoints + pos, len - pos, this->lineWidth);
@@ -220,7 +218,7 @@ size_t BabelTypesetter::writeCodepoints(BABEL_CODEPOINT codepoints[], size_t len
             else {
                 write_newline = true;
             }
-            for(int i = pos; i < pos + num_glyphs_to_draw; i++) {
+            for(size_t i = pos; i < pos + num_glyphs_to_draw; i++) {
                 retVal += this->writeCodepoint(codepoints[i]);
             }
             pos += num_glyphs_to_draw;
