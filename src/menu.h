@@ -41,7 +41,7 @@ public:
     }
 
     void render_menu_item(MenuItem const& menu_item) const {
-        File file = SD.open((char *)menu_item.get_name());
+        File file = book->getSD()->open((char *)menu_item.get_name());
         file.seek(8);
         uint64_t title_loc;
         uint32_t title_len;

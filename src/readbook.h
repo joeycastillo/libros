@@ -24,7 +24,7 @@ void doReader() {
 
     if (bookNeedsRefresh) {
         // update user's stored location
-        File f = SD.open(currentProgressFile, O_WRITE | O_CREAT);
+        File f = book->getSD()->open(currentProgressFile, O_WRITE | O_CREAT);
         f.write((byte *)&currentLine, sizeof(size_t));
         f.close();
 
@@ -34,7 +34,7 @@ void doReader() {
         BabelTypesetter *typesetter = book->getTypesetter();
         typesetter->setTextColor(EPD_BLACK);
         typesetter->setLayoutArea(16, 16, 264, 368);
-        File file = SD.open(currentBook);
+        File file = book->getSD()->open(currentBook);
         for(int i = 0; i < 22; i++) {
             uint64_t loc;
             uint32_t len;

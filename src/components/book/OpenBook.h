@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <Arduino.h>
 #include <SPI.h>
+#include <SdFat.h>
 
 #include "BabelTypesetterGFX.h"
 #include "OpenBook_IL0398.h"
@@ -111,17 +112,20 @@ public:
     bool configureI2CButtons(int8_t active, int8_t interrupt);
     bool configureBabel(int8_t bcs, SPIClass *spi);
     bool configureAudio(int8_t left, int8_t right, int8_t inlineMic, int8_t amplifiedMic);
+    bool configureSD(int8_t sdcs, SPIClass *spi);
 #endif // OPENBOOK_KNOWN_HARDWARE
 
     uint8_t readButtons();
     OpenBookSDCardState sdCardState();
     OpenBook_IL0398 *getDisplay();
     BabelTypesetterGFX *getTypesetter();
+    SdFat *getSD();
 
 protected:
     uint8_t readButtonRegister();
     OpenBook_IL0398 *display = NULL;
     BabelTypesetterGFX *typesetter = NULL;
+    SdFat *sd;
 
 #if OPENBOOK_USES_IO_EXPANDER
     Adafruit_MCP23008 *ioExpander = NULL;

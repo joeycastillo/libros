@@ -7,7 +7,6 @@
  */
 #include <MenuSystem.h>
 #include "OpenBook.h"
-#include <SD.h>
 
 void doLock();
 
@@ -34,13 +33,13 @@ void open_file(MenuComponent* menu_item) {
     // create or read progress file, just an int for what line the reader is on
     strcpy(currentProgressFile, currentBook);
     currentProgressFile[strlen(currentProgressFile) - 1] = 'P';
-    if (SD.exists(currentProgressFile)) {
-        File f = SD.open(currentProgressFile, FILE_READ);
+    if (book->getSD()->exists(currentProgressFile)) {
+        File f = book->getSD()->open(currentProgressFile, FILE_READ);
         f.read(&currentLine, sizeof(size_t));
         f.close();
     } else {
         currentLine = 2; // start of lines, after title and author
-        File f = SD.open(currentProgressFile, FILE_WRITE);
+        File f = book->getSD()->open(currentProgressFile, FILE_WRITE);
         f.write((byte *)&currentLine, sizeof(size_t));
         f.close();
     }
@@ -64,13 +63,13 @@ void setup() {
     pinMode(21, INPUT_PULLUP);
 
 #ifdef ARDUINO_ARCH_RP2040
-    if (!SD.begin(5)) Serial.println("No SD?");
     MbedSPI* SPI0 = new MbedSPI(4, 3, 2);
     MbedSPI* SPI1 = new MbedSPI(12, 11, 10);
     book->configureScreen(-1, 9, 8, 7, 6, SPI1, 300, 400);
+    book->configureSD(5, SPI0);
     book->configureBabel(1, SPI0);
 #else
-    if (!SD.begin(38)) Serial.println("No SD?");
+    if (!book->getSD()->begin(38)) Serial.println("No SD?");
     book->configureScreen(-1, 39, 40, 41, 42, &SPI, 300, 400);
     book->configureBabel(44);
 #endif
@@ -90,7 +89,7 @@ void setup() {
     // restore standard rotation going forward
     display->setRotation(0);
 
-    File root = SD.open("/");
+    File root = book->getSD()->open("/");
 
     File entry = root.openNextFile();
     Serial.println("Adding files...");
@@ -100,8 +99,8 @@ void setup() {
             entry.read((void *)&magic, 8);
             if (magic == 5426643222204338255) { // the string "OPENBOOK"
               Serial.println(entry.name());
-              char *filename = (char *)malloc(13);
-              strcpy(filename, entry.name());
+              char *filename = (char *)malloc(128);
+              entry.getName(filename, 128);
               MenuItem *item = new MenuItem(filename, &open_file);
               ms.get_root_menu().add_item(item);
             }

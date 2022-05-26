@@ -164,6 +164,12 @@ bool OpenBook::configureAudio(int8_t left, int8_t right, int8_t inlineMic, int8_
     return channels || (inlineMic >= 0) || (amplifiedMic >= 0);
 }
 
+bool OpenBook::configureSD(int8_t sdcs, SPIClass *spi) {
+    this->sd = new SdFat(spi);
+    if (!this->sd->begin(sdcs)) return false;
+
+    return true;
+}
 /**
  @brief Reads button state and returns it as a byte.
  @returns a bitmask with 1 for every button that is pressed, and 0 for every
@@ -253,4 +259,11 @@ OpenBook_IL0398 * OpenBook::getDisplay() {
 */
 BabelTypesetterGFX * OpenBook::getTypesetter() {
     return this->typesetter;
+}
+
+/**
+ @returns a reference to the SD card, or NULL if not configured.
+*/
+SdFat * OpenBook::getSD() {
+    return this->sd;
 }
