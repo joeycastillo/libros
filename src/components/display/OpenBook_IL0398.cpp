@@ -437,6 +437,8 @@ void OpenBook_IL0398::init(OpenBookDisplayMode displayMode) {
     buf[3] = 0x2b;    // VDL=-11V
   }
   if (displayMode == OPEN_BOOK_DISPLAY_MODE_GRAYSCALE) {
+    buf[2] = 0x1f;    // VDH= 8.6V
+    buf[3] = 0x1f;    // VDL=-8.6V
     buf[4] = 0x13;    // VDHR=6.2V
   } else {
     buf[4] = 0x03;    // VDHR=3V
