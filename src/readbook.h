@@ -69,7 +69,11 @@ void doReader() {
         pos -= textStart;
         len -= textStart;
         uint16_t progress = (uint16_t)(300 * pos / len);
-        book->getDisplay()->fillRect(0, 384, progress, 16, EPD_BLACK);
+        book->getDisplay()->fillRect(0, 392, progress, 8, EPD_BLACK);
+        book->getDisplay()->setCursor(16, 380);
+        char buf[35];
+        sprintf(buf, "%d/%d", (int)pos, (int)len);
+        book->getDisplay()->print(buf);
 
         book->getDisplay()->setDisplayMode(OPEN_BOOK_DISPLAY_MODE_QUICK);
         book->getDisplay()->display();
