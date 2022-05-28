@@ -429,8 +429,13 @@ void OpenBook_IL0398::init(OpenBookDisplayMode displayMode) {
 
   buf[0] = 0x03;    // Panel will generate VDH and VDL (1<<0) and VGH and VGL (1<<1)
   buf[1] = 0x00;    // VCOMH=VDH+VCOMDC and VCOML=VDL+VCOMDC; VGH and VGL are 16v and -16v respectively
-  buf[2] = 0x2b;    // VDH= 11V
-  buf[3] = 0x2b;    // VDL=-11V
+  if(displayMode == OPEN_BOOK_DISPLAY_MODE_QUICK) {
+    buf[2] = 0x1f;    // VDH= 8.6V
+    buf[3] = 0x1f;    // VDL=-8.6V
+  } else {
+    buf[2] = 0x2b;    // VDH= 11V
+    buf[3] = 0x2b;    // VDL=-11V
+  }
   if (displayMode == OPEN_BOOK_DISPLAY_MODE_GRAYSCALE) {
     buf[4] = 0x13;    // VDHR=6.2V
   } else {
