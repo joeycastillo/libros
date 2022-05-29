@@ -33,5 +33,26 @@ int16_t OpenBookRawButtonInput::run(Application *application) {
             application->generateEvent(BUTTON_LOCK, 0);
         }
     }
+
+    if (!buttons) this->lastButtons = 0;
+
+    return 0;
+}
+
+OpenBookDisplay::OpenBookDisplay(OpenBook *book) {
+    this->book = book;
+}
+
+int16_t OpenBookDisplay::run(Application *application) {
+    if (application->getWindow()->needsDisplay()) {
+        Serial.println("Display needs update.");
+        OpenBook_IL0398 *display = book->getDisplay();
+        display->clearBuffer();
+        application->getWindow()->draw(display, 0, 0);
+        display->setDisplayMode(OPEN_BOOK_DISPLAY_MODE_QUICK);
+        display->display();
+        application->getWindow()->setNeedsDisplay(false);
+    }
+
     return 0;
 }

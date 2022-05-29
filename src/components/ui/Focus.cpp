@@ -1,5 +1,6 @@
 #include "Focus.h"
-#include <map>
+#include "Adafruit_EPD.h"
+#include <algorithm>
 
 Task::Task() {
 }
@@ -11,19 +12,33 @@ View::View(int16_t x, int16_t y, int16_t width, int16_t height) {
     this->width = width;
     this->height = height;
     this->window = NULL;
-    this->nextResponder = NULL;
+    this->superview = NULL;
 }
 
-void View::draw(int16_t x, int16_t y) {
+void View::draw(Adafruit_GFX *display, int16_t x, int16_t y) {
+    display->drawRect(x + this->x, y + this->y, this->width, this->height, EPD_BLACK);
+    for(View *view : this->subviews) {
+        view->draw(display, this->x, this->y);
+    }
 }
 
 void View::addSubview(View *view) {
-    view->nextResponder = this;
+    Serial.println("Adding subview. New vec size:");
+    view->superview = this;
     view->window = this->window;
+    this->subviews.push_back(view);
+    this->window->setNeedsDisplay(true);
+    Serial.println(this->subviews.size());
 }
 
 void View::removeSubview(View *view) {
-
+    Serial.println("Removing subview. New vec size:");
+    view->superview = NULL;
+    view->window = NULL;
+    int index = std::distance(this->subviews.begin(), std::find(this->subviews.begin(), this->subviews.end(), view));
+    this->subviews.erase(this->subviews.begin() + index);
+    this->window->setNeedsDisplay(true);
+    Serial.println(this->subviews.size());
 }
 
 // ADD MORE HERE
@@ -40,6 +55,10 @@ void View::setAction(Action action, EventType type) {
 
 void View::removeAction(EventType type) {
     // TODO: remove the action
+}
+
+View* View::getSuperview() {
+    return this->superview;
 }
 
 Application::Application(Window *window) {
@@ -67,7 +86,27 @@ void Application::generateEvent(EventType eventType, int32_t userInfo) {
     this->window->focusedView->handleEvent(event);
 }
 
+Window* Application::getWindow() {
+    return this->window;
+}
+
 Window::Window(int16_t x, int16_t y, int16_t width, int16_t height) : View(x,  y, width, height) {
     this->focusedView = this;
     this->window = this;
+    this->dirtyRect = MakeRect(0, 0, width, height);
+}
+void Window::setFocusTargets(View *view, View *up, View *right, View *down, View *left) {
+    // TODO
+}
+
+bool Window::needsDisplay() {
+    return (this->dirtyRect.size.width > 0 && this->dirtyRect.size.height > 0);
+}
+
+void Window::setNeedsDisplay(bool needsDisplay) {
+    if (needsDisplay) {
+        this->dirtyRect = MakeRect(0, 0, width, height);
+    } else {
+        this->dirtyRect = MakeRect(0, 0, 0, 0);
+    }
 }
