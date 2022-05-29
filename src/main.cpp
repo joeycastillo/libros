@@ -1,8 +1,10 @@
 #include "OpenBook.h"
 #include "bitmaps.h"
+#include "OpenBookApplication.h"
 
 // global reference to the Open Book hardware abstraction
 OpenBook *book;
+OpenBookApplication *application;
 
 void setup() {
     book = new OpenBook();
@@ -35,20 +37,11 @@ void setup() {
     book->configureBabel(44);
 #endif
 
-    // display splash screen with factory standard waveform. I feel pretty confident 
-    // we can use quick mode exclusively, but until I test more, I want to use the
-    // factory waveform at least once when we are first getting started.
-    OpenBook_IL0398 *display = book->getDisplay();
-    display->setRotation(1);
-    display->fillScreen(EPD_WHITE);
-    display->drawBitmap(0, 0, OpenBookSplash, 400, 300, EPD_BLACK);
-    display->display();
-    display->setDisplayMode(OPEN_BOOK_DISPLAY_MODE_QUICK);
-    display->fillScreen(EPD_WHITE);
-    display->display();
+    Window *window = new Window(0, 0, 300, 400);
+    application = new OpenBookApplication(window, book);
 
-    // restore standard rotation going forward
-    display->setRotation(0);
+    Serial.println("Entering loop...");
+    application->run();
 }
 
 void loop() {
