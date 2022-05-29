@@ -33,10 +33,7 @@ public:
             book->getDisplay()->display();
             fullRefresh = false;
         } else {
-            // note that the partial update method is a mess right now; it should rotate this to the
-            // screen orientation and expand to 8-byte boundaries, but right now i'm passing in raw coordinates
-            // from the hardware's POV (and making sure they're multiples of 8 to avoid glitchiness)
-            book->getDisplay()->displayPartial(72, 280, 320, 8);
+            book->getDisplay()->displayPartial(12, 72, 8, 320);
         }
     }
 

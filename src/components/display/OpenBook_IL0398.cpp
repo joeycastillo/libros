@@ -712,19 +712,20 @@ void OpenBook_IL0398::displayPartial(uint16_t x, uint16_t y, uint16_t w, uint16_
 
     switch (this->getRotation())
     {
-        case 1:
+        case 0:
             _swap_int16_t(x, y);
             _swap_int16_t(w, h);
             y = WIDTH - y - h;
             break;
         case 2:
-            x = HEIGHT - x - w;
-            y = WIDTH - y - h;
-            break;
-        case 3:
             _swap_int16_t(x, y);
             _swap_int16_t(w, h);
             x = HEIGHT - x - w;
+            break;
+        case 3:
+            // does not work yet
+            x = HEIGHT - x - w;
+            y = WIDTH - y - h;
             break;
     }
     EPD_command(IL0398_PARTIALIN);
