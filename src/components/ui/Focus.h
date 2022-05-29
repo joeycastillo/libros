@@ -33,6 +33,7 @@ typedef struct {
 } Rect;
 
 inline Rect MakeRect(uint16_t x, uint16_t y, uint16_t width, uint16_t height) { return {{x, y}, {width, height}}; }
+inline bool RectsEqual(Rect a, Rect b) { return (a.origin.x == b.origin.x) && (a.origin.y == b.origin.y) && (a.size.width == b.size.width) && (a.size.height == b.size.height); }
 
 class Application;
 class Window;
@@ -70,20 +71,26 @@ public:
     void setAction(Action action, EventType type);
     void removeAction(EventType type);
     View *getSuperview();
-    int16_t x, y, width, height;
+    Rect getFrame();
+    void setFrame(Rect rect);
 protected:
+    Rect frame;
     std::vector<View *> subviews;
     std::map<EventType, Action> actions;
     Window *window;
     View *superview;
+
+    friend class Window;
 };
 
 class Window : public View {
 public:
-    Window(int16_t x, int16_t y, int16_t width, int16_t height);
+    Window(int16_t width, int16_t height);
     void setFocusTargets(View *view, View *up, View *right, View *down, View *left);
     bool needsDisplay();
     void setNeedsDisplay(bool needsDisplay);
+    void setNeedsDisplayInRect(Rect rect, View *view);
+    Rect getDirtyRect();
 protected:
     Application *application;
     View *focusedView;

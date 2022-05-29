@@ -45,12 +45,21 @@ OpenBookDisplay::OpenBookDisplay(OpenBook *book) {
 
 int16_t OpenBookDisplay::run(Application *application) {
     if (application->getWindow()->needsDisplay()) {
-        Serial.println("Display needs update.");
         OpenBook_IL0398 *display = book->getDisplay();
+        Window *window = application->getWindow();
+
         display->clearBuffer();
-        application->getWindow()->draw(display, 0, 0);
-        display->setDisplayMode(OPEN_BOOK_DISPLAY_MODE_QUICK);
-        display->display();
+        window->draw(display, 0, 0);
+
+        Rect dirtyRect = window->getDirtyRect();
+
+        if (RectsEqual(dirtyRect, window->getFrame())) {
+            display->setDisplayMode(OPEN_BOOK_DISPLAY_MODE_QUICK);
+            display->display();
+        } else {
+            display->setDisplayMode(OPEN_BOOK_DISPLAY_MODE_PARTIAL);
+            display->displayPartial(dirtyRect.origin.x, dirtyRect.origin.y, dirtyRect.size.width, dirtyRect.size.height);
+        }
         application->getWindow()->setNeedsDisplay(false);
     }
 

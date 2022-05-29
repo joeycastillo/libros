@@ -7,23 +7,19 @@ Task::Task() {
 
 
 View::View(int16_t x, int16_t y, int16_t width, int16_t height) {
-    this->x = x;
-    this->y = y;
-    this->width = width;
-    this->height = height;
+    this->frame = MakeRect(x, y, width, height);
     this->window = NULL;
     this->superview = NULL;
 }
 
 void View::draw(Adafruit_GFX *display, int16_t x, int16_t y) {
-    display->drawRect(x + this->x, y + this->y, this->width, this->height, EPD_BLACK);
+    display->drawRect(x + this->frame.origin.x, y + this->frame.origin.y, this->frame.size.width, this->frame.size.height, EPD_BLACK);
     for(View *view : this->subviews) {
-        view->draw(display, this->x, this->y);
+        view->draw(display, this->frame.origin.x, this->frame.origin.y);
     }
 }
 
 void View::addSubview(View *view) {
-    Serial.println("Adding subview. New vec size:");
     view->superview = this;
     view->window = this->window;
     this->subviews.push_back(view);
@@ -32,7 +28,6 @@ void View::addSubview(View *view) {
 }
 
 void View::removeSubview(View *view) {
-    Serial.println("Removing subview. New vec size:");
     view->superview = NULL;
     view->window = NULL;
     int index = std::distance(this->subviews.begin(), std::find(this->subviews.begin(), this->subviews.end(), view));
@@ -59,6 +54,18 @@ void View::removeAction(EventType type) {
 
 View* View::getSuperview() {
     return this->superview;
+}
+
+Rect View::getFrame() {
+    return this->frame;
+}
+
+void View::setFrame(Rect frame) {
+    Rect dirtyRect = MakeRect(min(this->frame.origin.x, frame.origin.x), min(this->frame.origin.y, frame.origin.y), 0, 0);
+    dirtyRect.size.width = max(this->frame.origin.x + this->frame.size.width, frame.origin.x + frame.size.width) - dirtyRect.origin.x;
+    dirtyRect.size.height = max(this->frame.origin.y + this->frame.size.height, frame.origin.y + frame.size.height) - dirtyRect.origin.y;
+    this->frame = frame;
+    this->window->setNeedsDisplayInRect(dirtyRect, this);
 }
 
 Application::Application(Window *window) {
@@ -90,7 +97,7 @@ Window* Application::getWindow() {
     return this->window;
 }
 
-Window::Window(int16_t x, int16_t y, int16_t width, int16_t height) : View(x,  y, width, height) {
+Window::Window(int16_t width, int16_t height) : View(0, 0, width, height) {
     this->focusedView = this;
     this->window = this;
     this->dirtyRect = MakeRect(0, 0, width, height);
@@ -105,8 +112,23 @@ bool Window::needsDisplay() {
 
 void Window::setNeedsDisplay(bool needsDisplay) {
     if (needsDisplay) {
-        this->dirtyRect = MakeRect(0, 0, width, height);
+        this->dirtyRect = MakeRect(0, 0, this->frame.size.width, this->frame.size.height);
     } else {
         this->dirtyRect = MakeRect(0, 0, 0, 0);
     }
+}
+
+void Window::setNeedsDisplayInRect(Rect rect, View *view) {
+    View *superview = view; // will become superview shortly
+    do {
+        superview = superview->superview;
+        rect.origin.x += superview->frame.origin.x;
+        rect.origin.y += superview->frame.origin.y;
+    } while (superview != this);
+
+    this->dirtyRect = rect;
+}
+
+Rect Window::getDirtyRect() {
+    return this->dirtyRect;
 }
