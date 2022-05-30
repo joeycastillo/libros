@@ -3,8 +3,8 @@
 
 OpenBookApplication::OpenBookApplication(const std::shared_ptr<Window>& window, OpenBook *book) : Application(window) {
     this->book = book;
-    OpenBookRawButtonInput *inputTask = new OpenBookRawButtonInput(book);
+    std::shared_ptr<Task> inputTask = std::make_shared<OpenBookRawButtonInput>(book);
     this->addTask(inputTask);
-    OpenBookDisplay *displayTask = new OpenBookDisplay(book);
+    std::shared_ptr<Task> displayTask = std::make_shared<OpenBookDisplay>(book);
     this->addTask(displayTask);
 }

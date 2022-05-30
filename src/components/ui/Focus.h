@@ -112,12 +112,12 @@ class Application : public std::enable_shared_from_this<Application> {
 public:
     Application(const std::shared_ptr<Window>& window);
     void run();
-    void addTask(Task *task);
+    void addTask(std::shared_ptr<Task> task);
     void generateEvent(EventType eventType, int32_t userInfo);
     std::shared_ptr<Window> getWindow();
 
 protected:
-    std::vector<Task *> tasks;
+    std::vector<std::shared_ptr<Task>> tasks;
     std::shared_ptr<Window> window;
 };
 

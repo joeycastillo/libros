@@ -166,14 +166,14 @@ Application::Application(const std::shared_ptr<Window>& window) {
     this->window = window;
 }
 
-void Application::addTask(Task *task) {
+void Application::addTask(std::shared_ptr<Task> task) {
     this->tasks.push_back(task);
 }
 
 void Application::run() {
     this->window->application = this->shared_from_this();
     while(true) {
-        for(Task *task : this->tasks) {
+        for(std::shared_ptr<Task> task : this->tasks) {
             if (task->run(this) != 0) return;
         }
     }
