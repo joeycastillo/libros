@@ -46,12 +46,10 @@ typedef struct {
     int32_t userInfo;
 } Event;
 
-typedef struct {
-    View *up;
-    View *down;
-    View *left;
-    View *right;
-} FocusTarget;
+typedef enum {
+    DirectionalAffinityVertical,
+    DirectionalAffinityHorizontal,
+} DirectionalAffinity;
 
 typedef void (*Action)(Event);
 
@@ -82,6 +80,7 @@ public:
     void setFrame(Rect rect);
 protected:
     Rect frame;
+    DirectionalAffinity affinity = DirectionalAffinityVertical;
     std::vector<View *> subviews;
     std::map<EventType, Action> actions;
     Window *window;
@@ -93,8 +92,6 @@ protected:
 class Window : public View {
 public:
     Window(int16_t width, int16_t height);
-    bool handleEvent(Event event) override;
-    void setFocusTargets(View *view, View *up, View *right, View *down, View *left);
     bool needsDisplay();
     void setNeedsDisplay(bool needsDisplay);
     void setNeedsDisplayInRect(Rect rect, View *view);
@@ -105,7 +102,6 @@ protected:
     View *focusedView;
     bool dirty;
     Rect dirtyRect;
-    std::map<View *, FocusTarget> focusTargets;
 
     friend class Application;
     friend class View;

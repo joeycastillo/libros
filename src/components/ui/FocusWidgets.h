@@ -42,7 +42,6 @@ public:
     Table(int16_t x, int16_t y, int16_t width, int16_t height, int16_t cellHeight, CellSelectionStyle selectionStyle);
     void setItems(std::vector<std::string> items);
     void becomeFocused() override;
-    bool handleEvent(Event event) override;
 protected:
     void updateCells();
     int16_t cellHeight;

@@ -11,6 +11,18 @@ void setup() {
     Window *window = new Window(300, 400);
     application = new OpenBookApplication(window, book);
 
+    // View *parent = new View(32, 32, 236, 336);
+    // window->addSubview(parent);
+
+    // Button *child1 = new Button(32, 32, 128, 64, "Button 1");
+    // Button *child2 = new Button(32, 128, 128, 64, "Button 2");
+    // Button *child3 = new Button(32, 224, 128, 64, "Button 3");
+    // parent->addSubview(child1);
+    // parent->addSubview(child2);
+    // parent->addSubview(child3);
+
+    // child1->becomeFocused();
+
     Table *table = new Table(0, 0, 300, 400, 48, CellSelectionStyleInvert);
     window->addSubview(table);
 

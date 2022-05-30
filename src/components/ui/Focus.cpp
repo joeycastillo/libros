@@ -69,7 +69,39 @@ void View::didResignFocus() {
 bool View::handleEvent(Event event) {
     if (this->actions.count(event.type)) {
         this->actions[event.type](event);
-    } else if (this->superview != NULL) {
+    } else if (event.type < BUTTON_CENTER) {
+        View *focusedView = this->window->getFocusedView();
+        uint32_t index = std::distance(this->subviews.begin(), std::find(this->subviews.begin(), this->subviews.end(), focusedView));
+        switch (event.type) {
+            case BUTTON_UP:
+                if (this->affinity == DirectionalAffinityVertical && index > 0) {
+                    this->subviews[index - 1]->becomeFocused();
+                    return true;
+                }
+                break;
+            case BUTTON_DOWN:
+                if (this->affinity == DirectionalAffinityVertical && (index + 1) < this->subviews.size()) {
+                    this->subviews[index + 1]->becomeFocused();
+                    return true;
+                }
+                break;
+            case BUTTON_LEFT:
+                if (this->affinity == DirectionalAffinityHorizontal && index > 0) {
+                    this->subviews[index - 1]->becomeFocused();
+                    return true;
+                }
+                break;
+            case BUTTON_RIGHT:
+                if (this->affinity == DirectionalAffinityHorizontal && (index + 1) < this->subviews.size()) {
+                    this->subviews[index + 1]->becomeFocused();
+                    return true;
+                }
+                break;
+            default:
+                break;
+        }
+    }
+    if (this->superview != NULL) {
         this->superview->handleEvent(event);
     }
 
@@ -133,52 +165,6 @@ Window::Window(int16_t width, int16_t height) : View(0, 0, width, height) {
     this->focusedView = this;
     this->window = this;
     this->dirtyRect = MakeRect(0, 0, width, height);
-}
-
-bool Window::handleEvent(Event event) {
-    if (event.type > BUTTON_RIGHT) {
-        return View::handleEvent(event);
-    }
-
-    View *focusSource = this->focusedView;
-    while (focusSource != this && !(this->focusTargets.count(focusSource))) {
-        focusSource = focusSource->superview;
-    }
-
-    View *focusTarget = NULL;
-
-    switch (event.type) {
-        case BUTTON_UP:
-            focusTarget = this->focusTargets[focusSource].up;
-            break;
-        case BUTTON_DOWN:
-            focusTarget = this->focusTargets[focusSource].down;
-            break;
-        case BUTTON_LEFT:
-            focusTarget = this->focusTargets[focusSource].left;
-            break;
-        case BUTTON_RIGHT:
-            focusTarget = this->focusTargets[focusSource].right;
-            break;
-        default:
-            break;
-    }
-
-    if (focusTarget == NULL) {
-        return View::handleEvent(event);
-    } else {
-        focusTarget->becomeFocused();
-        return true;
-    }
-}
-
-void Window::setFocusTargets(View *view, View *up, View *right, View *down, View *left) {
-    FocusTarget target;
-    target.up = up;
-    target.down = down;
-    target.left = left;
-    target.right = right;
-    this->focusTargets[view] = target;
 }
 
 bool Window::needsDisplay() {

@@ -71,27 +71,3 @@ void Table::becomeFocused() {
         this->subviews.front()->becomeFocused();
     }
 }
-
-bool Table::handleEvent(Event event) {
-    View *focusedView = this->window->getFocusedView();
-    uint32_t index = std::distance(this->subviews.begin(), std::find(this->subviews.begin(), this->subviews.end(), focusedView));
-    switch (event.type) {
-    case BUTTON_CENTER:
-        // TODO: select the cell
-        return true;
-    case BUTTON_NEXT:
-        // TODO: pagination
-        return true;
-    case BUTTON_PREV:
-        // TODO: pagination
-        return true;
-    case BUTTON_UP:
-        if (index > 0) this->subviews[index - 1]->becomeFocused();
-        return true;
-    case BUTTON_DOWN:
-        if (index < this->subviews.size()- 1) this->subviews[index + 1]->becomeFocused();
-        return true;
-    default:
-        return false;
-    }
-}
