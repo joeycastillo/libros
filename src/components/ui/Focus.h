@@ -62,6 +62,7 @@ public:
 class View : public std::enable_shared_from_this<View> {
 public:
     View(int16_t x, int16_t y, int16_t width, int16_t height);
+    ~View();
     virtual void draw(Adafruit_GFX *display, int16_t x, int16_t y);
     virtual void addSubview(std::shared_ptr<View> view);
     void removeSubview(std::shared_ptr<View> view);
@@ -93,6 +94,7 @@ class Window : public View {
 public:
     Window(int16_t width, int16_t height);
     void addSubview(std::shared_ptr<View> view) override;
+    void becomeFocused() override;
     bool needsDisplay();
     void setNeedsDisplay(bool needsDisplay);
     void setNeedsDisplayInRect(Rect rect, std::shared_ptr<View> view);

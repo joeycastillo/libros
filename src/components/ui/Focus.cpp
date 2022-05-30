@@ -5,9 +5,16 @@ Task::Task() {
 }
 
 View::View(int16_t x, int16_t y, int16_t width, int16_t height) {
+    Serial.print("Creating view ");
+    Serial.println((int32_t) this);
     this->frame = MakeRect(x, y, width, height);
     this->window.reset();
     this->superview.reset();
+}
+
+View::~View() {
+    Serial.print("Destroying view ");
+    Serial.println((int32_t) this);
 }
 
 void View::draw(Adafruit_GFX *display, int16_t x, int16_t y) {
@@ -43,7 +50,7 @@ void View::becomeFocused() {
             window->focusedView.reset();
             oldResponder->didResignFocus();
         }
-        willBecomeFocused();
+        this->willBecomeFocused();
         window->focusedView = this->shared_from_this();
         this->didBecomeFocused();
     }
@@ -91,6 +98,8 @@ bool View::handleEvent(Event event) {
     std::shared_ptr<View> focusedView = NULL;
     if (std::shared_ptr<Window> window = this->window.lock()) {
         focusedView = window->getFocusedView().lock();
+    } else {
+        focusedView = this->shared_from_this();
     }
 
     if (focusedView == NULL) return false;
@@ -201,6 +210,18 @@ void Window::addSubview(std::shared_ptr<View> view) {
     View::addSubview(view);
 }
 
+void Window::becomeFocused() {
+    std::shared_ptr<View> oldResponder = this->focusedView.lock();
+    if (oldResponder != NULL) {
+        oldResponder->willResignFocus();
+        this->focusedView.reset();
+        oldResponder->didResignFocus();
+    }
+    this->willBecomeFocused();
+    this->focusedView = this->shared_from_this();
+    this->didBecomeFocused();
+}
+
 bool Window::needsDisplay() {
     return this->dirty;
 }
@@ -216,7 +237,6 @@ void Window::setNeedsDisplay(bool needsDisplay) {
 
 void Window::setNeedsDisplayInRect(Rect rect, std::shared_ptr<View> view) {
     std::shared_ptr<View> superview(view);
-    Serial.print("checking superview ");
     while(superview = superview->superview.lock()) {
         rect.origin.x += superview->frame.origin.x;
         rect.origin.y += superview->frame.origin.y;
