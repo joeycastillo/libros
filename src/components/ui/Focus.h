@@ -18,13 +18,13 @@ typedef enum {
 } EventType;
 
 typedef struct {
-    uint16_t x;
-    uint16_t y;
+    int16_t x;
+    int16_t y;
 } Point;
 
 typedef struct {
-    uint16_t width;
-    uint16_t height;
+    int16_t width;
+    int16_t height;
 } Size;
 
 typedef struct {
@@ -32,7 +32,7 @@ typedef struct {
     Size size;
 } Rect;
 
-inline Rect MakeRect(uint16_t x, uint16_t y, uint16_t width, uint16_t height) { return {{x, y}, {width, height}}; }
+inline Rect MakeRect(int16_t x, int16_t y, int16_t width, int16_t height) { return {{x, y}, {width, height}}; }
 inline bool RectsEqual(Rect a, Rect b) { return (a.origin.x == b.origin.x) && (a.origin.y == b.origin.y) && (a.size.width == b.size.width) && (a.size.height == b.size.height); }
 
 class Application;
@@ -45,6 +45,13 @@ typedef struct {
     View *originator;
     int32_t userInfo;
 } Event;
+
+typedef struct {
+    View *up;
+    View *down;
+    View *left;
+    View *right;
+} FocusTarget;
 
 typedef void (*Action)(Event);
 
@@ -67,7 +74,7 @@ public:
     void didBecomeFocused();
     void willResignFocus();
     void didResignFocus();
-    void handleEvent(Event event);
+    bool handleEvent(Event event);
     void setAction(Action action, EventType type);
     void removeAction(EventType type);
     View *getSuperview();
@@ -86,6 +93,7 @@ protected:
 class Window : public View {
 public:
     Window(int16_t width, int16_t height);
+    bool handleEvent(Event event);
     void setFocusTargets(View *view, View *up, View *right, View *down, View *left);
     bool needsDisplay();
     void setNeedsDisplay(bool needsDisplay);
@@ -95,8 +103,10 @@ protected:
     Application *application;
     View *focusedView;
     Rect dirtyRect;
+    std::map<View *, FocusTarget> focusTargets;
 
     friend class Application;
+    friend class View;
 };
 
 class Application {
