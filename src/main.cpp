@@ -5,12 +5,11 @@
 #include <memory>
 
 OpenBook *book;
-OpenBookApplication *application;
 
 void setup() {
     book = new OpenBook();
     std::shared_ptr<Window> window = std::make_shared<Window>(300, 400);
-    application = new OpenBookApplication(window, book);
+    std::shared_ptr<OpenBookApplication> application = std::make_shared<OpenBookApplication>(window, book);
 
     // View *parent = new View(32, 32, 236, 336);
     // window->addSubview(parent);

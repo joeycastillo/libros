@@ -60,7 +60,7 @@ public:
     virtual int16_t run(Application *application) = 0;
 };
 
-class View {
+class View : public std::enable_shared_from_this<View> {
 public:
     View(int16_t x, int16_t y, int16_t width, int16_t height);
     virtual void draw(Adafruit_GFX *display, int16_t x, int16_t y);
@@ -100,7 +100,7 @@ public:
     Rect getDirtyRect();
     View* getFocusedView();
 protected:
-    Application *application;
+    std::weak_ptr<Application> application;
     View *focusedView;
     bool dirty;
     Rect dirtyRect;
@@ -109,7 +109,7 @@ protected:
     friend class View;
 };
 
-class Application {
+class Application : public std::enable_shared_from_this<Application> {
 public:
     Application(const std::shared_ptr<Window>& window);
     void run();

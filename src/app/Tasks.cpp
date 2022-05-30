@@ -45,7 +45,6 @@ OpenBookDisplay::OpenBookDisplay(OpenBook *book) {
 
 int16_t OpenBookDisplay::run(Application *application) {
     std::shared_ptr<Window> window = application->getWindow();
-    Serial.println(window.use_count());
     if (window->needsDisplay()) {
         OpenBook_IL0398 *display = book->getDisplay();
 

@@ -160,7 +160,6 @@ void View::setFrame(Rect frame) {
 
 Application::Application(const std::shared_ptr<Window>& window) {
     this->window = window;
-    this->window->application = this;
 }
 
 void Application::addTask(Task *task) {
@@ -168,6 +167,7 @@ void Application::addTask(Task *task) {
 }
 
 void Application::run() {
+    this->window->application = this->shared_from_this();
     while(true) {
         for(Task *task : this->tasks) {
             if (task->run(this) != 0) return;
@@ -193,7 +193,7 @@ Window::Window(int16_t width, int16_t height) : View(0, 0, width, height) {
 }
 
 void Window::addSubview(View *view) {
-    view->window = this->application->getWindow(); // TODO: shared_from_this?
+    view->window = std::static_pointer_cast<Window>(this->shared_from_this());
     View::addSubview(view);
 }
 
