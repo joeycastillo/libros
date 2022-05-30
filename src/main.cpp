@@ -2,13 +2,14 @@
 #include "bitmaps.h"
 #include "OpenBookApplication.h"
 #include "FocusWidgets.h"
+#include <memory>
 
 OpenBook *book;
 OpenBookApplication *application;
 
 void setup() {
     book = new OpenBook();
-    Window *window = new Window(300, 400);
+    std::shared_ptr<Window> window = std::make_shared<Window>(300, 400);
     application = new OpenBookApplication(window, book);
 
     // View *parent = new View(32, 32, 236, 336);

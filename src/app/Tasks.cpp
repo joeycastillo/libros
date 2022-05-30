@@ -44,9 +44,10 @@ OpenBookDisplay::OpenBookDisplay(OpenBook *book) {
 }
 
 int16_t OpenBookDisplay::run(Application *application) {
-    if (application->getWindow()->needsDisplay()) {
+    std::shared_ptr<Window> window = application->getWindow();
+    Serial.println(window.use_count());
+    if (window->needsDisplay()) {
         OpenBook_IL0398 *display = book->getDisplay();
-        Window *window = application->getWindow();
 
         display->clearBuffer();
         window->draw(display, 0, 0);
@@ -60,7 +61,7 @@ int16_t OpenBookDisplay::run(Application *application) {
             display->setDisplayMode(OPEN_BOOK_DISPLAY_MODE_PARTIAL);
             display->displayPartial(dirtyRect.origin.x, dirtyRect.origin.y, dirtyRect.size.width, dirtyRect.size.height);
         }
-        application->getWindow()->setNeedsDisplay(false);
+        window->setNeedsDisplay(false);
     }
 
     return 0;

@@ -3,7 +3,7 @@
 
 class OpenBookApplication : public Application {
 public:
-    OpenBookApplication(Window *window, OpenBook *book);
+    OpenBookApplication(const std::shared_ptr<Window>& window, OpenBook *book);
 protected:
     OpenBook *book;
 };

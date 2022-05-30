@@ -6,17 +6,19 @@ Button::Button(int16_t x, int16_t y, int16_t width, int16_t height, std::string 
 }
 
 void Button::draw(Adafruit_GFX *display, int16_t x, int16_t y) {
-    display->setCursor(this->frame.origin.x + x + 8, this->frame.origin.y + y + this->frame.size.height / 2 - 4);
-    if (this->window->getFocusedView() == this) {
-        display->fillRect(x + this->frame.origin.x, y + this->frame.origin.y, this->frame.size.width, this->frame.size.height, EPD_BLACK);
-        display->setTextColor(EPD_WHITE);
-        display->print(this->text.c_str());
-    } else {
-        display->drawRect(x + this->frame.origin.x, y + this->frame.origin.y, this->frame.size.width, this->frame.size.height, EPD_BLACK);
-        display->setTextColor(EPD_BLACK);
-        display->print(this->text.c_str());
+    if (std::shared_ptr<Window> window = this->window.lock()) {
+        display->setCursor(this->frame.origin.x + x + 8, this->frame.origin.y + y + this->frame.size.height / 2 - 4);
+        if (window->getFocusedView() == this) {
+            display->fillRect(x + this->frame.origin.x, y + this->frame.origin.y, this->frame.size.width, this->frame.size.height, EPD_BLACK);
+            display->setTextColor(EPD_WHITE);
+            display->print(this->text.c_str());
+        } else {
+            display->drawRect(x + this->frame.origin.x, y + this->frame.origin.y, this->frame.size.width, this->frame.size.height, EPD_BLACK);
+            display->setTextColor(EPD_BLACK);
+            display->print(this->text.c_str());
+        }
+        View::draw(display, x, y);
     }
-    View::draw(display, x, y);
 }
 
 Cell::Cell(int16_t x, int16_t y, int16_t width, int16_t height, std::string text, CellSelectionStyle selectionStyle) : View(x, y, width, height) {
@@ -25,18 +27,20 @@ Cell::Cell(int16_t x, int16_t y, int16_t width, int16_t height, std::string text
 }
 
 void Cell::draw(Adafruit_GFX *display, int16_t x, int16_t y) {
-    display->setCursor(this->frame.origin.x + x + 8, this->frame.origin.y + y + this->frame.size.height / 2 - 4);
-    // for now only implementing CellSelectionStyleInvert, just to get up and running
-    if (this->window->getFocusedView() == this) {
-        display->fillRect(x + this->frame.origin.x, y + this->frame.origin.y, this->frame.size.width, this->frame.size.height, EPD_BLACK);
-        display->setTextColor(EPD_WHITE);
-        display->print(this->text.c_str());
-    } else {
-        display->drawRect(x + this->frame.origin.x, y + this->frame.origin.y, this->frame.size.width, this->frame.size.height, EPD_BLACK);
-        display->setTextColor(EPD_BLACK);
-        display->print(this->text.c_str());
+    if (std::shared_ptr<Window> window = this->window.lock()) {
+        display->setCursor(this->frame.origin.x + x + 8, this->frame.origin.y + y + this->frame.size.height / 2 - 4);
+        // for now only implementing CellSelectionStyleInvert, just to get up and running
+        if (window->getFocusedView() == this) {
+            display->fillRect(x + this->frame.origin.x, y + this->frame.origin.y, this->frame.size.width, this->frame.size.height, EPD_BLACK);
+            display->setTextColor(EPD_WHITE);
+            display->print(this->text.c_str());
+        } else {
+            display->drawRect(x + this->frame.origin.x, y + this->frame.origin.y, this->frame.size.width, this->frame.size.height, EPD_BLACK);
+            display->setTextColor(EPD_BLACK);
+            display->print(this->text.c_str());
+        }
+        View::draw(display, x, y);
     }
-    View::draw(display, x, y);
 }
 
 Table::Table(int16_t x, int16_t y, int16_t width, int16_t height, int16_t cellHeight, CellSelectionStyle selectionStyle) : View(x, y, width, height) {
@@ -63,7 +67,9 @@ void Table::updateCells() {
         Cell *cell = new Cell(0, this->cellHeight * i++, this->frame.size.width, this->cellHeight, text, this->selectionStyle);
         this->addSubview(cell);
     }
-    this->window->setNeedsDisplay(true);
+    if (std::shared_ptr<Window> window = this->window.lock()) {
+        window->setNeedsDisplay(true);
+    }
 }
 
 void Table::becomeFocused() {

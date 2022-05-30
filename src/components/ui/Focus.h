@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include <vector>
+#include <memory>
 #include <map>
 #include "Adafruit_GFX.h"
 
@@ -63,7 +64,7 @@ class View {
 public:
     View(int16_t x, int16_t y, int16_t width, int16_t height);
     virtual void draw(Adafruit_GFX *display, int16_t x, int16_t y);
-    void addSubview(View *view);
+    virtual void addSubview(View *view);
     void removeSubview(View *view);
     virtual void becomeFocused();
     virtual void resignFocus();
@@ -83,7 +84,7 @@ protected:
     DirectionalAffinity affinity = DirectionalAffinityVertical;
     std::vector<View *> subviews;
     std::map<EventType, Action> actions;
-    Window *window;
+    std::weak_ptr<Window> window;
     View *superview;
 
     friend class Window;
@@ -92,6 +93,7 @@ protected:
 class Window : public View {
 public:
     Window(int16_t width, int16_t height);
+    void addSubview(View *view) override;
     bool needsDisplay();
     void setNeedsDisplay(bool needsDisplay);
     void setNeedsDisplayInRect(Rect rect, View *view);
@@ -109,15 +111,15 @@ protected:
 
 class Application {
 public:
-    Application(Window *window);
+    Application(const std::shared_ptr<Window>& window);
     void run();
     void addTask(Task *task);
     void generateEvent(EventType eventType, int32_t userInfo);
-    Window *getWindow();
+    std::shared_ptr<Window> getWindow();
 
 protected:
     std::vector<Task *> tasks;
-    Window *window;
+    std::shared_ptr<Window> window;
 };
 
 #endif // Focus_h
