@@ -75,8 +75,6 @@ void View::didResignFocus() {
 bool View::handleEvent(Event event) {
     if (this->actions.count(event.type)) {
         this->actions[event.type](event);
-    } else if (this->superview == this->window && this->superview != NULL) {
-        this->window->handleEvent(event);
     } else if (this->superview != NULL) {
         this->superview->handleEvent(event);
     }

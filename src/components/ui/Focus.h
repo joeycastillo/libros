@@ -74,7 +74,7 @@ public:
     void didBecomeFocused();
     void willResignFocus();
     void didResignFocus();
-    bool handleEvent(Event event);
+    virtual bool handleEvent(Event event);
     void setAction(Action action, EventType type);
     void removeAction(EventType type);
     View *getSuperview();
@@ -93,7 +93,7 @@ protected:
 class Window : public View {
 public:
     Window(int16_t width, int16_t height);
-    bool handleEvent(Event event);
+    bool handleEvent(Event event) override;
     void setFocusTargets(View *view, View *up, View *right, View *down, View *left);
     bool needsDisplay();
     void setNeedsDisplay(bool needsDisplay);
