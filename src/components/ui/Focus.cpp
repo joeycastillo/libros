@@ -1,5 +1,4 @@
 #include "Focus.h"
-#include "Adafruit_EPD.h"
 #include <algorithm>
 
 Task::Task() {
@@ -12,11 +11,6 @@ View::View(int16_t x, int16_t y, int16_t width, int16_t height) {
 }
 
 void View::draw(Adafruit_GFX *display, int16_t x, int16_t y) {
-    if (this->window->focusedView == this) {
-        display->fillRect(x + this->frame.origin.x, y + this->frame.origin.y, this->frame.size.width, this->frame.size.height, EPD_BLACK);
-    } else {
-        display->drawRect(x + this->frame.origin.x, y + this->frame.origin.y, this->frame.size.width, this->frame.size.height, EPD_BLACK);
-    }
     for(View *view : this->subviews) {
         view->draw(display, this->frame.origin.x, this->frame.origin.y);
     }
@@ -224,4 +218,8 @@ void Window::setNeedsDisplayInRect(Rect rect, View *view) {
 Rect Window::getDirtyRect() {
     if (this->dirty) return this->dirtyRect;
     else return {0};
+}
+
+View* Window::getFocusedView() {
+    return this->focusedView;
 }

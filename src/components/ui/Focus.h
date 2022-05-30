@@ -64,16 +64,16 @@ public:
 class View {
 public:
     View(int16_t x, int16_t y, int16_t width, int16_t height);
-    void draw(Adafruit_GFX *display, int16_t x, int16_t y);
+    virtual void draw(Adafruit_GFX *display, int16_t x, int16_t y);
     void addSubview(View *view);
     void removeSubview(View *view);
-    void becomeFocused();
-    void resignFocus();
-    void movedToWindow();
-    void willBecomeFocused();
-    void didBecomeFocused();
-    void willResignFocus();
-    void didResignFocus();
+    virtual void becomeFocused();
+    virtual void resignFocus();
+    virtual void movedToWindow();
+    virtual void willBecomeFocused();
+    virtual void didBecomeFocused();
+    virtual void willResignFocus();
+    virtual void didResignFocus();
     virtual bool handleEvent(Event event);
     void setAction(Action action, EventType type);
     void removeAction(EventType type);
@@ -99,6 +99,7 @@ public:
     void setNeedsDisplay(bool needsDisplay);
     void setNeedsDisplayInRect(Rect rect, View *view);
     Rect getDirtyRect();
+    View* getFocusedView();
 protected:
     Application *application;
     View *focusedView;

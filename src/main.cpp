@@ -1,6 +1,7 @@
 #include "OpenBook.h"
 #include "bitmaps.h"
 #include "OpenBookApplication.h"
+#include "FocusWidgets.h"
 
 OpenBook *book;
 OpenBookApplication *application;
@@ -13,9 +14,9 @@ void setup() {
     parent = new View(32, 32, 236, 336);
     window->addSubview(parent);
 
-    View *child1 = new View(32, 32, 64, 64);
-    View *child2 = new View(32, 128, 64, 64);
-    View *child3 = new View(32, 224, 64, 64);
+    Button *child1 = new Button(32, 32, 128, 64, "Button 1");
+    Button *child2 = new Button(32, 128, 128, 64, "Button 2");
+    Button *child3 = new Button(32, 224, 128, 64, "Button 3");
     parent->addSubview(child1);
     parent->addSubview(child2);
     parent->addSubview(child3);
