@@ -6,9 +6,16 @@ Button::Button(int16_t x, int16_t y, int16_t width, int16_t height, std::string 
 }
 
 void Button::draw(Adafruit_GFX *display, int16_t x, int16_t y) {
+    // i hate this hack, window needs to manage views' state and communicate it down.
+    View *focusedView = NULL;
+    if (auto window = this->window.lock()) {
+        if (auto fv = window->getFocusedView().lock()) {
+            focusedView = fv.get();
+        }
+    }
     if (std::shared_ptr<Window> window = this->window.lock()) {
         display->setCursor(this->frame.origin.x + x + 8, this->frame.origin.y + y + this->frame.size.height / 2 - 4);
-        if (window->getFocusedView() == this) {
+        if (focusedView == this) {
             display->fillRect(x + this->frame.origin.x, y + this->frame.origin.y, this->frame.size.width, this->frame.size.height, EPD_BLACK);
             display->setTextColor(EPD_WHITE);
             display->print(this->text.c_str());
@@ -27,10 +34,17 @@ Cell::Cell(int16_t x, int16_t y, int16_t width, int16_t height, std::string text
 }
 
 void Cell::draw(Adafruit_GFX *display, int16_t x, int16_t y) {
+    // i hate this hack, window needs to manage views' state and communicate it down.
+    View *focusedView = NULL;
+    if (auto window = this->window.lock()) {
+        if (auto fv = window->getFocusedView().lock()) {
+            focusedView = fv.get();
+        }
+    }
     if (std::shared_ptr<Window> window = this->window.lock()) {
         display->setCursor(this->frame.origin.x + x + 8, this->frame.origin.y + y + this->frame.size.height / 2 - 4);
         // for now only implementing CellSelectionStyleInvert, just to get up and running
-        if (window->getFocusedView() == this) {
+        if (focusedView == this) {
             display->fillRect(x + this->frame.origin.x, y + this->frame.origin.y, this->frame.size.width, this->frame.size.height, EPD_BLACK);
             display->setTextColor(EPD_WHITE);
             display->print(this->text.c_str());
@@ -64,7 +78,7 @@ void Table::updateCells() {
     std::vector<std::string>::iterator it;
     uint16_t i = 0;
     for(std::string text : this->items) {
-        Cell *cell = new Cell(0, this->cellHeight * i++, this->frame.size.width, this->cellHeight, text, this->selectionStyle);
+        std::shared_ptr<Cell> cell = std::make_shared<Cell>(0, this->cellHeight * i++, this->frame.size.width, this->cellHeight, text, this->selectionStyle);
         this->addSubview(cell);
     }
     if (std::shared_ptr<Window> window = this->window.lock()) {

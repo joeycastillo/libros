@@ -43,7 +43,6 @@ class Task;
 
 typedef struct {
     EventType type;
-    View *originator;
     int32_t userInfo;
 } Event;
 
@@ -64,8 +63,8 @@ class View : public std::enable_shared_from_this<View> {
 public:
     View(int16_t x, int16_t y, int16_t width, int16_t height);
     virtual void draw(Adafruit_GFX *display, int16_t x, int16_t y);
-    virtual void addSubview(View *view);
-    void removeSubview(View *view);
+    virtual void addSubview(std::shared_ptr<View> view);
+    void removeSubview(std::shared_ptr<View> view);
     virtual void becomeFocused();
     virtual void resignFocus();
     virtual void movedToWindow();
@@ -76,16 +75,16 @@ public:
     virtual bool handleEvent(Event event);
     void setAction(Action action, EventType type);
     void removeAction(EventType type);
-    View *getSuperview();
+    std::weak_ptr<View>getSuperview();
     Rect getFrame();
     void setFrame(Rect rect);
 protected:
     Rect frame;
     DirectionalAffinity affinity = DirectionalAffinityVertical;
-    std::vector<View *> subviews;
+    std::vector<std::shared_ptr<View>> subviews;
     std::map<EventType, Action> actions;
     std::weak_ptr<Window> window;
-    View *superview;
+    std::weak_ptr<View> superview;
 
     friend class Window;
 };
@@ -93,15 +92,15 @@ protected:
 class Window : public View {
 public:
     Window(int16_t width, int16_t height);
-    void addSubview(View *view) override;
+    void addSubview(std::shared_ptr<View> view) override;
     bool needsDisplay();
     void setNeedsDisplay(bool needsDisplay);
-    void setNeedsDisplayInRect(Rect rect, View *view);
+    void setNeedsDisplayInRect(Rect rect, std::shared_ptr<View> view);
     Rect getDirtyRect();
-    View* getFocusedView();
+    std::weak_ptr<View> getFocusedView();
 protected:
     std::weak_ptr<Application> application;
-    View *focusedView;
+    std::weak_ptr<View> focusedView;
     bool dirty;
     Rect dirtyRect;
 

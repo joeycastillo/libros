@@ -23,7 +23,8 @@ void setup() {
 
     // child1->becomeFocused();
 
-    Table *table = new Table(0, 0, 300, 400, 48, CellSelectionStyleInvert);
+
+    std::shared_ptr<Table> table = std::make_shared<Table>(0, 0, 300, 400, 48, CellSelectionStyleInvert);
     window->addSubview(table);
 
     std::vector<std::string> titles;
