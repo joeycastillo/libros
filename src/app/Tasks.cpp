@@ -53,10 +53,20 @@ int16_t OpenBookDisplay::run(Application *application) {
 
         Rect dirtyRect = window->getDirtyRect();
 
+        Serial.print(dirtyRect.origin.x);
+        Serial.print(" ");
+        Serial.print(dirtyRect.origin.y);
+        Serial.print(" ");
+        Serial.print(dirtyRect.size.width);
+        Serial.print(" ");
+        Serial.print(dirtyRect.size.height);
+        Serial.print(" ");
         if (RectsEqual(dirtyRect, window->getFrame())) {
+            Serial.println("full update");
             display->setDisplayMode(OPEN_BOOK_DISPLAY_MODE_QUICK);
             display->display();
         } else {
+            Serial.println("partial update");
             display->setDisplayMode(OPEN_BOOK_DISPLAY_MODE_PARTIAL);
             display->displayPartial(dirtyRect.origin.x, dirtyRect.origin.y, dirtyRect.size.width, dirtyRect.size.height);
         }

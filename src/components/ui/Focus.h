@@ -102,6 +102,7 @@ public:
 protected:
     Application *application;
     View *focusedView;
+    bool dirty;
     Rect dirtyRect;
     std::map<View *, FocusTarget> focusTargets;
 

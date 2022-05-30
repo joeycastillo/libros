@@ -75,9 +75,9 @@ void View::didResignFocus() {
 bool View::handleEvent(Event event) {
     if (this->actions.count(event.type)) {
         this->actions[event.type](event);
-    } else if (this->superview == this->window) {
+    } else if (this->superview == this->window && this->superview != NULL) {
         this->window->handleEvent(event);
-    } else {
+    } else if (this->superview != NULL) {
         this->superview->handleEvent(event);
     }
 
@@ -190,14 +190,15 @@ void Window::setFocusTargets(View *view, View *up, View *right, View *down, View
 }
 
 bool Window::needsDisplay() {
-    return (this->dirtyRect.size.width > 0 && this->dirtyRect.size.height > 0);
+    return this->dirty;
 }
 
 void Window::setNeedsDisplay(bool needsDisplay) {
     if (needsDisplay) {
         this->dirtyRect = MakeRect(0, 0, this->frame.size.width, this->frame.size.height);
+        this->dirty = true;
     } else {
-        this->dirtyRect = MakeRect(0, 0, 0, 0);
+        this->dirty = false;
     }
 }
 
@@ -209,13 +210,20 @@ void Window::setNeedsDisplayInRect(Rect rect, View *view) {
         rect.origin.y += superview->frame.origin.y;
     } while (superview != this);
 
-    Rect dirtyRect = MakeRect(min(this->dirtyRect.origin.x, rect.origin.x), min(this->dirtyRect.origin.y, rect.origin.y), 0, 0);
-    dirtyRect.size.width = max(this->dirtyRect.origin.x + this->dirtyRect.size.width, rect.origin.x + rect.size.width) - dirtyRect.origin.x;
-    dirtyRect.size.height = max(this->dirtyRect.origin.y + this->dirtyRect.size.height, rect.origin.y + rect.size.height) - dirtyRect.origin.y;
+    Rect finalRect;
+    if (this->dirty) {
+        finalRect = MakeRect(min(this->dirtyRect.origin.x, rect.origin.x), min(this->dirtyRect.origin.y, rect.origin.y), 0, 0);
+        finalRect.size.width = max(this->dirtyRect.origin.x + this->dirtyRect.size.width, rect.origin.x + rect.size.width) - finalRect.origin.x;
+        finalRect.size.height = max(this->dirtyRect.origin.y + this->dirtyRect.size.height, rect.origin.y + rect.size.height) - finalRect.origin.y;
+    } else {
+        finalRect = rect;
+    }
 
-    this->dirtyRect = dirtyRect;
+    this->dirty = true;
+    this->dirtyRect = finalRect;
 }
 
 Rect Window::getDirtyRect() {
-    return this->dirtyRect;
+    if (this->dirty) return this->dirtyRect;
+    else return {0};
 }
