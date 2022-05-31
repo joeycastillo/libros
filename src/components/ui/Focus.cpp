@@ -96,16 +96,19 @@ void View::didResignFocus() {
 
 bool View::handleEvent(Event event) {
     std::shared_ptr<View> focusedView = NULL;
-    if (std::shared_ptr<Window> window = this->window.lock()) {
+    std::shared_ptr<Window> window = NULL;
+    if (window = this->window.lock()) {
         focusedView = window->getFocusedView().lock();
     } else {
         focusedView = this->shared_from_this();
+        if (focusedView == NULL) return false;
+        window = std::static_pointer_cast<Window, View>(focusedView);
     }
 
-    if (focusedView == NULL) return false;
-
     if (this->actions.count(event.type)) {
-        this->actions[event.type](event);
+        if (std::shared_ptr<Application> application = window->application.lock()) {
+            this->actions[event.type](application, event);
+        }
     } else if (event.type < BUTTON_CENTER) {
         uint32_t index = std::distance(this->subviews.begin(), std::find(this->subviews.begin(), this->subviews.end(), focusedView));
         switch (event.type) {
@@ -181,6 +184,8 @@ void Application::addTask(std::shared_ptr<Task> task) {
 
 void Application::run() {
     this->window->application = this->shared_from_this();
+    this->window->becomeFocused();
+    this->window->setNeedsDisplay(true);
     while(true) {
         for(std::shared_ptr<Task> task : this->tasks) {
             if (task->run(this) != 0) return;

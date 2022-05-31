@@ -51,7 +51,7 @@ typedef enum {
     DirectionalAffinityHorizontal,
 } DirectionalAffinity;
 
-typedef void (*Action)(Event);
+typedef void (*Action)(std::shared_ptr<Application>application, Event);
 
 class Task {
 public:
