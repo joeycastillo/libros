@@ -27,14 +27,14 @@
 #include <string.h>
 #include "BabelTypesetterGFX.h"
 
-BabelTypesetterGFX::BabelTypesetterGFX(Adafruit_GFX *gfx, uint8_t cs, SPIClass *spi) {
-    this->gfx = gfx;
+BabelTypesetterGFX::BabelTypesetterGFX(Adafruit_GFX *display, uint8_t cs, SPIClass *spi) {
+    this->display = display;
     this->babelDevice = new BabelSPIFlash(cs, spi);
 }
 
 #if BOARD_REQUIRES_BABEL_FILE
-BabelTypesetterGFX::BabelTypesetterGFX(Adafruit_GFX *gfx, FatFileSystem *fatfs, char *filename) {
-    this->gfx = gfx;
+BabelTypesetterGFX::BabelTypesetterGFX(Adafruit_GFX *display, FatFileSystem *fatfs, char *filename) {
+    this->display = display;
     this->babelDevice = new BabelFile(fatfs, filename);
 }
 #endif
@@ -44,9 +44,9 @@ void BabelTypesetterGFX::begin() {
 }
 
 void BabelTypesetterGFX::drawPixel(int16_t x, int16_t y, uint16_t color) {
-    this->gfx->writePixel(x, y, color);
+    this->display->writePixel(x, y, color);
 }
 
 void BabelTypesetterGFX::drawFillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color) {
-    this->gfx->writeFillRect(x, y, w, h, color);
+    this->display->writeFillRect(x, y, w, h, color);
 }

@@ -11,7 +11,7 @@
 class Button : public View {
 public:
     Button(int16_t x, int16_t y, int16_t width, int16_t height, std::string text);
-    void draw(Adafruit_GFX *display, int16_t x, int16_t y) override;
+    void draw(BabelTypesetterGFX *typesetter, int16_t x, int16_t y) override;
 protected:
     std::string text;
 };
@@ -28,7 +28,7 @@ typedef enum {
 class Cell : public View {
 public:
     Cell(int16_t x, int16_t y, int16_t width, int16_t height, std::string text, CellSelectionStyle selectionStyle);
-    void draw(Adafruit_GFX *display, int16_t x, int16_t y) override;
+    void draw(BabelTypesetterGFX *typesetter, int16_t x, int16_t y) override;
     // TODO: implement these for the indicator style
     // void willBecomeFocused() override;
     // void willResignFocus() override;

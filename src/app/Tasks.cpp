@@ -47,9 +47,10 @@ int16_t OpenBookDisplay::run(Application *application) {
     std::shared_ptr<Window> window = application->getWindow();
     if (window->needsDisplay()) {
         OpenBook_IL0398 *display = book->getDisplay();
+        BabelTypesetterGFX *typesetter = book->getTypesetter();
 
         display->clearBuffer();
-        window->draw(display, 0, 0);
+        window->draw(typesetter, 0, 0);
 
         Rect dirtyRect = window->getDirtyRect();
 

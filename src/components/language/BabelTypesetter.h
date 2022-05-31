@@ -129,7 +129,7 @@ public:
      @returns the number of codepoints printed
      @note This method handles newlines and direction changes, and updates the current cursor position. It might move 8 or 16 pixels to the right, OR it might move to the left side of the next line if the text wrapped. But it could also move to the right side of the next line if the layout direction changed to RTL mode.
     */
-    size_t print(char * utf8String);
+    size_t print(const char * utf8String);
 
     /*!
      @brief access to the Babel abstraction, for things like getting glyphs, case mapping, word wrapping, etc.

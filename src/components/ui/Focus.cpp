@@ -17,9 +17,9 @@ View::~View() {
     Serial.println((int32_t) this);
 }
 
-void View::draw(Adafruit_GFX *display, int16_t x, int16_t y) {
+void View::draw(BabelTypesetterGFX *typesetter, int16_t x, int16_t y) {
     for(std::shared_ptr<View> view : this->subviews) {
-        view->draw(display, this->frame.origin.x, this->frame.origin.y);
+        view->draw(typesetter, this->frame.origin.x, this->frame.origin.y);
     }
 }
 

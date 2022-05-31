@@ -28,7 +28,18 @@ OpenBookApplication::OpenBookApplication(const std::shared_ptr<Window>& window, 
             if (magic == 5426643222204338255) { // the string "OPENBOOK"
                 char *filename = (char *)malloc(128);
                 entry.getName(filename, 128);
-                titles.push_back(filename);
+                File file = book->getSD()->open(filename);
+                file.seek(8);
+                uint64_t title_loc;
+                uint32_t title_len;
+                file.read(&title_loc, 8);
+                file.read(&title_len, 4);
+                char *title = (char *)malloc(title_len + 1);
+                file.seek(title_loc);
+                file.read(title, title_len);
+                title[title_len] = 0;
+                titles.push_back(std::string(title));
+                free(title);
             }
         }
         entry = root.openNextFile();

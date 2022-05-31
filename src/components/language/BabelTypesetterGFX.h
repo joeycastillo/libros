@@ -39,15 +39,15 @@
 
 class BabelTypesetterGFX: public BabelTypesetter {
 public:
-    BabelTypesetterGFX(Adafruit_GFX *gfx, uint8_t cs, SPIClass *spi);
+    BabelTypesetterGFX(Adafruit_GFX *display, uint8_t cs, SPIClass *spi);
 #if BOARD_REQUIRES_BABEL_FILE
-    BabelTypesetterGFX(Adafruit_GFX *gfx, FatFileSystem *fatfs, char *filename);
+    BabelTypesetterGFX(Adafruit_GFX *display, FatFileSystem *fatfs, char *filename);
 #endif
     void begin();
     void drawPixel(int16_t x, int16_t y, uint16_t color);
     void drawFillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color);
+    Adafruit_GFX *display;
 private:
-    Adafruit_GFX *gfx;
 };
 
 #endif /* BabelTypesetterGFX_h */

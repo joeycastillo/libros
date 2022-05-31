@@ -5,7 +5,7 @@ Button::Button(int16_t x, int16_t y, int16_t width, int16_t height, std::string 
     this->text = text;
 }
 
-void Button::draw(Adafruit_GFX *display, int16_t x, int16_t y) {
+void Button::draw(BabelTypesetterGFX *typesetter, int16_t x, int16_t y) {
     // i hate this hack, window needs to manage views' state and communicate it down.
     View *focusedView = NULL;
     if (auto window = this->window.lock()) {
@@ -14,17 +14,17 @@ void Button::draw(Adafruit_GFX *display, int16_t x, int16_t y) {
         }
     }
     if (std::shared_ptr<Window> window = this->window.lock()) {
-        display->setCursor(this->frame.origin.x + x + 8, this->frame.origin.y + y + this->frame.size.height / 2 - 4);
+        typesetter->setCursor(this->frame.origin.x + x + 8, this->frame.origin.y + y + this->frame.size.height / 2 - 8);
         if (focusedView == this) {
-            display->fillRect(x + this->frame.origin.x, y + this->frame.origin.y, this->frame.size.width, this->frame.size.height, EPD_BLACK);
-            display->setTextColor(EPD_WHITE);
-            display->print(this->text.c_str());
+            typesetter->display->fillRect(x + this->frame.origin.x, y + this->frame.origin.y, this->frame.size.width, this->frame.size.height, EPD_BLACK);
+            typesetter->setTextColor(EPD_WHITE);
+            typesetter->print(this->text.c_str());
         } else {
-            display->drawRect(x + this->frame.origin.x, y + this->frame.origin.y, this->frame.size.width, this->frame.size.height, EPD_BLACK);
-            display->setTextColor(EPD_BLACK);
-            display->print(this->text.c_str());
+            typesetter->display->drawRect(x + this->frame.origin.x, y + this->frame.origin.y, this->frame.size.width, this->frame.size.height, EPD_BLACK);
+            typesetter->setTextColor(EPD_BLACK);
+            typesetter->print(this->text.c_str());
         }
-        View::draw(display, x, y);
+        View::draw(typesetter, x, y);
     }
 }
 
@@ -33,7 +33,7 @@ Cell::Cell(int16_t x, int16_t y, int16_t width, int16_t height, std::string text
     this->selectionStyle = selectionStyle;
 }
 
-void Cell::draw(Adafruit_GFX *display, int16_t x, int16_t y) {
+void Cell::draw(BabelTypesetterGFX *typesetter, int16_t x, int16_t y) {
     // i hate this hack, window needs to manage views' state and communicate it down.
     View *focusedView = NULL;
     if (auto window = this->window.lock()) {
@@ -42,18 +42,18 @@ void Cell::draw(Adafruit_GFX *display, int16_t x, int16_t y) {
         }
     }
     if (std::shared_ptr<Window> window = this->window.lock()) {
-        display->setCursor(this->frame.origin.x + x + 8, this->frame.origin.y + y + this->frame.size.height / 2 - 4);
+        typesetter->setCursor(this->frame.origin.x + x + 8, this->frame.origin.y + y + this->frame.size.height / 2 - 8);
         // for now only implementing CellSelectionStyleInvert, just to get up and running
         if (focusedView == this) {
-            display->fillRect(x + this->frame.origin.x, y + this->frame.origin.y, this->frame.size.width, this->frame.size.height, EPD_BLACK);
-            display->setTextColor(EPD_WHITE);
-            display->print(this->text.c_str());
+            typesetter->display->fillRect(x + this->frame.origin.x, y + this->frame.origin.y, this->frame.size.width, this->frame.size.height, EPD_BLACK);
+            typesetter->setTextColor(EPD_WHITE);
+            typesetter->print(this->text.c_str());
         } else {
-            display->drawRect(x + this->frame.origin.x, y + this->frame.origin.y, this->frame.size.width, this->frame.size.height, EPD_BLACK);
-            display->setTextColor(EPD_BLACK);
-            display->print(this->text.c_str());
+            // typesetter->display->drawRect(x + this->frame.origin.x, y + this->frame.origin.y, this->frame.size.width, this->frame.size.height, EPD_BLACK);
+            typesetter->setTextColor(EPD_BLACK);
+            typesetter->print(this->text.c_str());
         }
-        View::draw(display, x, y);
+        View::draw(typesetter, x, y);
     }
 }
 

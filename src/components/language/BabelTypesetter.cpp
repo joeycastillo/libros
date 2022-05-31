@@ -233,10 +233,10 @@ size_t BabelTypesetter::writeCodepoints(BABEL_CODEPOINT codepoints[], size_t len
     return retVal;
 }
 
-size_t BabelTypesetter::print(char * utf8String) {
-    size_t len = this->babelDevice->utf8_codepoint_length(utf8String);
+size_t BabelTypesetter::print(const char * utf8String) {
+    size_t len = this->babelDevice->utf8_codepoint_length((char *)utf8String);
     BABEL_CODEPOINT *codepoints = (BABEL_CODEPOINT *)malloc(len * sizeof(BABEL_CODEPOINT));
-    this->babelDevice->utf8_parse(utf8String, codepoints);
+    this->babelDevice->utf8_parse((char *)utf8String, codepoints);
     size_t retVal = this->writeCodepoints(codepoints, len);
     free(codepoints);
 
