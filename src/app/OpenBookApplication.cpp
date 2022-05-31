@@ -1,30 +1,11 @@
 #include "OpenBookApplication.h"
 #include "Tasks.h"
 
-void centerButtonPressed(std::shared_ptr<Application>application, Event event) {
-    std::shared_ptr<OpenBookApplication>myApplication = std::static_pointer_cast<OpenBookApplication, Application>(application);
-    std::shared_ptr<Window>window = myApplication->getWindow();
+void selectBook(std::shared_ptr<Application>application, Event event) {
+    std::shared_ptr<OpenBookApplication>myApp = std::static_pointer_cast<OpenBookApplication, Application>(application);
+    std::shared_ptr<Window>window = myApp->getWindow();
 
-    if (myApplication->table) {
-        window->becomeFocused();
-        window->removeSubview(myApplication->table);
-        myApplication->table.reset();
-        window->setNeedsDisplay(true);
-    } else {
-        myApplication->table = std::make_shared<Table>(0, 0, 300, 400, 48, CellSelectionStyleInvert);
-        window->addSubview(myApplication->table);
-
-        std::vector<std::string> titles;
-        titles.push_back("Pride and Prejudice");
-        titles.push_back("Alice's Adventures in Wonderland");
-        titles.push_back("The Adventures of Sherlock Holmes");
-        titles.push_back("A Tale of Two Cities");
-        titles.push_back("The Picture of Dorian Gray");
-        titles.push_back("The Great Gatsby");
-
-        myApplication->table->setItems(titles);
-        myApplication->table->becomeFocused();
-    }
+    // TODO: Remove table from view hierarchy and add reader view
 }
 
 OpenBookApplication::OpenBookApplication(const std::shared_ptr<Window>& window, OpenBook *book) : Application(window) {
@@ -34,5 +15,27 @@ OpenBookApplication::OpenBookApplication(const std::shared_ptr<Window>& window, 
     std::shared_ptr<Task> displayTask = std::make_shared<OpenBookDisplay>(book);
     this->addTask(displayTask);
 
-    window->setAction(&centerButtonPressed, BUTTON_CENTER);
+    this->table = std::make_shared<Table>(0, 0, 300, 400, 48, CellSelectionStyleInvert);
+    window->addSubview(this->table);
+    std::vector<std::string> titles;
+
+    File root = this->book->getSD()->open("/");
+    File entry = root.openNextFile();
+    while (entry) {
+        if (!entry.isDirectory()) {
+            uint64_t magic = 0;
+            entry.read((void *)&magic, 8);
+            if (magic == 5426643222204338255) { // the string "OPENBOOK"
+                char *filename = (char *)malloc(128);
+                entry.getName(filename, 128);
+                titles.push_back(filename);
+            }
+        }
+        entry = root.openNextFile();
+    }
+
+    this->table->setItems(titles);
+    this->table->becomeFocused();
+
+    this->table->setAction(&selectBook, BUTTON_CENTER);
 }
