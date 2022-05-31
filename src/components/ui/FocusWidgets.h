@@ -16,6 +16,15 @@ protected:
     std::string text;
 };
 
+class Label : public View {
+public:
+    Label(int16_t x, int16_t y, int16_t width, int16_t height, std::string text);
+    void draw(BabelTypesetterGFX *typesetter, int16_t x, int16_t y) override;
+    void setText(std::string text);
+protected:
+    std::string text;
+};
+
 typedef enum {
     CellSelectionStyleNone,
     CellSelectionStyleInvert,
@@ -42,6 +51,7 @@ public:
     Table(int16_t x, int16_t y, int16_t width, int16_t height, int16_t cellHeight, CellSelectionStyle selectionStyle);
     void setItems(std::vector<std::string> items);
     void becomeFocused() override;
+    bool handleEvent(Event event) override;
 protected:
     void updateCells();
     int16_t cellHeight;

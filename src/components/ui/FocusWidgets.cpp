@@ -28,6 +28,23 @@ void Button::draw(BabelTypesetterGFX *typesetter, int16_t x, int16_t y) {
     }
 }
 
+Label::Label(int16_t x, int16_t y, int16_t width, int16_t height, std::string text) : View(x, y, width, height) {
+    this->text = text;
+}
+
+void Label::draw(BabelTypesetterGFX *typesetter, int16_t x, int16_t y) {
+    typesetter->setLayoutArea(this->frame.origin.x + x, this->frame.origin.y + y, this->frame.size.width, this->frame.size.height);
+    typesetter->print(this->text.c_str());
+    View::draw(typesetter, x, y);
+}
+
+void Label::setText(std::string text) {
+    this->text = text;
+    if (std::shared_ptr<Window> window = this->window.lock()) {
+        window->setNeedsDisplay(true);
+    }
+}
+
 Cell::Cell(int16_t x, int16_t y, int16_t width, int16_t height, std::string text, CellSelectionStyle selectionStyle) : View(x, y, width, height) {
     this->text = text;
     this->selectionStyle = selectionStyle;
@@ -70,7 +87,6 @@ void Table::setItems(std::vector<std::string> items) {
 
 void Table::updateCells() {
     this->items = items;
-    // TODO: free these
     this->subviews.clear();
 
     uint16_t end = this->startOffset + this->cellsPerPage;
@@ -90,4 +106,17 @@ void Table::becomeFocused() {
     if (this->subviews.size()) {
         this->subviews.front()->becomeFocused();
     }
+}
+
+bool Table::handleEvent(Event event) {
+    if (event.type == BUTTON_CENTER) {
+        if (std::shared_ptr<Window> window = this->window.lock()) {
+            if (std::shared_ptr<View> focusedView = window->getFocusedView().lock()) {
+                uint32_t index = std::distance(this->subviews.begin(), std::find(this->subviews.begin(), this->subviews.end(), focusedView));
+                event.userInfo = index;
+            }
+        }
+    }
+
+    return View::handleEvent(event);
 }
