@@ -79,8 +79,14 @@ public:
     std::weak_ptr<View>getSuperview();
     Rect getFrame();
     void setFrame(Rect rect);
+    bool isOpaque();
+    void setOpaque(bool value);
+    uint16_t getBackgroundColor();
+    void setBackgroundColor(uint16_t value);
 protected:
-    Rect frame;
+    bool opaque = false;
+    uint16_t backgroundColor = 0;
+    Rect frame = {0};
     DirectionalAffinity affinity = DirectionalAffinityVertical;
     std::vector<std::shared_ptr<View>> subviews;
     std::map<EventType, Action> actions;

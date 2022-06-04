@@ -18,6 +18,9 @@ View::~View() {
 }
 
 void View::draw(BabelTypesetterGFX *typesetter, int16_t x, int16_t y) {
+    if (this->opaque || this->backgroundColor) {
+        typesetter->display->fillRect(x + this->frame.origin.x, y + this->frame.origin.y, this->frame.size.width, this->frame.size.height, this->backgroundColor);
+    }
     for(std::shared_ptr<View> view : this->subviews) {
         view->draw(typesetter, this->frame.origin.x, this->frame.origin.y);
     }
@@ -172,6 +175,22 @@ void View::setFrame(Rect frame) {
         std::shared_ptr<View> shared_this = this->shared_from_this();
         window->setNeedsDisplayInRect(dirtyRect, shared_this);
     }
+}
+
+bool View::isOpaque() {
+    return this->opaque;
+}
+
+void View::setOpaque(bool value) {
+    this->opaque = value;
+}
+
+uint16_t View::getBackgroundColor() {
+    return this->backgroundColor;
+}
+
+void View::setBackgroundColor(uint16_t value) {
+    this->backgroundColor = value;
 }
 
 Application::Application(const std::shared_ptr<Window>& window) {

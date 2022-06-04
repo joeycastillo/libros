@@ -14,6 +14,7 @@ void Button::draw(BabelTypesetterGFX *typesetter, int16_t x, int16_t y) {
         }
     }
     if (std::shared_ptr<Window> window = this->window.lock()) {
+        View::draw(typesetter, x, y);
         typesetter->setCursor(this->frame.origin.x + x + 8, this->frame.origin.y + y + this->frame.size.height / 2 - 8);
         if (focusedView == this) {
             typesetter->display->fillRect(x + this->frame.origin.x, y + this->frame.origin.y, this->frame.size.width, this->frame.size.height, EPD_BLACK);
@@ -24,7 +25,6 @@ void Button::draw(BabelTypesetterGFX *typesetter, int16_t x, int16_t y) {
             typesetter->setTextColor(EPD_BLACK);
             typesetter->print(this->text.c_str());
         }
-        View::draw(typesetter, x, y);
     }
 }
 
@@ -33,9 +33,9 @@ Label::Label(int16_t x, int16_t y, int16_t width, int16_t height, std::string te
 }
 
 void Label::draw(BabelTypesetterGFX *typesetter, int16_t x, int16_t y) {
+    View::draw(typesetter, x, y);
     typesetter->setLayoutArea(this->frame.origin.x + x, this->frame.origin.y + y, this->frame.size.width, this->frame.size.height);
     typesetter->print(this->text.c_str());
-    View::draw(typesetter, x, y);
 }
 
 void Label::setText(std::string text) {
@@ -59,6 +59,7 @@ void Cell::draw(BabelTypesetterGFX *typesetter, int16_t x, int16_t y) {
         }
     }
     if (std::shared_ptr<Window> window = this->window.lock()) {
+        View::draw(typesetter, x, y);
         typesetter->setCursor(this->frame.origin.x + x + 8, this->frame.origin.y + y + this->frame.size.height / 2 - 8);
         // for now only implementing CellSelectionStyleInvert, just to get up and running
         if (focusedView == this) {
@@ -70,7 +71,6 @@ void Cell::draw(BabelTypesetterGFX *typesetter, int16_t x, int16_t y) {
             typesetter->setTextColor(EPD_BLACK);
             typesetter->print(this->text.c_str());
         }
-        View::draw(typesetter, x, y);
     }
 }
 
