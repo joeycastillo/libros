@@ -28,6 +28,21 @@ void Button::draw(BabelTypesetterGFX *typesetter, int16_t x, int16_t y) {
     }
 }
 
+HatchedView::HatchedView(int16_t x, int16_t y, int16_t width, int16_t height, uint16_t color) : View(x, y, width, height) {
+    this->color = color;
+}
+
+void HatchedView::draw(BabelTypesetterGFX *typesetter, int16_t x, int16_t y) {
+    for(int16_t i = x; i < x + this->frame.size.width; i++) {
+        for(int16_t j = y; j < y + this->frame.size.height; j++) {
+            if ((i + j) % 2) {
+                typesetter->display->drawPixel(i, j, this->color);
+            }
+        }
+    }
+    View::draw(typesetter, x, y);
+}
+
 Label::Label(int16_t x, int16_t y, int16_t width, int16_t height, std::string text) : View(x, y, width, height) {
     this->text = text;
 }
