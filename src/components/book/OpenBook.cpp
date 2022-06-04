@@ -1,5 +1,6 @@
 #include "OpenBook.h"
 #include "OpenBook_IL0398.h"
+#include "sleep.h"
 
 OpenBook::OpenBook() {
 #ifdef ARDUINO_ARCH_RP2040
@@ -137,6 +138,23 @@ bool OpenBook::configureSD(int8_t sdcs, SPIClass *spi) {
 
     return true;
 }
+
+/**
+ @brief Locks the device and enters a low power mode. Exit using the LOCK button.
+ @details You may want to call this in response to a long timeout, or the user
+          pressing the Lock button themselves. Note that this does not change
+          what's on the screen; it's up to you to display an image or message
+          indicating the correct way to leave this locked state.
+*/
+void OpenBook::lockDevice() {
+#ifdef ARDUINO_ARCH_RP2040
+    sleep_run_from_rosc();
+    sleep_goto_dormant_until_pin(12, true, false);
+    // reset the device
+    (*((volatile uint32_t*)(PPB_BASE + 0x0ED0C))) = 0x5FA0004;
+#endif
+}
+
 /**
  @brief Reads button state and returns it as a byte.
  @returns a bitmask with 1 for every button that is pressed, and 0 for every

@@ -17,3 +17,11 @@ public:
 protected:
     OpenBook *book;
 };
+
+class OpenBookLockScreen : public Task {
+public:
+    OpenBookLockScreen(OpenBook *book);
+    int16_t run(Application *application);
+protected:
+    OpenBook *book;
+};

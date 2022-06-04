@@ -6,6 +6,7 @@
 class OpenBookApplication : public Application {
 public:
     OpenBookApplication(const std::shared_ptr<Window>& window, OpenBook *book);    
+    bool locked = false;
     size_t currentLine;
     bool bookAtEnd;
     bool bookNeedsRefresh;

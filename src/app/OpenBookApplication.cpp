@@ -5,6 +5,7 @@
 void selectBook(std::shared_ptr<Application>application, Event event);
 void turnPage(std::shared_ptr<Application>application, Event event);
 void returnHome(std::shared_ptr<Application>application, Event event);
+void lockScreen(std::shared_ptr<Application>application, Event event);
 
 // Helpers
 void updateBooks(OpenBookApplication *myApp);
@@ -12,6 +13,8 @@ void updatePage(std::shared_ptr<OpenBookApplication>myApp);
 
 OpenBookApplication::OpenBookApplication(const std::shared_ptr<Window>& window, OpenBook *book) : Application(window) {
     this->book = book;
+    std::shared_ptr<Task> lockScreenTask = std::make_shared<OpenBookLockScreen>(book);
+    this->addTask(lockScreenTask);
     std::shared_ptr<Task> inputTask = std::make_shared<OpenBookRawButtonInput>(book);
     this->addTask(inputTask);
     std::shared_ptr<Task> displayTask = std::make_shared<OpenBookDisplay>(book);
@@ -31,6 +34,9 @@ OpenBookApplication::OpenBookApplication(const std::shared_ptr<Window>& window, 
     this->page->setAction(&returnHome, BUTTON_CENTER);
     this->page->setAction(&turnPage, BUTTON_PREV);
     this->page->setAction(&turnPage, BUTTON_NEXT);
+
+    // Actions for any mode
+    this->window->setAction(&lockScreen, BUTTON_LOCK);
 }
 
 void selectBook(std::shared_ptr<Application>application, Event event) {
@@ -95,6 +101,11 @@ void returnHome(std::shared_ptr<Application>application, Event event) {
     window->addSubview(myApp->table);
     myApp->table->becomeFocused();
     window->setNeedsDisplay(true);
+}
+
+void lockScreen(std::shared_ptr<Application>application, Event event) {
+    std::shared_ptr<OpenBookApplication>myApp = std::static_pointer_cast<OpenBookApplication, Application>(application);
+    myApp->locked = true;
 }
 
 void updateBooks(OpenBookApplication *myApp) {

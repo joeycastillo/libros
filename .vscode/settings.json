@@ -56,6 +56,16 @@
         "streambuf": "cpp",
         "thread": "cpp",
         "cinttypes": "cpp",
-        "typeinfo": "cpp"
+        "typeinfo": "cpp",
+        "stdlib.h": "c",
+        "rtc.h": "c",
+        "xosc.h": "c",
+        "io_bank0.h": "c",
+        "time.h": "c",
+        "gpio.h": "c",
+        "clocks.h": "c",
+        "openbook.h": "c",
+        "openbookapplication.h": "c",
+        "arduino.h": "c"
     }
 }

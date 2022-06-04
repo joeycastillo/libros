@@ -46,6 +46,8 @@ public:
     bool configureBabel(int8_t bcs, SPIClass *spi);
     bool configureSD(int8_t sdcs, SPIClass *spi);
 
+    void lockDevice();
+
     uint8_t readButtons();
     OpenBookSDCardState sdCardState();
     OpenBook_IL0398 *getDisplay();
