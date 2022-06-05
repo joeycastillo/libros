@@ -18,10 +18,9 @@ OpenBookApplication::OpenBookApplication(const std::shared_ptr<Window>& window) 
     this->addTask(inputTask);
     std::shared_ptr<Task> displayTask = std::make_shared<OpenBookDisplay>();
     this->addTask(displayTask);
-    OpenBook *book = OpenBook::sharedInstance();
 
-    this->table = std::make_shared<BabelTable>(0, 0, 300, 400, 48, CellSelectionStyleInvert, book->getTypesetter());
-    this->page = std::make_shared<BabelLabel>(16, 16, 300 - 32, 400 - 32, "", book->getTypesetter());
+    this->table = std::make_shared<BabelTable>(0, 0, 300, 400, 48, CellSelectionStyleInvert);
+    this->page = std::make_shared<BabelLabel>(16, 16, 300 - 32, 400 - 32, "");
 
     window->addSubview(this->table);
     updateBooks(this);
