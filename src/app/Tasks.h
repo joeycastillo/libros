@@ -1,5 +1,5 @@
 #include "Focus.h"
-#include "OpenBook.h"
+#include "OpenBookDevice.h"
 
 class OpenBookRawButtonInput : public Task {
 public:

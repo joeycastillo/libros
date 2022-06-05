@@ -1,5 +1,5 @@
 #include "Focus.h"
-#include "OpenBook.h"
+#include "OpenBookDevice.h"
 #include "OpenBookWidgets.h"
 #include <memory>
 

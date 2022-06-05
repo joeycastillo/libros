@@ -1,5 +1,5 @@
-#ifndef OSO_OpenBook_h
-#define OSO_OpenBook_h
+#ifndef OpenBookDevice_h
+#define OpenBookDevice_h
 
 #include <stdint.h>
 #include <Arduino.h>
@@ -37,14 +37,14 @@ typedef struct {
     int16_t lock_pin;
 } OpenBookButtonConfig;
 
-class OpenBook {
+class OpenBookDevice {
 public:
-    static OpenBook *sharedInstance() {
-        static OpenBook instance;
+    static OpenBookDevice *sharedInstance() {
+        static OpenBookDevice instance;
         return &instance;
     }
-    OpenBook(OpenBook const&) = delete;
-    void operator=(OpenBook const&) = delete;
+    OpenBookDevice(OpenBookDevice const&) = delete;
+    void operator=(OpenBookDevice const&) = delete;
 
     bool configureScreen(int8_t srcs, int8_t ecs, int8_t edc, int8_t erst, int8_t ebsy, SPIClass *spi, int width, int height);
     bool configureButtons(int8_t active, OpenBookButtonConfig config);
@@ -69,7 +69,7 @@ protected:
     OpenBookButtonConfig buttonConfig = {0};
     int8_t activeState, buttonInterrupt;
 private:
-    OpenBook();
+    OpenBookDevice();
 };
 
-#endif // OSO_OpenBook_h
+#endif // OpenBookDevice_h

@@ -1,8 +1,8 @@
-#include "OpenBook.h"
+#include "OpenBookDevice.h"
 #include "OpenBook_IL0398.h"
 #include "sleep.h"
 
-OpenBook::OpenBook() {
+OpenBookDevice::OpenBookDevice() {
 #ifdef ARDUINO_ARCH_RP2040
     // enable secondary voltage regulator
     pinMode(0, OUTPUT);
@@ -54,7 +54,7 @@ OpenBook::OpenBook() {
         * GxEPD2: https://github.com/ZinggJM/GxEPD2
         * IL0398 Datasheet: https://cdn.sparkfun.com/assets/f/a/9/3/7/4.2in_ePaper_Driver.pdf
 */
-bool OpenBook::configureScreen(int8_t srcs, int8_t ecs, int8_t edc, int8_t erst, int8_t ebsy, SPIClass *spi, int width, int height) {
+bool OpenBookDevice::configureScreen(int8_t srcs, int8_t ecs, int8_t edc, int8_t erst, int8_t ebsy, SPIClass *spi, int width, int height) {
     OpenBook_IL0398 *display = new OpenBook_IL0398(width, height, edc, erst, ecs, srcs, ebsy, spi);
     display->begin();
     display->clearBuffer();
@@ -67,7 +67,7 @@ bool OpenBook::configureScreen(int8_t srcs, int8_t ecs, int8_t edc, int8_t erst,
 /**
  @brief Configures the buttons.
 */
-bool OpenBook::configureButtons(int8_t active, OpenBookButtonConfig config) {
+bool OpenBookDevice::configureButtons(int8_t active, OpenBookButtonConfig config) {
     int8_t pull = active ? INPUT_PULLDOWN : INPUT_PULLUP;
     if (config.left_pin != -1) pinMode(config.left_pin, pull);
     if (config.down_pin != -1) pinMode(config.down_pin, pull);
@@ -92,7 +92,7 @@ bool OpenBook::configureButtons(int8_t active, OpenBookButtonConfig config) {
  @note This is currently the button solution for the wing. All buttons are on
        the port expander, including the Lock button.
 */
-bool OpenBook::configureI2CButtons(int8_t active, int8_t interrupt) {
+bool OpenBookDevice::configureI2CButtons(int8_t active, int8_t interrupt) {
     Adafruit_MCP23008 *ioExpander = new Adafruit_MCP23008();
     ioExpander->begin();
     for (int i = 0; i <= 7; i++) {
@@ -122,7 +122,7 @@ bool OpenBook::configureI2CButtons(int8_t active, int8_t interrupt) {
        there, we assume you've closed the jumper. Pass in a different value for
        Babel Chip Select if you've wired it to a different GPIO.
 */
-bool OpenBook::configureBabel(int8_t bcs, SPIClass *spi) {
+bool OpenBookDevice::configureBabel(int8_t bcs, SPIClass *spi) {
     if (this->display == NULL || bcs < 0) return false;
 
     BabelTypesetterGFX *typesetter = new BabelTypesetterGFX(this->display, bcs, spi);
@@ -132,7 +132,7 @@ bool OpenBook::configureBabel(int8_t bcs, SPIClass *spi) {
     return true;
 }
 
-bool OpenBook::configureSD(int8_t sdcs, SPIClass *spi) {
+bool OpenBookDevice::configureSD(int8_t sdcs, SPIClass *spi) {
     this->sd = new SdFat(spi);
     if (!this->sd->begin(sdcs)) return false;
 
@@ -146,7 +146,7 @@ bool OpenBook::configureSD(int8_t sdcs, SPIClass *spi) {
           what's on the screen; it's up to you to display an image or message
           indicating the correct way to leave this locked state.
 */
-void OpenBook::lockDevice() {
+void OpenBookDevice::lockDevice() {
 #ifdef ARDUINO_ARCH_RP2040
     sleep_run_from_rosc();
     sleep_goto_dormant_until_pin(12, true, false);
@@ -162,7 +162,7 @@ void OpenBook::lockDevice() {
  @note Don't worry whether the buttons are active low or active high; this
        method abstracts that away. 1 is pressed, 0 is not pressed.
 */
-uint8_t OpenBook::readButtons() {
+uint8_t OpenBookDevice::readButtons() {
     uint8_t buttonState = 0;
     if(this->ioExpander != NULL) {
         // read from I2C
@@ -191,7 +191,7 @@ uint8_t OpenBook::readButtons() {
        The one in the DigiKey 1-click BOM does not have card detect functionality; if you
        use that one, this function will always return the same value.
 */
-OpenBookSDCardState OpenBook::sdCardState() {
+OpenBookSDCardState OpenBookDevice::sdCardState() {
     #if defined(ODDLY_SPECIFIC_OPEN_BOOK)
     if ((this->readButtonRegister() & OPENBOOK_BUTTONMASK_SDCD) == 0) return OPEN_BOOK_SD_CARD_NOT_PRESENT;
     return OPEN_BOOK_SD_CARD_PRESENT;
@@ -203,20 +203,20 @@ OpenBookSDCardState OpenBook::sdCardState() {
 /**
  @returns a reference to the e-paper display, or NULL if not configured.
 */
-OpenBook_IL0398 * OpenBook::getDisplay() {
+OpenBook_IL0398 * OpenBookDevice::getDisplay() {
     return this->display;
 }
 
 /**
  @returns a reference to the Babel typesetter, or NULL if not configured.
 */
-BabelTypesetterGFX * OpenBook::getTypesetter() {
+BabelTypesetterGFX * OpenBookDevice::getTypesetter() {
     return this->typesetter;
 }
 
 /**
  @returns a reference to the SD card, or NULL if not configured.
 */
-SdFat * OpenBook::getSD() {
+SdFat * OpenBookDevice::getSD() {
     return this->sd;
 }
