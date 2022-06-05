@@ -1,6 +1,6 @@
 #include "Focus.h"
 #include "OpenBook.h"
-#include "FocusWidgets.h"
+#include "BabelWidgets.h"
 #include <memory>
 
 class OpenBookApplication : public Application {
@@ -14,7 +14,7 @@ public:
     std::string currentBook;
 
     std::vector<std::string> filenames;
-    std::shared_ptr<Table> table;
-    std::shared_ptr<Label> page;
+    std::shared_ptr<BabelTable> table;
+    std::shared_ptr<BabelLabel> page;
     OpenBook *book;
 };

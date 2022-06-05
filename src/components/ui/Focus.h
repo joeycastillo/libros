@@ -5,7 +5,7 @@
 #include <vector>
 #include <memory>
 #include <map>
-#include "BabelTypesetterGFX.h"
+#include "Adafruit_GFX.h"
 
 typedef enum {
     BUTTON_LEFT,
@@ -63,7 +63,7 @@ class View : public std::enable_shared_from_this<View> {
 public:
     View(int16_t x, int16_t y, int16_t width, int16_t height);
     ~View();
-    virtual void draw(BabelTypesetterGFX *typesetter, int16_t x, int16_t y);
+    virtual void draw(Adafruit_GFX *display, int16_t x, int16_t y);
     virtual void addSubview(std::shared_ptr<View> view);
     void removeSubview(std::shared_ptr<View> view);
     virtual void becomeFocused();
@@ -86,6 +86,7 @@ public:
 protected:
     bool opaque = false;
     uint16_t backgroundColor = 0;
+    uint16_t foregroundColor = 1;
     Rect frame = {0};
     DirectionalAffinity affinity = DirectionalAffinityVertical;
     std::vector<std::shared_ptr<View>> subviews;

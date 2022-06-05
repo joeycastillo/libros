@@ -1,4 +1,5 @@
 #include "Focus.h"
+#include "Arduino.h"
 #include <algorithm>
 
 Task::Task() {
@@ -17,16 +18,16 @@ View::~View() {
     Serial.println((int32_t) this);
 }
 
-void View::draw(BabelTypesetterGFX *typesetter, int16_t x, int16_t y) {
+void View::draw(Adafruit_GFX *display, int16_t x, int16_t y) {
     Serial.print("Drawing view ");
     Serial.println((int32_t) this);
     if (this->opaque || this->backgroundColor) {
         Serial.print("Drawing fill ");
         Serial.println((int32_t) this);
-        typesetter->display->fillRect(x + this->frame.origin.x, y + this->frame.origin.y, this->frame.size.width, this->frame.size.height, this->backgroundColor);
+        display->fillRect(x + this->frame.origin.x, y + this->frame.origin.y, this->frame.size.width, this->frame.size.height, this->backgroundColor);
     }
     for(std::shared_ptr<View> view : this->subviews) {
-        view->draw(typesetter, this->frame.origin.x, this->frame.origin.y);
+        view->draw(display, this->frame.origin.x, this->frame.origin.y);
     }
 }
 
