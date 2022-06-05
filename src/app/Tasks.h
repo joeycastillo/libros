@@ -3,25 +3,20 @@
 
 class OpenBookRawButtonInput : public Task {
 public:
-    OpenBookRawButtonInput(OpenBook *book);
+    OpenBookRawButtonInput() {};
     int16_t run(Application *application);
 protected:
-    OpenBook *book;
     uint8_t lastButtons = 0;
 };
 
 class OpenBookDisplay : public Task {
 public:
-    OpenBookDisplay(OpenBook *book);
+    OpenBookDisplay() {};
     int16_t run(Application *application);
-protected:
-    OpenBook *book;
 };
 
 class OpenBookLockScreen : public Task {
 public:
-    OpenBookLockScreen(OpenBook *book);
+    OpenBookLockScreen() {};
     int16_t run(Application *application);
-protected:
-    OpenBook *book;
 };

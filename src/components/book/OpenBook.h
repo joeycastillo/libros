@@ -39,7 +39,13 @@ typedef struct {
 
 class OpenBook {
 public:
-    OpenBook();
+    static OpenBook *sharedInstance() {
+        static OpenBook instance;
+        return &instance;
+    }
+    OpenBook(OpenBook const&) = delete;
+    void operator=(OpenBook const&) = delete;
+
     bool configureScreen(int8_t srcs, int8_t ecs, int8_t edc, int8_t erst, int8_t ebsy, SPIClass *spi, int width, int height);
     bool configureButtons(int8_t active, OpenBookButtonConfig config);
     bool configureI2CButtons(int8_t active, int8_t interrupt);
@@ -62,6 +68,8 @@ protected:
     Adafruit_MCP23008 *ioExpander = NULL;
     OpenBookButtonConfig buttonConfig = {0};
     int8_t activeState, buttonInterrupt;
+private:
+    OpenBook();
 };
 
 #endif // OSO_OpenBook_h

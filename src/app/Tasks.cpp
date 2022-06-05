@@ -2,11 +2,9 @@
 #include "OpenBookApplication.h"
 #include <memory>
 
-OpenBookRawButtonInput::OpenBookRawButtonInput(OpenBook *book) {
-    this->book = book;
-}
-
 int16_t OpenBookRawButtonInput::run(Application *application) {
+    OpenBook *book = OpenBook::sharedInstance();
+
     uint8_t buttons = book->readButtons();
     if (buttons && buttons != this->lastButtons) {
         this->lastButtons = buttons;
@@ -41,11 +39,9 @@ int16_t OpenBookRawButtonInput::run(Application *application) {
     return 0;
 }
 
-OpenBookDisplay::OpenBookDisplay(OpenBook *book) {
-    this->book = book;
-}
-
 int16_t OpenBookDisplay::run(Application *application) {
+    OpenBook *book = OpenBook::sharedInstance();
+
     std::shared_ptr<Window> window = application->getWindow();
     if (window->needsDisplay()) {
         OpenBook_IL0398 *display = book->getDisplay();
@@ -68,11 +64,9 @@ int16_t OpenBookDisplay::run(Application *application) {
     return 0;
 }
 
-OpenBookLockScreen::OpenBookLockScreen(OpenBook *book) {
-    this->book = book;
-}
-
 int16_t OpenBookLockScreen::run(Application *application) {
+    OpenBook *book = OpenBook::sharedInstance();
+
     OpenBookApplication *myApp = (OpenBookApplication *)application;
     if (myApp->locked) {
         std::shared_ptr<Window> window = application->getWindow();
@@ -95,7 +89,7 @@ int16_t OpenBookLockScreen::run(Application *application) {
 
         display->setDisplayMode(OPEN_BOOK_DISPLAY_MODE_DEFAULT);
         display->display();
-        myApp->book->lockDevice(); // we remain here in dormant mode until the lock button is pressed.
+        book->lockDevice(); // we remain here in dormant mode until the lock button is pressed.
         // at this time, the open book hardware resets when leaving low power mode, so the below code never runs.
         window->removeSubview(lockView);
         window->setNeedsDisplay(true);

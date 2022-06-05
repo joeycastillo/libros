@@ -11,14 +11,14 @@ void lockScreen(std::shared_ptr<Application>application, Event event);
 void updateBooks(OpenBookApplication *myApp);
 void updatePage(std::shared_ptr<OpenBookApplication>myApp);
 
-OpenBookApplication::OpenBookApplication(const std::shared_ptr<Window>& window, OpenBook *book) : Application(window) {
-    this->book = book;
-    std::shared_ptr<Task> lockScreenTask = std::make_shared<OpenBookLockScreen>(book);
+OpenBookApplication::OpenBookApplication(const std::shared_ptr<Window>& window) : Application(window) {
+    std::shared_ptr<Task> lockScreenTask = std::make_shared<OpenBookLockScreen>();
     this->addTask(lockScreenTask);
-    std::shared_ptr<Task> inputTask = std::make_shared<OpenBookRawButtonInput>(book);
+    std::shared_ptr<Task> inputTask = std::make_shared<OpenBookRawButtonInput>();
     this->addTask(inputTask);
-    std::shared_ptr<Task> displayTask = std::make_shared<OpenBookDisplay>(book);
+    std::shared_ptr<Task> displayTask = std::make_shared<OpenBookDisplay>();
     this->addTask(displayTask);
+    OpenBook *book = OpenBook::sharedInstance();
 
     this->table = std::make_shared<BabelTable>(0, 0, 300, 400, 48, CellSelectionStyleInvert, book->getTypesetter());
     this->page = std::make_shared<BabelLabel>(16, 16, 300 - 32, 400 - 32, "", book->getTypesetter());
@@ -42,19 +42,20 @@ OpenBookApplication::OpenBookApplication(const std::shared_ptr<Window>& window, 
 void selectBook(std::shared_ptr<Application>application, Event event) {
     std::shared_ptr<OpenBookApplication>myApp = std::static_pointer_cast<OpenBookApplication, Application>(application);
     std::shared_ptr<Window>window = myApp->getWindow();
+    OpenBook *book = OpenBook::sharedInstance();
 
     int32_t selectedIndex = event.userInfo;
     if (selectedIndex >= 0 && selectedIndex < (int32_t)myApp->filenames.size()) {
         myApp->currentBook = myApp->filenames[selectedIndex];
         std::string currentProgressFile = myApp->filenames[selectedIndex];
         currentProgressFile[currentProgressFile.size() - 1] = 'p';
-        if (myApp->book->getSD()->exists(currentProgressFile.c_str())) {
-            File f = myApp->book->getSD()->open(currentProgressFile.c_str(), FILE_READ);
+        if (book->getSD()->exists(currentProgressFile.c_str())) {
+            File f = book->getSD()->open(currentProgressFile.c_str(), FILE_READ);
             f.read(&myApp->currentLine, sizeof(size_t));
             f.close();
         } else {
             myApp->currentLine = 2; // start of lines, after title and author
-            File f = myApp->book->getSD()->open(currentProgressFile.c_str(), FILE_WRITE);
+            File f = book->getSD()->open(currentProgressFile.c_str(), FILE_WRITE);
             f.write((byte *)&(myApp->currentLine), sizeof(size_t));
             f.close();
         }
@@ -69,6 +70,8 @@ void selectBook(std::shared_ptr<Application>application, Event event) {
 void turnPage(std::shared_ptr<Application>application, Event event) {
     std::shared_ptr<OpenBookApplication>myApp = std::static_pointer_cast<OpenBookApplication, Application>(application);
     std::shared_ptr<Window>window = myApp->getWindow();
+    OpenBook *book = OpenBook::sharedInstance();
+
     switch (event.type) {
         case BUTTON_NEXT:
             if (!myApp->bookAtEnd) {
@@ -86,7 +89,7 @@ void turnPage(std::shared_ptr<Application>application, Event event) {
     }
     std::string currentProgressFile = myApp->currentBook;
     currentProgressFile[currentProgressFile.size() - 1] = 'p';
-    File f = myApp->book->getSD()->open(currentProgressFile.c_str(), FILE_READ);
+    File f = book->getSD()->open(currentProgressFile.c_str(), FILE_READ);
     f.write((byte *)&(myApp->currentLine), sizeof(size_t));
     f.close();
 
@@ -110,8 +113,9 @@ void lockScreen(std::shared_ptr<Application>application, Event event) {
 
 void updateBooks(OpenBookApplication *myApp) {
     std::vector<std::string> titles;
+    OpenBook *book = OpenBook::sharedInstance();
 
-    File root = myApp->book->getSD()->open("/");
+    File root = book->getSD()->open("/");
     File entry = root.openNextFile();
     while (entry) {
         if (!entry.isDirectory()) {
@@ -120,7 +124,7 @@ void updateBooks(OpenBookApplication *myApp) {
             if (magic == 5426643222204338255) { // the string "OPENBOOK"
                 char *filename = (char *)malloc(128);
                 entry.getName(filename, 128);
-                File file = myApp->book->getSD()->open(filename);
+                File file = book->getSD()->open(filename);
                 file.seek(8);
                 uint64_t title_loc;
                 uint32_t title_len;
@@ -142,9 +146,10 @@ void updateBooks(OpenBookApplication *myApp) {
 }
 
 void updatePage(std::shared_ptr<OpenBookApplication>myApp) {
+    OpenBook *book = OpenBook::sharedInstance();
     std::string pageText = "";
+    FatFile file = book->getSD()->open(myApp->currentBook.c_str(), FILE_READ);
 
-    FatFile file = myApp->book->getSD()->open(myApp->currentBook.c_str(), FILE_READ);
     for(int i = 0; i < 22; i++) {
         uint64_t loc;
         uint32_t len;
