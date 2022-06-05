@@ -1,7 +1,4 @@
-#include "bitmaps.h"
 #include "OpenBookApplication.h"
-#include "FocusWidgets.h"
-#include <memory>
 
 std::shared_ptr<OpenBookApplication> application(nullptr);
 std::shared_ptr<Window> window(nullptr);
