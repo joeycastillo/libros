@@ -4,15 +4,15 @@
 #include "Focus.h"
 #include "FocusWidgets.h"
 
-class BabelButton : public Button {
+class OpenBookButton : public Button {
 public:
-    BabelButton(int16_t x, int16_t y, int16_t width, int16_t height, std::string text);
+    OpenBookButton(int16_t x, int16_t y, int16_t width, int16_t height, std::string text);
     void draw(Adafruit_GFX *display, int16_t x, int16_t y) override;
 };
 
-class BabelLabel : public Label {
+class OpenBookLabel : public Label {
 public:
-    BabelLabel(int16_t x, int16_t y, int16_t width, int16_t height, std::string text);
+    OpenBookLabel(int16_t x, int16_t y, int16_t width, int16_t height, std::string text);
     void draw(Adafruit_GFX *display, int16_t x, int16_t y) override;
 };
 
@@ -23,23 +23,23 @@ typedef enum {
     CellSelectionStyleIndicatorTrailing,
     CellSelectionStyleIndicatorAbove,
     CellSelectionStyleIndicatorBelow
-} CellSelectionStyle;
+} OpenBookCellSelectionStyle;
 
-class BabelCell : public View {
+class OpenBookCell : public View {
 public:
-    BabelCell(int16_t x, int16_t y, int16_t width, int16_t height, std::string text, CellSelectionStyle selectionStyle);
+    OpenBookCell(int16_t x, int16_t y, int16_t width, int16_t height, std::string text, OpenBookCellSelectionStyle selectionStyle);
     void draw(Adafruit_GFX *display, int16_t x, int16_t y) override;
     // TODO: implement these for the indicator style
     // void willBecomeFocused() override;
     // void willResignFocus() override;
 protected:
     std::string text;
-    CellSelectionStyle selectionStyle;
+    OpenBookCellSelectionStyle selectionStyle;
 };
 
-class BabelTable : public View {
+class OpenBookTable : public View {
 public:
-    BabelTable(int16_t x, int16_t y, int16_t width, int16_t height, int16_t cellHeight, CellSelectionStyle selectionStyle);
+    OpenBookTable(int16_t x, int16_t y, int16_t width, int16_t height, int16_t cellHeight, OpenBookCellSelectionStyle selectionStyle);
     void setItems(std::vector<std::string> items);
     void becomeFocused() override;
     bool handleEvent(Event event) override;
@@ -50,7 +50,7 @@ protected:
     int16_t startOffset;
     std::vector<std::string> items;
     std::string text;
-    CellSelectionStyle selectionStyle;
+    OpenBookCellSelectionStyle selectionStyle;
 };
 
 #endif // BabelWidgets_h

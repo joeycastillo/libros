@@ -73,7 +73,7 @@ int16_t OpenBookLockScreen::run(Application *application) {
         OpenBook_IL0398 *display = book->getDisplay();
         std::shared_ptr<HatchedView> lockView = std::make_shared<HatchedView>(0, 0, 300, 400, EPD_BLACK);
         std::shared_ptr<View> lockModal = std::make_shared<View>(10, 168, 300 - 20, 68);
-        std::shared_ptr<BabelLabel> lockLabel = std::make_shared<BabelLabel>(1, 1, 300 - 22, 66, "\n  Open Book is in low power mode.\n  Press the lock button to wake.");
+        std::shared_ptr<OpenBookLabel> lockLabel = std::make_shared<OpenBookLabel>(1, 1, 300 - 22, 66, "\n  Open Book is in low power mode.\n  Press the lock button to wake.");
 
         lockModal->setBackgroundColor(EPD_BLACK);
         lockModal->addSubview(lockLabel);
