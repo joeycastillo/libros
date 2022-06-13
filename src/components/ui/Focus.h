@@ -66,6 +66,7 @@ public:
     virtual void draw(Adafruit_GFX *display, int16_t x, int16_t y);
     virtual void addSubview(std::shared_ptr<View> view);
     void removeSubview(std::shared_ptr<View> view);
+    virtual bool canBecomeFocused();
     virtual void becomeFocused();
     virtual void resignFocus();
     virtual void movedToWindow();
@@ -97,10 +98,21 @@ protected:
     friend class Window;
 };
 
+class Control : public View {
+public:
+    Control(int16_t x, int16_t y, int16_t width, int16_t height);
+    bool isEnabled();
+    void setEnabled(bool value);
+    bool canBecomeFocused() override;
+protected:
+    bool enabled = true;
+};
+
 class Window : public View {
 public:
     Window(int16_t width, int16_t height);
     void addSubview(std::shared_ptr<View> view) override;
+    bool canBecomeFocused() override;
     void becomeFocused() override;
     bool needsDisplay();
     void setNeedsDisplay(bool needsDisplay);

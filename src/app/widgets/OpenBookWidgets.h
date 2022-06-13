@@ -25,7 +25,7 @@ typedef enum {
     CellSelectionStyleIndicatorBelow
 } OpenBookCellSelectionStyle;
 
-class OpenBookCell : public View {
+class OpenBookCell : public Control {
 public:
     OpenBookCell(int16_t x, int16_t y, int16_t width, int16_t height, std::string text, OpenBookCellSelectionStyle selectionStyle);
     void draw(Adafruit_GFX *display, int16_t x, int16_t y) override;
@@ -37,7 +37,7 @@ protected:
     OpenBookCellSelectionStyle selectionStyle;
 };
 
-class OpenBookTable : public View {
+class OpenBookTable : public Control {
 public:
     OpenBookTable(int16_t x, int16_t y, int16_t width, int16_t height, int16_t cellHeight, OpenBookCellSelectionStyle selectionStyle);
     void setItems(std::vector<std::string> items);

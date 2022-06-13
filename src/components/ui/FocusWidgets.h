@@ -7,7 +7,7 @@
 #include <string>
 #include "Focus.h"
 
-class Button : public View {
+class Button : public Control {
 public:
     Button(int16_t x, int16_t y, int16_t width, int16_t height, std::string text);
     void draw(Adafruit_GFX *display, int16_t x, int16_t y) override;
@@ -21,7 +21,7 @@ public:
     void draw(Adafruit_GFX *display, int16_t x, int16_t y) override;
 };
 
-class Label : public View {
+class Label : public Control {
 public:
     Label(int16_t x, int16_t y, int16_t width, int16_t height, std::string text);
     void draw(Adafruit_GFX *display, int16_t x, int16_t y) override;

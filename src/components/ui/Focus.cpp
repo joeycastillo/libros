@@ -76,6 +76,10 @@ void View::movedToWindow() {
     // nothing to do here
 }
 
+bool View::canBecomeFocused() {
+    return false;
+}
+
 void View::willBecomeFocused() {
     // nothing to do here
 }
@@ -119,33 +123,42 @@ bool View::handleEvent(Event event) {
         }
     } else if (event.type < BUTTON_CENTER) {
         uint32_t index = std::distance(this->subviews.begin(), std::find(this->subviews.begin(), this->subviews.end(), focusedView));
-        switch (event.type) {
-            case BUTTON_UP:
-                if (this->affinity == DirectionalAffinityVertical && index > 0) {
-                    this->subviews[index - 1]->becomeFocused();
-                    return true;
-                }
-                break;
-            case BUTTON_DOWN:
-                if (this->affinity == DirectionalAffinityVertical && (index + 1) < this->subviews.size()) {
-                    this->subviews[index + 1]->becomeFocused();
-                    return true;
-                }
-                break;
-            case BUTTON_LEFT:
-                if (this->affinity == DirectionalAffinityHorizontal && index > 0) {
-                    this->subviews[index - 1]->becomeFocused();
-                    return true;
-                }
-                break;
-            case BUTTON_RIGHT:
-                if (this->affinity == DirectionalAffinityHorizontal && (index + 1) < this->subviews.size()) {
-                    this->subviews[index + 1]->becomeFocused();
-                    return true;
-                }
-                break;
-            default:
-                break;
+        if (this->affinity == DirectionalAffinityVertical) {
+            switch (event.type) {
+                case BUTTON_UP:
+                    while (index > 0) {
+                        if (this->subviews[index - 1]->canBecomeFocused()) this->subviews[index - 1]->becomeFocused();
+                        else index--;
+                        return true;
+                    }
+                    break;
+                case BUTTON_DOWN:
+                    while ((index + 1) < this->subviews.size()) {
+                        if (this->subviews[index + 1]->canBecomeFocused()) this->subviews[index + 1]->becomeFocused();
+                        else index--;
+                        return true;
+                    }
+                    break;
+                default:
+                    break;
+            }
+        } else if (this->affinity == DirectionalAffinityHorizontal) {
+            switch (event.type) {
+                case BUTTON_LEFT:
+                    while (index > 0) {
+                        if (this->subviews[index - 1]->canBecomeFocused()) this->subviews[index - 1]->becomeFocused();
+                        return true;
+                    }
+                    break;
+                case BUTTON_RIGHT:
+                    while ((index + 1) < this->subviews.size()) {
+                        if (this->subviews[index + 1]->canBecomeFocused()) this->subviews[index + 1]->becomeFocused();
+                        return true;
+                    }
+                    break;
+                default:
+                    break;
+            }
         }
     }
     if (std::shared_ptr<View> superview = this->superview.lock()) {
@@ -198,6 +211,22 @@ void View::setBackgroundColor(uint16_t value) {
     this->backgroundColor = value;
 }
 
+Control::Control(int16_t x, int16_t y, int16_t width, int16_t height) : View(x, y, width, height) {
+}
+
+bool Control::isEnabled() {
+    return this->enabled;
+}
+
+void Control::setEnabled(bool value) {
+    this->enabled = value;
+}
+
+bool Control::canBecomeFocused() {
+    return this->enabled;
+}
+
+
 Application::Application(const std::shared_ptr<Window>& window) {
     this->window = window;
 }
@@ -239,7 +268,13 @@ void Window::addSubview(std::shared_ptr<View> view) {
     View::addSubview(view);
 }
 
+bool Window::canBecomeFocused() {
+    return true;
+}
+
 void Window::becomeFocused() {
+    if (!this->canBecomeFocused()) return;
+
     std::shared_ptr<View> oldResponder = this->focusedView.lock();
     if (oldResponder != NULL) {
         oldResponder->willResignFocus();

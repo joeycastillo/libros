@@ -39,7 +39,7 @@ void OpenBookLabel::draw(Adafruit_GFX *display, int16_t x, int16_t y) {
     typesetter->print(this->text.c_str());
 }
 
-OpenBookCell::OpenBookCell(int16_t x, int16_t y, int16_t width, int16_t height, std::string text, OpenBookCellSelectionStyle selectionStyle) : View(x, y, width, height) {
+OpenBookCell::OpenBookCell(int16_t x, int16_t y, int16_t width, int16_t height, std::string text, OpenBookCellSelectionStyle selectionStyle) : Control(x, y, width, height) {
     this->text = text;
     this->selectionStyle = selectionStyle;
 }
@@ -69,7 +69,7 @@ void OpenBookCell::draw(Adafruit_GFX *display, int16_t x, int16_t y) {
     }
 }
 
-OpenBookTable::OpenBookTable(int16_t x, int16_t y, int16_t width, int16_t height, int16_t cellHeight, OpenBookCellSelectionStyle selectionStyle) : View(x, y, width, height) {
+OpenBookTable::OpenBookTable(int16_t x, int16_t y, int16_t width, int16_t height, int16_t cellHeight, OpenBookCellSelectionStyle selectionStyle) : Control(x, y, width, height) {
     this->selectionStyle = selectionStyle;
     this->cellHeight = cellHeight;
     this->cellsPerPage = height / cellHeight;
