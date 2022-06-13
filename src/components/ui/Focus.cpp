@@ -226,39 +226,6 @@ bool Control::canBecomeFocused() {
     return this->enabled;
 }
 
-
-Application::Application(const std::shared_ptr<Window>& window) {
-    this->window = window;
-}
-
-void Application::addTask(std::shared_ptr<Task> task) {
-    this->tasks.push_back(task);
-}
-
-void Application::run() {
-    this->window->application = this->shared_from_this();
-    this->window->becomeFocused();
-    this->window->setNeedsDisplay(true);
-    while(true) {
-        for(std::shared_ptr<Task> task : this->tasks) {
-            if (task->run(this) != 0) return;
-        }
-    }
-}
-
-void Application::generateEvent(EventType eventType, int32_t userInfo) {
-    Event event;
-    event.type = eventType;
-    event.userInfo = userInfo;
-    if (std::shared_ptr<View> focusedView = this->window->focusedView.lock()) {
-        focusedView->handleEvent(event);
-    }
-}
-
-std::shared_ptr<Window> Application::getWindow() {
-    return this->window;
-}
-
 Window::Window(int16_t width, int16_t height) : View(0, 0, width, height) {
     this->dirtyRect = MakeRect(0, 0, width, height);
 }
@@ -326,4 +293,36 @@ Rect Window::getDirtyRect() {
 
 std::weak_ptr<View> Window::getFocusedView() {
     return this->focusedView;
+}
+
+Application::Application(const std::shared_ptr<Window>& window) {
+    this->window = window;
+}
+
+void Application::addTask(std::shared_ptr<Task> task) {
+    this->tasks.push_back(task);
+}
+
+void Application::run() {
+    this->window->application = this->shared_from_this();
+    this->window->becomeFocused();
+    this->window->setNeedsDisplay(true);
+    while(true) {
+        for(std::shared_ptr<Task> task : this->tasks) {
+            if (task->run(this) != 0) return;
+        }
+    }
+}
+
+void Application::generateEvent(EventType eventType, int32_t userInfo) {
+    Event event;
+    event.type = eventType;
+    event.userInfo = userInfo;
+    if (std::shared_ptr<View> focusedView = this->window->focusedView.lock()) {
+        focusedView->handleEvent(event);
+    }
+}
+
+std::shared_ptr<Window> Application::getWindow() {
+    return this->window;
 }
