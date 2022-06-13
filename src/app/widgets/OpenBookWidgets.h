@@ -6,13 +6,13 @@
 
 class OpenBookButton : public Button {
 public:
-    OpenBookButton(int16_t x, int16_t y, int16_t width, int16_t height, std::string text);
+    OpenBookButton(Rect rect, std::string text);
     void draw(Adafruit_GFX *display, int16_t x, int16_t y) override;
 };
 
 class OpenBookLabel : public Label {
 public:
-    OpenBookLabel(int16_t x, int16_t y, int16_t width, int16_t height, std::string text);
+    OpenBookLabel(Rect rect, std::string text);
     void draw(Adafruit_GFX *display, int16_t x, int16_t y) override;
 };
 
@@ -27,7 +27,7 @@ typedef enum {
 
 class OpenBookCell : public Control {
 public:
-    OpenBookCell(int16_t x, int16_t y, int16_t width, int16_t height, std::string text, OpenBookCellSelectionStyle selectionStyle);
+    OpenBookCell(Rect rect, std::string text, OpenBookCellSelectionStyle selectionStyle);
     void draw(Adafruit_GFX *display, int16_t x, int16_t y) override;
     // TODO: implement these for the indicator style
     // void willBecomeFocused() override;
@@ -39,7 +39,7 @@ protected:
 
 class OpenBookTable : public Control {
 public:
-    OpenBookTable(int16_t x, int16_t y, int16_t width, int16_t height, int16_t cellHeight, OpenBookCellSelectionStyle selectionStyle);
+    OpenBookTable(Rect rect, int16_t cellHeight, OpenBookCellSelectionStyle selectionStyle);
     void setItems(std::vector<std::string> items);
     void becomeFocused() override;
     bool handleEvent(Event event) override;

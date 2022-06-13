@@ -5,10 +5,10 @@
 Task::Task() {
 }
 
-View::View(int16_t x, int16_t y, int16_t width, int16_t height) {
+View::View(Rect rect) {
     Serial.print("Creating view ");
     Serial.println((int32_t) this);
-    this->frame = MakeRect(x, y, width, height);
+    this->frame = rect;
     this->window.reset();
     this->superview.reset();
 }
@@ -211,7 +211,7 @@ void View::setBackgroundColor(uint16_t value) {
     this->backgroundColor = value;
 }
 
-Control::Control(int16_t x, int16_t y, int16_t width, int16_t height) : View(x, y, width, height) {
+Control::Control(Rect rect) : View(rect) {
 }
 
 bool Control::isEnabled() {
@@ -226,8 +226,8 @@ bool Control::canBecomeFocused() {
     return this->enabled;
 }
 
-Window::Window(int16_t width, int16_t height) : View(0, 0, width, height) {
-    this->dirtyRect = MakeRect(0, 0, width, height);
+Window::Window(Size size) : View(MakeRect(0, 0, size.width, size.height)) {
+    this->setNeedsDisplay(true);
 }
 
 void Window::addSubview(std::shared_ptr<View> view) {

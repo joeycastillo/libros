@@ -2,7 +2,7 @@
 #include "OpenBookDevice.h"
 #include <algorithm>
 
-OpenBookButton::OpenBookButton(int16_t x, int16_t y, int16_t width, int16_t height, std::string text) : Button(x, y, width, height, text) {
+OpenBookButton::OpenBookButton(Rect rect, std::string text) : Button(rect, text) {
 }
 
 void OpenBookButton::draw(Adafruit_GFX *display, int16_t x, int16_t y) {
@@ -29,7 +29,7 @@ void OpenBookButton::draw(Adafruit_GFX *display, int16_t x, int16_t y) {
     }
 }
 
-OpenBookLabel::OpenBookLabel(int16_t x, int16_t y, int16_t width, int16_t height, std::string text) : Label(x, y, width, height, text) {
+OpenBookLabel::OpenBookLabel(Rect rect, std::string text) : Label(rect, text) {
 }
 
 void OpenBookLabel::draw(Adafruit_GFX *display, int16_t x, int16_t y) {
@@ -39,7 +39,7 @@ void OpenBookLabel::draw(Adafruit_GFX *display, int16_t x, int16_t y) {
     typesetter->print(this->text.c_str());
 }
 
-OpenBookCell::OpenBookCell(int16_t x, int16_t y, int16_t width, int16_t height, std::string text, OpenBookCellSelectionStyle selectionStyle) : Control(x, y, width, height) {
+OpenBookCell::OpenBookCell(Rect rect, std::string text, OpenBookCellSelectionStyle selectionStyle) : Control(rect) {
     this->text = text;
     this->selectionStyle = selectionStyle;
 }
@@ -69,10 +69,10 @@ void OpenBookCell::draw(Adafruit_GFX *display, int16_t x, int16_t y) {
     }
 }
 
-OpenBookTable::OpenBookTable(int16_t x, int16_t y, int16_t width, int16_t height, int16_t cellHeight, OpenBookCellSelectionStyle selectionStyle) : Control(x, y, width, height) {
+OpenBookTable::OpenBookTable(Rect rect, int16_t cellHeight, OpenBookCellSelectionStyle selectionStyle) : Control(rect) {
     this->selectionStyle = selectionStyle;
     this->cellHeight = cellHeight;
-    this->cellsPerPage = height / cellHeight;
+    this->cellsPerPage = rect.size.height / cellHeight;
 }
 
 void OpenBookTable::setItems(std::vector<std::string> items) {
@@ -89,7 +89,7 @@ void OpenBookTable::updateCells() {
     std::vector<std::string>::iterator it;
     uint16_t i = 0;
     for(std::string text : this->items) {
-        std::shared_ptr<OpenBookCell> cell = std::make_shared<OpenBookCell>(0, this->cellHeight * i++, this->frame.size.width, this->cellHeight, text, this->selectionStyle);
+        std::shared_ptr<OpenBookCell> cell = std::make_shared<OpenBookCell>(MakeRect(0, this->cellHeight * i++, this->frame.size.width, this->cellHeight), text, this->selectionStyle);
         this->addSubview(cell);
     }
     if (std::shared_ptr<Window> window = this->window.lock()) {

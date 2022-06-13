@@ -33,8 +33,13 @@ typedef struct {
     Size size;
 } Rect;
 
+inline Point MakePoint(int16_t x, int16_t y) { return {x, y}; }
+inline Size MakeSize(int16_t width, int16_t height) { return {width, height}; }
 inline Rect MakeRect(int16_t x, int16_t y, int16_t width, int16_t height) { return {{x, y}, {width, height}}; }
-inline bool RectsEqual(Rect a, Rect b) { return (a.origin.x == b.origin.x) && (a.origin.y == b.origin.y) && (a.size.width == b.size.width) && (a.size.height == b.size.height); }
+
+inline bool PointsEqual(Point a, Point b) { return (a.x == b.x) && (a.y == b.y); }
+inline bool SizesEqual(Size a, Size b) { return (a.width == b.width) && (a.height == b.height); }
+inline bool RectsEqual(Rect a, Rect b) { return PointsEqual(a.origin, b.origin) && SizesEqual(a.size, b.size); }
 
 class Application;
 class Window;
@@ -61,7 +66,7 @@ public:
 
 class View : public std::enable_shared_from_this<View> {
 public:
-    View(int16_t x, int16_t y, int16_t width, int16_t height);
+    View(Rect rect);
     ~View();
     virtual void draw(Adafruit_GFX *display, int16_t x, int16_t y);
     virtual void addSubview(std::shared_ptr<View> view);
@@ -100,7 +105,7 @@ protected:
 
 class Control : public View {
 public:
-    Control(int16_t x, int16_t y, int16_t width, int16_t height);
+    Control(Rect rect);
     bool isEnabled();
     void setEnabled(bool value);
     bool canBecomeFocused() override;
@@ -110,7 +115,7 @@ protected:
 
 class Window : public View {
 public:
-    Window(int16_t width, int16_t height);
+    Window(Size size);
     void addSubview(std::shared_ptr<View> view) override;
     bool canBecomeFocused() override;
     void becomeFocused() override;

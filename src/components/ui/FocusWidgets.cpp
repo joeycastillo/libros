@@ -1,7 +1,7 @@
 #include "FocusWidgets.h"
 #include <algorithm>
 
-Button::Button(int16_t x, int16_t y, int16_t width, int16_t height, std::string text) : Control(x, y, width, height) {
+Button::Button(Rect rect, std::string text) : Control(rect) {
     this->text = text;
 }
 
@@ -28,7 +28,7 @@ void Button::draw(Adafruit_GFX *display, int16_t x, int16_t y) {
     }
 }
 
-HatchedView::HatchedView(int16_t x, int16_t y, int16_t width, int16_t height, uint16_t color) : View(x, y, width, height) {
+HatchedView::HatchedView(Rect rect, uint16_t color) : View(rect) {
     this->foregroundColor = color;
 }
 
@@ -43,7 +43,7 @@ void HatchedView::draw(Adafruit_GFX *display, int16_t x, int16_t y) {
     View::draw(display, x, y);
 }
 
-Label::Label(int16_t x, int16_t y, int16_t width, int16_t height, std::string text) : Control(x, y, width, height) {
+Label::Label(Rect rect, std::string text) : Control(rect) {
     this->text = text;
 }
 
