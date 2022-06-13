@@ -83,7 +83,11 @@ int16_t OpenBookLockScreen::run(Application *application) {
         display->clearBuffer();
         window->draw(display, 0, 0);
 
-        display->setDisplayMode(OPEN_BOOK_DISPLAY_MODE_DEFAULT);
+        // this is pretty cool, if accidental: EPD_DARK renders as white with the
+        // default or quick LUT, but dark in grayscale. so if we render this in
+        // grayscale, it makes the white areas of the main screen appear dimmed,
+        // as though we put a black layer with partial opacity.
+        display->setDisplayMode(OPEN_BOOK_DISPLAY_MODE_GRAYSCALE);
         display->display();
         device->lockDevice(); // we remain here in dormant mode until the lock button is pressed.
         // at this time, the open book hardware resets when leaving low power mode, so the below code never runs.
