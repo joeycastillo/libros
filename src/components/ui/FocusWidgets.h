@@ -21,6 +21,12 @@ public:
     void draw(Adafruit_GFX *display, int16_t x, int16_t y) override;
 };
 
+class BorderedView : public View {
+public:
+    BorderedView(Rect rect) : View(rect) {};
+    void draw(Adafruit_GFX *display, int16_t x, int16_t y) override;
+};
+
 class Label : public Control {
 public:
     Label(Rect rect, std::string text);

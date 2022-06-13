@@ -71,18 +71,15 @@ int16_t OpenBookLockScreen::run(Application *application) {
     if (myApp->locked) {
         std::shared_ptr<Window> window = application->getWindow();
         OpenBook_IL0398 *display = device->getDisplay();
-        std::shared_ptr<HatchedView> lockView = std::make_shared<HatchedView>(MakeRect(0, 0, 300, 400), EPD_BLACK);
-        std::shared_ptr<View> lockModal = std::make_shared<View>(MakeRect(10, 168, 300 - 20, 68));
-        std::shared_ptr<OpenBookLabel> lockLabel = std::make_shared<OpenBookLabel>(MakeRect(1, 1, 300 - 22, 66), "\n  Open Book is in low power mode.\n  Press the lock button to wake.");
+        std::shared_ptr<BorderedView> lockModal = std::make_shared<BorderedView>(MakeRect(10, 168, 300 - 20, 68));
+        std::shared_ptr<OpenBookLabel> lockLabel = std::make_shared<OpenBookLabel>(MakeRect(2, 2, 300 - 24, 64), "\n  Open Book is in low power mode.\n  Press the lock button to wake.");
 
-        lockModal->setBackgroundColor(EPD_BLACK);
         lockModal->addSubview(lockLabel);
 
-        lockLabel->setOpaque(true);
-        lockLabel->setBackgroundColor(EPD_DARK);
-        lockView->addSubview(lockModal);
+        lockModal->setOpaque(true);
+        lockModal->setBackgroundColor(EPD_WHITE);
+        window->addSubview(lockModal);
 
-        window->addSubview(lockView);
         display->clearBuffer();
         window->draw(display, 0, 0);
 
@@ -90,7 +87,7 @@ int16_t OpenBookLockScreen::run(Application *application) {
         display->display();
         device->lockDevice(); // we remain here in dormant mode until the lock button is pressed.
         // at this time, the open book hardware resets when leaving low power mode, so the below code never runs.
-        window->removeSubview(lockView);
+        window->removeSubview(lockModal);
         window->setNeedsDisplay(true);
         myApp->locked = false;
     }
