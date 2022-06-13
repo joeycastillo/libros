@@ -158,7 +158,7 @@ void Adafruit_EPD::begin(bool reset) {
     sram.write8(0, K640_SEQUENTIAL_MODE, MCPSRAM_WRSR);
   }
 
-  Serial.println("set pins");
+  // Serial.println("set pins");
   // set pin directions
   pinMode(_dc_pin, OUTPUT);
   pinMode(_cs_pin, OUTPUT);
@@ -176,16 +176,16 @@ void Adafruit_EPD::begin(bool reset) {
     return;
   }
 
-  Serial.println("hard reset");
+  // Serial.println("hard reset");
   if (reset) {
     hardwareReset();
   }
 
-  Serial.println("busy");
+  // Serial.println("busy");
   if (_busy_pin >= 0) {
     pinMode(_busy_pin, INPUT);
   }
-  Serial.println("done!");
+  // Serial.println("done!");
 }
 
 /**************************************************************************/
