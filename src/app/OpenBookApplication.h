@@ -14,6 +14,7 @@ public:
     std::string currentBook;
 
     std::vector<std::string> filenames;
+    std::shared_ptr<View> mainMenu;
     std::shared_ptr<OpenBookTable> table;
     std::shared_ptr<OpenBookLabel> page;
 };

@@ -72,7 +72,7 @@ public:
     virtual void addSubview(std::shared_ptr<View> view);
     void removeSubview(std::shared_ptr<View> view);
     virtual bool canBecomeFocused();
-    virtual void becomeFocused();
+    virtual bool becomeFocused();
     virtual void resignFocus();
     virtual void movedToWindow();
     virtual void willBecomeFocused();
@@ -82,7 +82,9 @@ public:
     virtual bool handleEvent(Event event);
     void setAction(Action action, EventType type);
     void removeAction(EventType type);
-    std::weak_ptr<View>getSuperview();
+    virtual std::weak_ptr<View>getSuperview();
+    virtual std::weak_ptr<Window> getWindow();
+    virtual void setWindow(std::shared_ptr<Window> window);
     Rect getFrame();
     void setFrame(Rect rect);
     bool isOpaque();
@@ -97,8 +99,9 @@ protected:
     DirectionalAffinity affinity = DirectionalAffinityVertical;
     std::vector<std::shared_ptr<View>> subviews;
     std::map<EventType, Action> actions;
-    std::weak_ptr<Window> window;
     std::weak_ptr<View> superview;
+private:
+    std::weak_ptr<Window> window;
 
     friend class Window;
 };
@@ -118,12 +121,14 @@ public:
     Window(Size size);
     void addSubview(std::shared_ptr<View> view) override;
     bool canBecomeFocused() override;
-    void becomeFocused() override;
     bool needsDisplay();
     void setNeedsDisplay(bool needsDisplay);
     void setNeedsDisplayInRect(Rect rect, std::shared_ptr<View> view);
     Rect getDirtyRect();
     std::weak_ptr<View> getFocusedView();
+    std::weak_ptr<View>getSuperview() override;
+    std::weak_ptr<Window> getWindow() override;
+    void setWindow(std::shared_ptr<Window> window) override;
 protected:
     std::weak_ptr<Application> application;
     std::weak_ptr<View> focusedView;

@@ -8,12 +8,12 @@ OpenBookButton::OpenBookButton(Rect rect, std::string text) : Button(rect, text)
 void OpenBookButton::draw(Adafruit_GFX *display, int16_t x, int16_t y) {
     // i hate this hack, window needs to manage views' state and communicate it down.
     View *focusedView = NULL;
-    if (auto window = this->window.lock()) {
+    if (auto window = this->getWindow().lock()) {
         if (auto fv = window->getFocusedView().lock()) {
             focusedView = fv.get();
         }
     }
-    if (std::shared_ptr<Window> window = this->window.lock()) {
+    if (std::shared_ptr<Window> window = this->getWindow().lock()) {
         View::draw(display, x, y);
         BabelTypesetterGFX *typesetter = OpenBookDevice::sharedInstance()->getTypesetter();
         typesetter->setCursor(this->frame.origin.x + x + 8, this->frame.origin.y + y + this->frame.size.height / 2 - 8);
@@ -36,7 +36,33 @@ void OpenBookLabel::draw(Adafruit_GFX *display, int16_t x, int16_t y) {
     View::draw(display, x, y);
     BabelTypesetterGFX *typesetter = OpenBookDevice::sharedInstance()->getTypesetter();
     typesetter->setLayoutArea(this->frame.origin.x + x, this->frame.origin.y + y, this->frame.size.width, this->frame.size.height);
+    typesetter->setTextColor(this->foregroundColor);
+    typesetter->setBold(this->bold);
+    typesetter->setItalic(this->italic);
+    typesetter->setTextSize(this->textSize);
     typesetter->print(this->text.c_str());
+}
+
+void OpenBookLabel::setBold(bool value) {
+    this->bold = value;
+    // TODO: setNeedsDisplay should be a method on View
+    if (auto window = this->getWindow().lock()) {
+        window->setNeedsDisplayInRect(this->frame, window);
+    }
+}
+
+void OpenBookLabel::setItalic(bool value) {
+    this->italic = value;
+    if (auto window = this->getWindow().lock()) {
+        window->setNeedsDisplayInRect(this->frame, window);
+    }
+}
+
+void OpenBookLabel::setTextSize(uint16_t value) {
+    this->textSize = value;
+    if (auto window = this->getWindow().lock()) {
+        window->setNeedsDisplayInRect(this->frame, window);
+    }
 }
 
 OpenBookCell::OpenBookCell(Rect rect, std::string text, OpenBookCellSelectionStyle selectionStyle) : Control(rect) {
@@ -47,14 +73,16 @@ OpenBookCell::OpenBookCell(Rect rect, std::string text, OpenBookCellSelectionSty
 void OpenBookCell::draw(Adafruit_GFX *display, int16_t x, int16_t y) {
     // i hate this hack, window needs to manage views' state and communicate it down.
     View *focusedView = NULL;
-    if (auto window = this->window.lock()) {
+    if (auto window = this->getWindow().lock()) {
         if (auto fv = window->getFocusedView().lock()) {
             focusedView = fv.get();
         }
     }
-    if (std::shared_ptr<Window> window = this->window.lock()) {
+    if (std::shared_ptr<Window> window = this->getWindow().lock()) {
         View::draw(display, x, y);
         BabelTypesetterGFX *typesetter = OpenBookDevice::sharedInstance()->getTypesetter();
+        typesetter->setBold(false);
+        typesetter->setItalic(false);
         typesetter->setCursor(this->frame.origin.x + x + 8, this->frame.origin.y + y + this->frame.size.height / 2 - 8);
         // for now only implementing CellSelectionStyleInvert, just to get up and running
         if (focusedView == this) {
@@ -92,20 +120,14 @@ void OpenBookTable::updateCells() {
         std::shared_ptr<OpenBookCell> cell = std::make_shared<OpenBookCell>(MakeRect(0, this->cellHeight * i++, this->frame.size.width, this->cellHeight), text, this->selectionStyle);
         this->addSubview(cell);
     }
-    if (std::shared_ptr<Window> window = this->window.lock()) {
+    if (std::shared_ptr<Window> window = this->getWindow().lock()) {
         window->setNeedsDisplay(true);
-    }
-}
-
-void OpenBookTable::becomeFocused() {
-    if (this->subviews.size()) {
-        this->subviews.front()->becomeFocused();
     }
 }
 
 bool OpenBookTable::handleEvent(Event event) {
     if (event.type == BUTTON_CENTER) {
-        if (std::shared_ptr<Window> window = this->window.lock()) {
+        if (std::shared_ptr<Window> window = this->getWindow().lock()) {
             if (std::shared_ptr<View> focusedView = window->getFocusedView().lock()) {
                 uint32_t index = std::distance(this->subviews.begin(), std::find(this->subviews.begin(), this->subviews.end(), focusedView));
                 event.userInfo = index;

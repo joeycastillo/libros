@@ -12,6 +12,7 @@ void updateBooks(OpenBookApplication *myApp);
 void updatePage(std::shared_ptr<OpenBookApplication>myApp);
 
 OpenBookApplication::OpenBookApplication(const std::shared_ptr<Window>& window) : Application(window) {
+    // set up tasks for input, output and the lock screen
     std::shared_ptr<Task> lockScreenTask = std::make_shared<OpenBookLockScreen>();
     this->addTask(lockScreenTask);
     std::shared_ptr<Task> inputTask = std::make_shared<OpenBookRawButtonInput>();
@@ -19,15 +20,20 @@ OpenBookApplication::OpenBookApplication(const std::shared_ptr<Window>& window) 
     std::shared_ptr<Task> displayTask = std::make_shared<OpenBookDisplay>();
     this->addTask(displayTask);
 
-    this->table = std::make_shared<OpenBookTable>(MakeRect(0, 0, 300, 400), 48, CellSelectionStyleInvert);
+    this->mainMenu = std::make_shared<View>(MakeRect(0, 0, 300, 400));
+    std::shared_ptr<OpenBookLabel> titleLabel = std::make_shared<OpenBookLabel>(MakeRect(8, 8, 220, 16), "My Library");
+    titleLabel->setBold(true);
+    titleLabel->setEnabled(false);
+    this->table = std::make_shared<OpenBookTable>(MakeRect(0, 32, 300, 360), 24, CellSelectionStyleInvert);
+    this->mainMenu->addSubview(titleLabel);
+    this->mainMenu->addSubview(this->table);
+    window->addSubview(this->mainMenu);
+    updateBooks(this);
+
     this->page = std::make_shared<OpenBookLabel>(MakeRect(16, 16, 300 - 32, 400 - 32), "");
 
-    window->addSubview(this->table);
-    updateBooks(this);
-    this->table->becomeFocused();
-
     // Actions for the home menu
-    this->table->setAction(&selectBook, BUTTON_CENTER);
+    this->mainMenu->setAction(&selectBook, BUTTON_CENTER);
 
     // Actions for the book reading mode
     this->page->setAction(&returnHome, BUTTON_CENTER);
@@ -59,7 +65,7 @@ void selectBook(std::shared_ptr<Application>application, Event event) {
             f.close();
         }
 
-        window->removeSubview(myApp->table);
+        window->removeSubview(myApp->mainMenu);
         window->addSubview(myApp->page);
         myApp->page->becomeFocused();
         updatePage(myApp);
@@ -100,8 +106,8 @@ void returnHome(std::shared_ptr<Application>application, Event event) {
     std::shared_ptr<Window>window = myApp->getWindow();
 
     window->removeSubview(myApp->page);
-    window->addSubview(myApp->table);
-    myApp->table->becomeFocused();
+    window->addSubview(myApp->mainMenu);
+    myApp->mainMenu->becomeFocused();
     window->setNeedsDisplay(true);
 }
 

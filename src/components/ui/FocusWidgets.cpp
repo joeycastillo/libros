@@ -8,12 +8,12 @@ Button::Button(Rect rect, std::string text) : Control(rect) {
 void Button::draw(Adafruit_GFX *display, int16_t x, int16_t y) {
     // i hate this hack, window needs to manage views' state and communicate it down.
     View *focusedView = NULL;
-    if (auto window = this->window.lock()) {
+    if (auto window = this->getWindow().lock()) {
         if (auto fv = window->getFocusedView().lock()) {
             focusedView = fv.get();
         }
     }
-    if (std::shared_ptr<Window> window = this->window.lock()) {
+    if (std::shared_ptr<Window> window = this->getWindow().lock()) {
         View::draw(display, x, y);
         display->setCursor(this->frame.origin.x + x + 8, this->frame.origin.y + y + this->frame.size.height / 2 - 8);
         if (focusedView == this) {
@@ -61,7 +61,7 @@ void Label::draw(Adafruit_GFX *display, int16_t x, int16_t y) {
 
 void Label::setText(std::string text) {
     this->text = text;
-    if (std::shared_ptr<Window> window = this->window.lock()) {
+    if (std::shared_ptr<Window> window = this->getWindow().lock()) {
         window->setNeedsDisplay(true);
     }
 }

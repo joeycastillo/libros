@@ -14,6 +14,13 @@ class OpenBookLabel : public Label {
 public:
     OpenBookLabel(Rect rect, std::string text);
     void draw(Adafruit_GFX *display, int16_t x, int16_t y) override;
+    void setBold(bool value);
+    void setItalic(bool value);
+    void setTextSize(uint16_t value);
+protected:
+    bool bold = false;
+    bool italic = false;
+    uint16_t textSize = 1;
 };
 
 typedef enum {
@@ -41,7 +48,6 @@ class OpenBookTable : public Control {
 public:
     OpenBookTable(Rect rect, int16_t cellHeight, OpenBookCellSelectionStyle selectionStyle);
     void setItems(std::vector<std::string> items);
-    void becomeFocused() override;
     bool handleEvent(Event event) override;
 protected:
     void updateCells();

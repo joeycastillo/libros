@@ -22,8 +22,6 @@ void View::draw(Adafruit_GFX *display, int16_t x, int16_t y) {
     Serial.print("Drawing view ");
     Serial.println((int32_t) this);
     if (this->opaque || this->backgroundColor) {
-        Serial.print("Drawing fill ");
-        Serial.println((int32_t) this);
         display->fillRect(x + this->frame.origin.x, y + this->frame.origin.y, this->frame.size.width, this->frame.size.height, this->backgroundColor);
     }
     for(std::shared_ptr<View> view : this->subviews) {
@@ -34,8 +32,8 @@ void View::draw(Adafruit_GFX *display, int16_t x, int16_t y) {
 void View::addSubview(std::shared_ptr<View> view) {
     view->superview = this->shared_from_this();
     this->subviews.push_back(view);
-    if (std::shared_ptr<Window> window = this->window.lock()) {
-        view->window = window;
+    if (std::shared_ptr<Window> window = this->getWindow().lock()) {
+        view->setWindow(window);
         window->setNeedsDisplay(true);
     }
 }
@@ -45,27 +43,43 @@ void View::removeSubview(std::shared_ptr<View> view) {
     view->window.reset();
     int index = std::distance(this->subviews.begin(), std::find(this->subviews.begin(), this->subviews.end(), view));
     this->subviews.erase(this->subviews.begin() + index);
-    if (std::shared_ptr<Window> window = this->window.lock()) {
+    if (std::shared_ptr<Window> window = this->getWindow().lock()) {
         window->setNeedsDisplay(true);
     }
 }
 
-void View::becomeFocused() {
-    if (std::shared_ptr<Window> window = this->window.lock()) {
-        std::shared_ptr<View> oldResponder = window->focusedView.lock();
-        if (oldResponder != NULL) {
-            oldResponder->willResignFocus();
-            window->focusedView.reset();
-            oldResponder->didResignFocus();
+bool View::becomeFocused() {
+    for(std::shared_ptr<View> subview : this->subviews) {
+        if (subview->becomeFocused()) {
+            return true;
         }
-        this->willBecomeFocused();
-        window->focusedView = this->shared_from_this();
-        this->didBecomeFocused();
     }
+
+    if (this->canBecomeFocused()) {
+        // when there are no focusable subviews, and we can become
+        // focused, become focused ourselves.
+        // note that Window can always become focused, so this
+        // block is guaranteed to execute when we reach the window.
+        if (std::shared_ptr<Window> window = this->getWindow().lock()) {
+            std::shared_ptr<View> oldResponder = window->focusedView.lock();
+            if (oldResponder != NULL) {
+                oldResponder->willResignFocus();
+                window->focusedView.reset();
+                oldResponder->didResignFocus();
+            }
+            this->willBecomeFocused();
+            window->focusedView = this->shared_from_this();
+            this->didBecomeFocused();
+        }
+
+        return true;
+    }
+
+    return false;
 }
 
 void View::resignFocus() {
-    if (std::shared_ptr<Window> window = this->window.lock()) {
+    if (std::shared_ptr<Window> window = this->getWindow().lock()) {
         if (std::shared_ptr<View> superview = this->superview.lock()) {
             superview->becomeFocused();
         }
@@ -86,7 +100,7 @@ void View::willBecomeFocused() {
 
 void View::didBecomeFocused() {
     if (this->superview.lock()) {
-        if (std::shared_ptr<Window> window = this->window.lock()) {
+        if (std::shared_ptr<Window> window = this->getWindow().lock()) {
             std::shared_ptr<View> shared_this = this->shared_from_this();
             window->setNeedsDisplayInRect(this->frame, shared_this);
         }
@@ -99,7 +113,7 @@ void View::willResignFocus() {
 
 void View::didResignFocus() {
     if (this->superview.lock()) {
-        if (std::shared_ptr<Window> window = this->window.lock()) {
+        if (std::shared_ptr<Window> window = this->getWindow().lock()) {
             std::shared_ptr<View> shared_this = this->shared_from_this();
             window->setNeedsDisplayInRect(this->frame, shared_this);
         }
@@ -109,7 +123,7 @@ void View::didResignFocus() {
 bool View::handleEvent(Event event) {
     std::shared_ptr<View> focusedView = NULL;
     std::shared_ptr<Window> window = NULL;
-    if (window = this->window.lock()) {
+    if (window = this->getWindow().lock()) {
         focusedView = window->getFocusedView().lock();
     } else {
         focusedView = this->shared_from_this();
@@ -180,12 +194,23 @@ std::weak_ptr<View> View::getSuperview() {
     return this->superview;
 }
 
+std::weak_ptr<Window> View::getWindow() {
+    return this->window;
+}
+
+void View::setWindow(std::shared_ptr<Window>window) {
+    this->window = window;
+    for(std::shared_ptr<View> subview : this->subviews) {
+        subview->setWindow(window);
+    }
+}
+
 Rect View::getFrame() {
     return this->frame;
 }
 
 void View::setFrame(Rect frame) {
-    if (std::shared_ptr<Window> window = this->window.lock()) {
+    if (std::shared_ptr<Window> window = this->getWindow().lock()) {
         Rect dirtyRect = MakeRect(min(this->frame.origin.x, frame.origin.x), min(this->frame.origin.y, frame.origin.y), 0, 0);
         dirtyRect.size.width = max(this->frame.origin.x + this->frame.size.width, frame.origin.x + frame.size.width) - dirtyRect.origin.x;
         dirtyRect.size.height = max(this->frame.origin.y + this->frame.size.height, frame.origin.y + frame.size.height) - dirtyRect.origin.y;
@@ -231,26 +256,12 @@ Window::Window(Size size) : View(MakeRect(0, 0, size.width, size.height)) {
 }
 
 void Window::addSubview(std::shared_ptr<View> view) {
-    view->window = std::static_pointer_cast<Window>(this->shared_from_this());
+    view->setWindow(std::static_pointer_cast<Window>(this->shared_from_this()));
     View::addSubview(view);
 }
 
 bool Window::canBecomeFocused() {
     return true;
-}
-
-void Window::becomeFocused() {
-    if (!this->canBecomeFocused()) return;
-
-    std::shared_ptr<View> oldResponder = this->focusedView.lock();
-    if (oldResponder != NULL) {
-        oldResponder->willResignFocus();
-        this->focusedView.reset();
-        oldResponder->didResignFocus();
-    }
-    this->willBecomeFocused();
-    this->focusedView = this->shared_from_this();
-    this->didBecomeFocused();
 }
 
 bool Window::needsDisplay() {
@@ -293,6 +304,18 @@ Rect Window::getDirtyRect() {
 
 std::weak_ptr<View> Window::getFocusedView() {
     return this->focusedView;
+}
+
+std::weak_ptr<View> Window::getSuperview() {
+    return std::weak_ptr<View>();
+}
+
+std::weak_ptr<Window> Window::getWindow() {
+    return std::static_pointer_cast<Window, View>(this->shared_from_this());
+}
+
+void Window::setWindow(std::shared_ptr<Window> window) {
+    // nothing to do here
 }
 
 Application::Application(const std::shared_ptr<Window>& window) {
