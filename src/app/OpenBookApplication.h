@@ -17,5 +17,6 @@ public:
     std::shared_ptr<View> mainMenu;
     std::shared_ptr<OpenBookTable> table;
     std::shared_ptr<Control> page;
+    std::shared_ptr<ProgressView> progressView;
     std::shared_ptr<OpenBookLabel> bookText;
 };
