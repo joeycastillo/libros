@@ -58,4 +58,12 @@ protected:
     OpenBookCellSelectionStyle selectionStyle;
 };
 
+class OpenBookGrayscaleImageView : public View {
+public:
+    OpenBookGrayscaleImageView(Rect rect, const unsigned char *image);
+    void draw(Adafruit_GFX *display, int16_t x, int16_t y) override;
+protected:
+    const unsigned char *image;
+};
+
 #endif // BabelWidgets_h
