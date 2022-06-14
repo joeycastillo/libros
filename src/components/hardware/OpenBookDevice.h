@@ -46,11 +46,9 @@ public:
     OpenBookDevice(OpenBookDevice const&) = delete;
     void operator=(OpenBookDevice const&) = delete;
 
-    bool configureScreen(int8_t srcs, int8_t ecs, int8_t edc, int8_t erst, int8_t ebsy, SPIClass *spi, int width, int height);
-    bool configureButtons(int8_t active, OpenBookButtonConfig config);
-    bool configureI2CButtons(int8_t active, int8_t interrupt);
-    bool configureBabel(int8_t bcs, SPIClass *spi);
-    bool configureSD(int8_t sdcs, SPIClass *spi);
+    bool startDisplay();
+    bool startSD();
+    bool startBabel();
 
     void lockDevice();
 
@@ -61,13 +59,19 @@ public:
     SdFat *getSD();
 
 protected:
+    bool configureScreen(int8_t srcs, int8_t ecs, int8_t edc, int8_t erst, int8_t ebsy, SPIClass *spi, int width, int height);
+    bool configureButtons(int8_t active, OpenBookButtonConfig config);
+    bool configureI2CButtons(int8_t active, int8_t interrupt);
+    bool configureBabel(int8_t bcs, SPIClass *spi);
+    bool configureSD(int8_t sdcs, SPIClass *spi);
+
     OpenBook_IL0398 *display = NULL;
     BabelTypesetterGFX *typesetter = NULL;
     SdFat *sd;
 
     Adafruit_MCP23008 *ioExpander = NULL;
     OpenBookButtonConfig buttonConfig = {0};
-    int8_t activeState, buttonInterrupt;
+    int8_t activeState, buttonInterrupt, sdcs;
 private:
     OpenBookDevice();
 };

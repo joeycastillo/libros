@@ -56,9 +56,6 @@ OpenBookDevice::OpenBookDevice() {
 */
 bool OpenBookDevice::configureScreen(int8_t srcs, int8_t ecs, int8_t edc, int8_t erst, int8_t ebsy, SPIClass *spi, int width, int height) {
     OpenBook_IL0398 *display = new OpenBook_IL0398(width, height, edc, erst, ecs, srcs, ebsy, spi);
-    display->begin();
-    display->clearBuffer();
-    display->setColorBuffer(1, false);
     this->display = display;
 
     return true;
@@ -126,7 +123,6 @@ bool OpenBookDevice::configureBabel(int8_t bcs, SPIClass *spi) {
     if (this->display == NULL || bcs < 0) return false;
 
     BabelTypesetterGFX *typesetter = new BabelTypesetterGFX(this->display, bcs, spi);
-    typesetter->begin();
     this->typesetter = typesetter;
 
     return true;
@@ -134,8 +130,27 @@ bool OpenBookDevice::configureBabel(int8_t bcs, SPIClass *spi) {
 
 bool OpenBookDevice::configureSD(int8_t sdcs, SPIClass *spi) {
     this->sd = new SdFat(spi);
-    if (!this->sd->begin(sdcs)) return false;
+    this->sdcs = sdcs;
 
+    return true;
+}
+
+bool OpenBookDevice::startDisplay() {
+    this->display->begin();
+    this->display->clearBuffer();
+    this->display->setColorBuffer(1, false);
+
+    return true;
+}
+
+bool OpenBookDevice::startSD() {
+    return this->sd->begin(this->sdcs);
+}
+
+bool OpenBookDevice::startBabel() {
+    this->typesetter->begin();
+
+    // TODO: Babel should return a boolean to indicate success or failure.
     return true;
 }
 
