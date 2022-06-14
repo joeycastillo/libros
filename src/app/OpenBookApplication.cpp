@@ -185,6 +185,11 @@ void updatePage(std::shared_ptr<OpenBookApplication>myApp) {
         }
     }
 
+    uint64_t pos = file.curPosition();
+    uint64_t len = file.fileSize();
+    uint64_t textStart;
+    file.seekSet(32);
+    file.read(&textStart, 8);
+    myApp->progressView->setProgress((float)(pos - textStart) / (float)(len - textStart));
     myApp->bookText->setText(pageText);
-    myApp->progressView->setProgress(((float)file.curPosition()) / ((float)file.fileSize()));
 }
