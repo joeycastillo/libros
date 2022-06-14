@@ -27,7 +27,7 @@ public:
     void draw(Adafruit_GFX *display, int16_t x, int16_t y) override;
 };
 
-class Label : public Control {
+class Label : public View {
 public:
     Label(Rect rect, std::string text);
     void draw(Adafruit_GFX *display, int16_t x, int16_t y) override;

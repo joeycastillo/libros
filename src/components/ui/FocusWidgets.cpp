@@ -48,7 +48,7 @@ void BorderedView::draw(Adafruit_GFX *display, int16_t x, int16_t y) {
     display->drawRect(x + this->frame.origin.x, y + this->frame.origin.y, this->frame.size.width, this->frame.size.height, this->foregroundColor);
 }
 
-Label::Label(Rect rect, std::string text) : Control(rect) {
+Label::Label(Rect rect, std::string text) : View(rect) {
     this->text = text;
 }
 
