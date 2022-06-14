@@ -267,6 +267,8 @@ Window::Window(Size size) : View(MakeRect(0, 0, size.width, size.height)) {
 void Window::addSubview(std::shared_ptr<View> view) {
     view->setWindow(std::static_pointer_cast<Window>(this->shared_from_this()));
     View::addSubview(view);
+    // when we add a new view hierarchy to the window, try to focus on its innermost view.
+    this->becomeFocused();
 }
 
 bool Window::canBecomeFocused() {

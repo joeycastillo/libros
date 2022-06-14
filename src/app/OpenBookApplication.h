@@ -16,5 +16,6 @@ public:
     std::vector<std::string> filenames;
     std::shared_ptr<View> mainMenu;
     std::shared_ptr<OpenBookTable> table;
-    std::shared_ptr<OpenBookLabel> page;
+    std::shared_ptr<Control> page;
+    std::shared_ptr<OpenBookLabel> bookText;
 };

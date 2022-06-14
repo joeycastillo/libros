@@ -33,7 +33,9 @@ OpenBookApplication::OpenBookApplication(const std::shared_ptr<Window>& window) 
     window->addSubview(this->mainMenu);
     updateBooks(this);
 
-    this->page = std::make_shared<OpenBookLabel>(MakeRect(16, 16, 300 - 32, 400 - 32), "");
+    this->page = std::make_shared<Control>(MakeRect(0, 0, 300, 400));
+    this->bookText = std::make_shared<OpenBookLabel>(MakeRect(16, 16, 300 - 32, 400 - 32), "");
+    this->page->addSubview(this->bookText);
 
     // Actions for the home menu
     this->mainMenu->setAction(&selectBook, BUTTON_CENTER);
@@ -181,5 +183,5 @@ void updatePage(std::shared_ptr<OpenBookApplication>myApp) {
         }
     }
 
-    myApp->page->setText(pageText);
+    myApp->bookText->setText(pageText);
 }
