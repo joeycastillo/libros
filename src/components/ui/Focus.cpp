@@ -39,6 +39,9 @@ void View::addSubview(std::shared_ptr<View> view) {
 }
 
 void View::removeSubview(std::shared_ptr<View> view) {
+    if (view->isFocused()) {
+        view->resignFocus();
+    }
     view->superview.reset();
     view->window.reset();
     int index = std::distance(this->subviews.begin(), std::find(this->subviews.begin(), this->subviews.end(), view));
@@ -46,6 +49,14 @@ void View::removeSubview(std::shared_ptr<View> view) {
     if (std::shared_ptr<Window> window = this->getWindow().lock()) {
         window->setNeedsDisplay(true);
     }
+}
+
+bool View::isFocused() {
+    return this->focused;
+}
+
+bool View::canBecomeFocused() {
+    return false;
 }
 
 bool View::becomeFocused() {
@@ -61,13 +72,15 @@ bool View::becomeFocused() {
         // note that Window can always become focused, so this
         // block is guaranteed to execute when we reach the window.
         if (std::shared_ptr<Window> window = this->getWindow().lock()) {
-            std::shared_ptr<View> oldResponder = window->focusedView.lock();
+            std::shared_ptr<View> oldResponder = window->getFocusedView().lock();
             if (oldResponder != NULL) {
                 oldResponder->willResignFocus();
+                oldResponder->focused = false;
                 window->focusedView.reset();
                 oldResponder->didResignFocus();
             }
             this->willBecomeFocused();
+            this->focused = true;
             window->focusedView = this->shared_from_this();
             this->didBecomeFocused();
         }
@@ -88,10 +101,6 @@ void View::resignFocus() {
 
 void View::movedToWindow() {
     // nothing to do here
-}
-
-bool View::canBecomeFocused() {
-    return false;
 }
 
 void View::willBecomeFocused() {

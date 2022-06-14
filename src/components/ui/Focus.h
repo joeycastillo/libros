@@ -71,6 +71,7 @@ public:
     virtual void draw(Adafruit_GFX *display, int16_t x, int16_t y);
     virtual void addSubview(std::shared_ptr<View> view);
     void removeSubview(std::shared_ptr<View> view);
+    bool isFocused();
     virtual bool canBecomeFocused();
     virtual bool becomeFocused();
     virtual void resignFocus();
@@ -92,6 +93,7 @@ public:
     uint16_t getBackgroundColor();
     void setBackgroundColor(uint16_t value);
 protected:
+    bool focused = false;
     bool opaque = false;
     uint16_t backgroundColor = 0;
     uint16_t foregroundColor = 1;
