@@ -21,10 +21,14 @@ OpenBookApplication::OpenBookApplication(const std::shared_ptr<Window>& window) 
     this->addTask(displayTask);
 
     this->mainMenu = std::make_shared<View>(MakeRect(0, 0, 300, 400));
-    std::shared_ptr<OpenBookLabel> titleLabel = std::make_shared<OpenBookLabel>(MakeRect(8, 8, 220, 16), "My Library");
+    std::shared_ptr<OpenBookLabel> titleLabel = std::make_shared<OpenBookLabel>(MakeRect(8, 8, 200, 16), "My Library");
     titleLabel->setBold(true);
+    char buf[16];
+    sprintf(buf, "VSYS: %4.2fV", OpenBookDevice::sharedInstance()->getSystemVoltage());
+    std::shared_ptr<OpenBookLabel> batteryLabel = std::make_shared<OpenBookLabel>(MakeRect(200, 8, 80, 16), buf);
     this->table = std::make_shared<OpenBookTable>(MakeRect(0, 32, 300, 360), 24, CellSelectionStyleIndicatorLeading);
     this->mainMenu->addSubview(titleLabel);
+    this->mainMenu->addSubview(batteryLabel);
     this->mainMenu->addSubview(this->table);
     window->addSubview(this->mainMenu);
     updateBooks(this);

@@ -52,6 +52,8 @@ public:
 
     void lockDevice();
 
+    double getSystemVoltage();
+
     uint8_t readButtons();
     OpenBookSDCardState sdCardState();
     OpenBook_IL0398 *getDisplay();

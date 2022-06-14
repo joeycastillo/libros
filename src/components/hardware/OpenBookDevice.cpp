@@ -170,6 +170,16 @@ void OpenBookDevice::lockDevice() {
 #endif
 }
 
+double OpenBookDevice::getSystemVoltage() {
+#ifdef ARDUINO_ARCH_RP2040
+    analogReadResolution(16);
+    pinMode(29, INPUT);
+    int32_t value = analogRead(A3);
+    return 3.3 * 3.3333333333 * value / 65535;
+#endif
+    return 0;
+}
+
 /**
  @brief Reads button state and returns it as a byte.
  @returns a bitmask with 1 for every button that is pressed, and 0 for every
