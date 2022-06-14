@@ -37,6 +37,7 @@ OpenBookApplication::OpenBookApplication(const std::shared_ptr<Window>& window) 
     this->bookText = std::make_shared<OpenBookLabel>(MakeRect(16, 16, 300 - 32, 400 - 32), "");
     this->page->addSubview(this->bookText);
     this->progressView = std::make_shared<ProgressView>(MakeRect(0, 400 - 8, 300, 8));
+    this->progressView->setBackgroundColor(EPD_DARK);
     this->page->addSubview(this->progressView);
 
     // Actions for the home menu
