@@ -7,6 +7,14 @@
 #include <string>
 #include "Focus.h"
 
+class BitmapView : public View {
+public:
+    BitmapView(Rect rect, const unsigned char *bitmap);
+    void draw(Adafruit_GFX *display, int16_t x, int16_t y) override;
+protected:
+    const unsigned char *bitmap;
+};
+
 class Button : public Control {
 public:
     Button(Rect rect, std::string text);
