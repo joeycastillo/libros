@@ -24,7 +24,6 @@ protected:
 };
 
 typedef enum {
-    CellSelectionStyleNone,
     CellSelectionStyleInvert,
     CellSelectionStyleIndicatorLeading,
     CellSelectionStyleIndicatorTrailing,
@@ -36,10 +35,10 @@ class OpenBookCell : public Control {
 public:
     OpenBookCell(Rect rect, std::string text, OpenBookCellSelectionStyle selectionStyle);
     void draw(Adafruit_GFX *display, int16_t x, int16_t y) override;
-    // TODO: implement these for the indicator style
-    // void willBecomeFocused() override;
-    // void willResignFocus() override;
+    void didBecomeFocused() override;
+    void didResignFocus() override;
 protected:
+    Rect _indicatorRect();
     std::string text;
     OpenBookCellSelectionStyle selectionStyle;
 };

@@ -23,7 +23,7 @@ OpenBookApplication::OpenBookApplication(const std::shared_ptr<Window>& window) 
     this->mainMenu = std::make_shared<View>(MakeRect(0, 0, 300, 400));
     std::shared_ptr<OpenBookLabel> titleLabel = std::make_shared<OpenBookLabel>(MakeRect(8, 8, 220, 16), "My Library");
     titleLabel->setBold(true);
-    this->table = std::make_shared<OpenBookTable>(MakeRect(0, 32, 300, 360), 24, CellSelectionStyleInvert);
+    this->table = std::make_shared<OpenBookTable>(MakeRect(0, 32, 300, 360), 24, CellSelectionStyleIndicatorLeading);
     this->mainMenu->addSubview(titleLabel);
     this->mainMenu->addSubview(this->table);
     window->addSubview(this->mainMenu);
