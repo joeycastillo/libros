@@ -101,9 +101,7 @@ void OpenBook_IL0398::busy_wait(void)
   if (_busy_pin > -1) {
     do {
       EPD_command(IL0398_GETSTATUS);
-      delay(10);
     } while (!digitalRead(_busy_pin)); //wait for busy high
-    delay(200);
   } else {
     delay(BUSY_WAIT);
   }
@@ -131,7 +129,6 @@ void OpenBook_IL0398::begin(bool reset)
 void OpenBook_IL0398::update()
 {
   EPD_command(IL0398_DISPLAY_REFRESH);
-  delay(100);
 
   busy_wait();
   if (_busy_pin <= -1) {
@@ -509,8 +506,6 @@ void OpenBook_IL0398::init(OpenBookDisplayMode displayMode) {
 
   EPD_command(IL0398_POWER_ON);
   busy_wait();
-
-  delay(20);
 }
 
 /**************************************************************************/
@@ -529,7 +524,6 @@ void OpenBook_IL0398::powerDown()
   busy_wait();
   buf[0] = 0xA5; // deep sleep
   EPD_command(IL0398_DEEP_SLEEP, buf, 1);
-  delay(100);
 }
 
 /**************************************************************************/
@@ -746,8 +740,6 @@ void OpenBook_IL0398::displayPartial(uint16_t x, uint16_t y, uint16_t w, uint16_
     }
     this->update();
     EPD_command(IL0398_PARTIALOUT);
-
-    delay(20);
 }
 
 /**************************************************************************/
