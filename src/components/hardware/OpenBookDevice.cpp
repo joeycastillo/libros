@@ -246,3 +246,11 @@ bool OpenBookDevice::fileExists(const char *path) {
 File OpenBookDevice::openFile(const char *path, oflag_t oflag) {
     return this->sd->open(path, oflag);
 }
+
+bool OpenBookDevice::renameFile(const char *oldPath, const char *newPath) {
+    return this->sd->rename(oldPath, newPath);
+}
+
+bool OpenBookDevice::removeFile(const char *path) {
+    return this->sd->remove(path);
+}
