@@ -184,3 +184,30 @@ BookRecord OpenBookDatabase::getBookRecord(uint32_t i) {
 
     return retval;
 }
+
+std::string OpenBookDatabase::getBookTitle(BookRecord record) {
+    return this->_getMetadataAtIndex(record, OPEN_BOOK_TITLE_INDEX);
+}
+
+std::string OpenBookDatabase::getBookAuthor(BookRecord record) {
+    return this->_getMetadataAtIndex(record, OPEN_BOOK_AUTHOR_INDEX);
+}
+
+std::string OpenBookDatabase::getBookDescription(BookRecord record) {
+    return this->_getMetadataAtIndex(record, OPEN_BOOK_DESCRIPTION_INDEX);
+}
+
+std::string OpenBookDatabase::_getMetadataAtIndex(BookRecord record, uint16_t i) {
+    BookField field = record.metadata[i];
+    char *value = (char *)malloc(field.len + 1);
+    File f = OpenBookDevice::sharedInstance()->openFile(record.filename);
+
+    f.seekSet(field.loc);
+    f.read((void *)value, field.len);
+    f.close();
+    value[field.len] = 0;
+    std::string retval = std::string(value);
+    free(value);
+
+    return retval;
+}

@@ -96,21 +96,12 @@ void lockScreen(std::shared_ptr<Application>application, Event event) {
 
 void updateBooks(OpenBookApplication *myApp) {
     std::vector<std::string> titles;
-    OpenBookDevice *device = OpenBookDevice::sharedInstance();
     uint32_t numBooks = OpenBookDatabase::sharedInstance()->getNumberOfBooks();
 
     for (uint32_t i = 0 ; i < numBooks ; i++) {
         BookRecord record = OpenBookDatabase::sharedInstance()->getBookRecord(i);
-        BookField titleField = record.metadata[OPEN_BOOK_TITLE_INDEX];
-        char *title = (char *)malloc(titleField.len + 1);
-        File f = device->openFile(record.filename);
-        f.seekSet(titleField.loc);
-        f.read((void *)title, titleField.len);
-        f.close();
-        title[titleField.len] = 0;
-        titles.push_back(std::string(title));
-        free(title);
-
+        std::string title = OpenBookDatabase::sharedInstance()->getBookTitle(record);
+        titles.push_back(title);
         myApp->filenames.push_back(std::string(record.filename));
     }
 

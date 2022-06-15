@@ -54,9 +54,13 @@ public:
     bool scanForNewBooks();
     uint32_t getNumberOfBooks();
     BookRecord getBookRecord(uint32_t i);
+    std::string getBookTitle(BookRecord record);
+    std::string getBookAuthor(BookRecord record);
+    std::string getBookDescription(BookRecord record);
 protected:
-  uint16_t numFields = 0;
-  uint32_t numBooks = 0;
+    std::string _getMetadataAtIndex(BookRecord record, uint16_t i);
+    uint16_t numFields = 0;
+    uint32_t numBooks = 0;
 private:
     OpenBookDatabase();
 };

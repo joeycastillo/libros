@@ -67,7 +67,8 @@
         "openbook.h": "c",
         "openbookapplication.h": "c",
         "arduino.h": "c",
-        "openbookdevice.h": "c"
+        "openbookdevice.h": "c",
+        "iostream": "cpp"
     },
     "C_Cpp.intelliSenseEngine": "Tag Parser",
 }
