@@ -1,5 +1,4 @@
 #include "OpenBookDatabase.h"
-#include "OpenBookDevice.h"
 #include "sha256.h"
 #include <map>
 
@@ -50,7 +49,7 @@ bool OpenBookDatabase::connect() {
     return true;
 }
 
-bool _fileLooksLikeBook(File entry) {
+bool OpenBookDatabase::_fileLooksLikeBook(File entry) {
     uint32_t magic = 0;
     uint32_t extension = 0;
     char filename[128];
@@ -78,7 +77,7 @@ bool OpenBookDatabase::scanForNewBooks() {
     root = device->openFile("/");
     entry = root.openNextFile();
     while (entry) {
-        if (_fileLooksLikeBook(entry)) {
+        if (this->_fileLooksLikeBook(entry)) {
             numBooks++;
         }
         entry.close();
@@ -98,7 +97,7 @@ bool OpenBookDatabase::scanForNewBooks() {
     root = device->openFile("/");
     entry = root.openNextFile();
     while (entry) {
-        if (_fileLooksLikeBook(entry)) {
+        if (this->_fileLooksLikeBook(entry)) {
             BookRecord record = {0};
             entry.getName(record.filename, 128);
             hash = sha256(std::string(record.filename));

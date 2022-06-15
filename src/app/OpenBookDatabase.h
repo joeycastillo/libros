@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include <string>
+#include "OpenBookDevice.h"
 
 #define OPEN_BOOK_LIBRARY_FILENAME ("_LIBRARY")
 #define OPEN_BOOK_BACKUP_FILENAME ("_LIBBACK")
@@ -58,6 +59,7 @@ public:
     std::string getBookAuthor(BookRecord record);
     std::string getBookDescription(BookRecord record);
 protected:
+    bool _fileLooksLikeBook(File entry);
     std::string _getMetadataAtIndex(BookRecord record, uint16_t i);
     uint16_t numFields = 0;
     uint32_t numBooks = 0;
