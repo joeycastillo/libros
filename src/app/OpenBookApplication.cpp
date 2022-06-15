@@ -65,13 +65,13 @@ void selectBook(std::shared_ptr<Application>application, Event event) {
         myApp->currentBook = myApp->filenames[selectedIndex];
         std::string currentProgressFile = myApp->filenames[selectedIndex];
         currentProgressFile[currentProgressFile.size() - 1] = 'p';
-        if (device->getSD()->exists(currentProgressFile.c_str())) {
-            File f = device->getSD()->open(currentProgressFile.c_str(), FILE_READ);
+        if (device->fileExists(currentProgressFile.c_str())) {
+            File f = device->openFile(currentProgressFile.c_str(), FILE_READ);
             f.read(&myApp->currentLine, sizeof(size_t));
             f.close();
         } else {
             myApp->currentLine = 2; // start of lines, after title and author
-            File f = device->getSD()->open(currentProgressFile.c_str(), FILE_WRITE);
+            File f = device->openFile(currentProgressFile.c_str(), FILE_WRITE);
             f.write((byte *)&(myApp->currentLine), sizeof(size_t));
             f.close();
         }
@@ -105,7 +105,7 @@ void turnPage(std::shared_ptr<Application>application, Event event) {
     }
     std::string currentProgressFile = myApp->currentBook;
     currentProgressFile[currentProgressFile.size() - 1] = 'p';
-    File f = device->getSD()->open(currentProgressFile.c_str(), FILE_READ);
+    File f = device->openFile(currentProgressFile.c_str(), FILE_READ);
     f.write((byte *)&(myApp->currentLine), sizeof(size_t));
     f.close();
 
@@ -131,7 +131,7 @@ void updateBooks(OpenBookApplication *myApp) {
     std::vector<std::string> titles;
     OpenBookDevice *device = OpenBookDevice::sharedInstance();
 
-    File root = device->getSD()->open("/");
+    File root = device->openFile("/");
     File entry = root.openNextFile();
     while (entry) {
         if (!entry.isDirectory()) {
@@ -140,7 +140,7 @@ void updateBooks(OpenBookApplication *myApp) {
             if (magic == 5426643222204338255) { // the string "OPENBOOK"
                 char *filename = (char *)malloc(128);
                 entry.getName(filename, 128);
-                File file = device->getSD()->open(filename);
+                File file = device->openFile(filename);
                 file.seek(8);
                 uint64_t title_loc;
                 uint32_t title_len;
@@ -164,7 +164,7 @@ void updateBooks(OpenBookApplication *myApp) {
 void updatePage(std::shared_ptr<OpenBookApplication>myApp) {
     OpenBookDevice *device = OpenBookDevice::sharedInstance();
     std::string pageText = "";
-    FatFile file = device->getSD()->open(myApp->currentBook.c_str(), FILE_READ);
+    FatFile file = device->openFile(myApp->currentBook.c_str(), FILE_READ);
 
     for(int i = 0; i < 22; i++) {
         uint64_t loc;

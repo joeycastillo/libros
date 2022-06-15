@@ -58,7 +58,9 @@ public:
     OpenBookSDCardState sdCardState();
     OpenBook_IL0398 *getDisplay();
     BabelTypesetterGFX *getTypesetter();
-    SdFat *getSD();
+
+    bool fileExists(const char *path);
+    File openFile(const char *path, oflag_t oflag = FILE_READ);
 
 protected:
     bool configureScreen(int8_t srcs, int8_t ecs, int8_t edc, int8_t erst, int8_t ebsy, SPIClass *spi, int width, int height);

@@ -239,9 +239,10 @@ BabelTypesetterGFX * OpenBookDevice::getTypesetter() {
     return this->typesetter;
 }
 
-/**
- @returns a reference to the SD card, or NULL if not configured.
-*/
-SdFat * OpenBookDevice::getSD() {
-    return this->sd;
+bool OpenBookDevice::fileExists(const char *path) {
+    return this->sd->exists(path);
+}
+
+File OpenBookDevice::openFile(const char *path, oflag_t oflag) {
+    return this->sd->open(path, oflag);
 }
