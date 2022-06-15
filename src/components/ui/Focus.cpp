@@ -45,8 +45,10 @@ void View::removeSubview(std::shared_ptr<View> view) {
     view->superview.reset();
     view->window.reset();
     int index = std::distance(this->subviews.begin(), std::find(this->subviews.begin(), this->subviews.end(), view));
-    this->subviews.erase(this->subviews.begin() + index);
+    this->subviews.erase(this->subviews.begin() + index);    
     if (std::shared_ptr<Window> window = this->getWindow().lock()) {
+        // FIXME: We should only refocus if we know the focused view was removed.
+        window->becomeFocused();
         window->setNeedsDisplay(true);
     }
 }

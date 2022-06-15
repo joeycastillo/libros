@@ -31,7 +31,7 @@ public:
 
 class BorderedView : public View {
 public:
-    BorderedView(Rect rect) : View(rect) {};
+    BorderedView(Rect rect);
     void draw(Adafruit_GFX *display, int16_t x, int16_t y) override;
 };
 

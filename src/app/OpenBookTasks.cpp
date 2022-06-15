@@ -41,6 +41,7 @@ int16_t OpenBookRawButtonInput::run(Application *application) {
 
 int16_t OpenBookDisplay::run(Application *application) {
     OpenBookDevice *device = OpenBookDevice::sharedInstance();
+    OpenBookApplication *myApp = (OpenBookApplication *)application;
 
     std::shared_ptr<Window> window = application->getWindow();
     if (window->needsDisplay()) {
@@ -51,7 +52,11 @@ int16_t OpenBookDisplay::run(Application *application) {
 
         Rect dirtyRect = window->getDirtyRect();
 
-        if (RectsEqual(dirtyRect, window->getFrame())) {
+        if (myApp->requestedRefreshMode != -1) {
+            display->setDisplayMode((OpenBookDisplayMode)myApp->requestedRefreshMode);
+            myApp->requestedRefreshMode = -1;
+            display->display();
+        } else if (RectsEqual(dirtyRect, window->getFrame())) {
             display->setDisplayMode(OPEN_BOOK_DISPLAY_MODE_QUICK);
             display->display();
         } else {

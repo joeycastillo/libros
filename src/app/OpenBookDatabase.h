@@ -58,6 +58,8 @@ public:
     std::string getBookTitle(BookRecord record);
     std::string getBookAuthor(BookRecord record);
     std::string getBookDescription(BookRecord record);
+
+    bool bookIsPaginated(BookRecord record);
 protected:
     bool _fileLooksLikeBook(File entry);
     std::string _getMetadataAtIndex(BookRecord record, uint16_t i);

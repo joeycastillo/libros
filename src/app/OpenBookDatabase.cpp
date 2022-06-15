@@ -196,6 +196,16 @@ std::string OpenBookDatabase::getBookDescription(BookRecord record) {
     return this->_getMetadataAtIndex(record, OPEN_BOOK_DESCRIPTION_INDEX);
 }
 
+bool OpenBookDatabase::bookIsPaginated(BookRecord record) {
+    char pagefile[128];
+    const uint32_t extension = 1734438958; // four ASCII characters, .pag
+
+    memcpy(pagefile, record.filename, 128);
+    memcpy((byte *)&pagefile + (strlen(record.filename) - 4), (byte *)&extension, sizeof(extension));
+
+    return OpenBookDevice::sharedInstance()->fileExists(pagefile);
+}
+
 std::string OpenBookDatabase::_getMetadataAtIndex(BookRecord record, uint16_t i) {
     BookField field = record.metadata[i];
     char *value = (char *)malloc(field.len + 1);

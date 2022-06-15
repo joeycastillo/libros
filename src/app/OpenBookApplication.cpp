@@ -1,5 +1,4 @@
 #include "OpenBookApplication.h"
-#include "OpenBookDatabase.h"
 #include "OpenBookTasks.h"
 #include "Bitmaps.h"
 
@@ -8,6 +7,7 @@ void selectBook(std::shared_ptr<Application>application, Event event);
 void turnPage(std::shared_ptr<Application>application, Event event);
 void returnHome(std::shared_ptr<Application>application, Event event);
 void lockScreen(std::shared_ptr<Application>application, Event event);
+void dismiss(std::shared_ptr<Application>application, Event event);
 
 // Helpers
 void updateBooks(OpenBookApplication *myApp);
@@ -59,10 +59,27 @@ OpenBookApplication::OpenBookApplication(const std::shared_ptr<Window>& window) 
 void selectBook(std::shared_ptr<Application>application, Event event) {
     std::shared_ptr<OpenBookApplication>myApp = std::static_pointer_cast<OpenBookApplication, Application>(application);
     std::shared_ptr<Window>window = myApp->getWindow();
-    window->removeSubview(myApp->mainMenu);
-    window->addSubview(myApp->page);
-    myApp->page->becomeFocused();
-    updatePage(myApp);
+
+    if (OpenBookDatabase::sharedInstance()->bookIsPaginated(myApp->books[event.userInfo])) {
+        window->removeSubview(myApp->mainMenu);
+        window->addSubview(myApp->page);
+        myApp->page->becomeFocused();
+        updatePage(myApp);
+    } else {
+        myApp->modal = std::make_shared<BorderedView>(MakeRect(20, 100, 300 - 20 * 2, 200));
+        int16_t subviewWidth = myApp->modal->getFrame().size.width - 40;
+        window->addSubview(myApp->modal);
+        std::shared_ptr<OpenBookLabel> label = std::make_shared<OpenBookLabel>(MakeRect(20, 20, subviewWidth, 32), "This book is not paginated.\nPaginate it now?");
+        myApp->modal->addSubview(label);
+        std::shared_ptr<OpenBookButton> yes = std::make_shared<OpenBookButton>(MakeRect(20, 68, subviewWidth, 48), "Yes");
+        yes->setAction(&dismiss, BUTTON_CENTER);
+        myApp->modal->addSubview(yes);
+        std::shared_ptr<OpenBookButton> no = std::make_shared<OpenBookButton>(MakeRect(20, 132, subviewWidth, 48), "No");
+        no->setAction(&dismiss, BUTTON_CENTER);
+        myApp->modal->addSubview(no);
+        myApp->modal->becomeFocused();
+        myApp->requestedRefreshMode = OPEN_BOOK_DISPLAY_MODE_GRAYSCALE;
+    }
 }
 
 void turnPage(std::shared_ptr<Application>application, Event event) {
@@ -102,7 +119,7 @@ void updateBooks(OpenBookApplication *myApp) {
         BookRecord record = OpenBookDatabase::sharedInstance()->getBookRecord(i);
         std::string title = OpenBookDatabase::sharedInstance()->getBookTitle(record);
         titles.push_back(title);
-        myApp->filenames.push_back(std::string(record.filename));
+        myApp->books.push_back(record);
     }
 
     myApp->table->setItems(titles);
@@ -111,4 +128,11 @@ void updateBooks(OpenBookApplication *myApp) {
 void updatePage(std::shared_ptr<OpenBookApplication>myApp) {
     myApp->bookText->setText("TODO: new pagination work");
     // myApp->progressView->setProgress((float)(pos - textStart) / (float)(len - textStart));
+}
+
+void dismiss(std::shared_ptr<Application>application, Event event) {
+    std::shared_ptr<OpenBookApplication>myApp = std::static_pointer_cast<OpenBookApplication, Application>(application);
+    std::shared_ptr<Window>window = myApp->getWindow();
+    window->removeSubview(myApp->modal);
+    myApp->modal.reset();
 }
