@@ -17,28 +17,28 @@
 #define OPEN_BOOK_LANGUAGE_INDEX (4)
 
 typedef struct {
-  uint32_t tag = 0;
-  uint16_t loc = 0;
-  uint16_t len = 0;
+    uint32_t tag = 0;
+    uint16_t loc = 0;
+    uint16_t len = 0;
 } BookField;
 
 typedef struct {
-  char filename[128];
-  uint64_t fileHash = 0;
-  uint64_t fileSize = 0;
-  uint64_t currentPosition = 0;
-  uint64_t flags = 0;
-  BookField metadata[OPEN_BOOK_NUM_FIELDS];
+    char filename[128];
+    uint64_t fileHash = 0;
+    uint64_t fileSize = 0;
+    uint64_t currentPosition = 0;
+    uint64_t flags = 0;
+    BookField metadata[OPEN_BOOK_NUM_FIELDS];
 } BookRecord;
 
 typedef struct {
-  uint64_t flags = 0;
-  uint32_t version = OPEN_BOOK_DATABASE_VERSION;
-  uint16_t numFields = OPEN_BOOK_NUM_FIELDS;
-  uint16_t reserved1 = 0;
-  uint32_t numBooks = 0;
-  uint32_t reserved2 = 0;
-  uint64_t reserved3 = 0;
+    uint64_t flags = 0;
+    uint32_t version = OPEN_BOOK_DATABASE_VERSION;
+    uint16_t numFields = OPEN_BOOK_NUM_FIELDS;
+    uint16_t reserved1 = 0;
+    uint32_t numBooks = 0;
+    uint32_t reserved2 = 0;
+    uint64_t reserved3 = 0;
 } BookDatabaseHeader;
 
 class OpenBookDatabase {
