@@ -2,6 +2,8 @@
 #include "OpenBookDevice.h"
 #include <map>
 
+static const uint64_t DATABASE_FILE_IDENTIFIER = 6825903261955698688;
+
 OpenBookDatabase::OpenBookDatabase() {
 
 }
@@ -15,6 +17,7 @@ bool OpenBookDatabase::connect() {
             device->renameFile(OPEN_BOOK_BACKUP_FILENAME, OPEN_BOOK_LIBRARY_FILENAME);
         } else {
             File database = device->openFile(OPEN_BOOK_LIBRARY_FILENAME, O_CREAT | O_RDWR);
+            database.write((byte *)&DATABASE_FILE_IDENTIFIER, sizeof(DATABASE_FILE_IDENTIFIER));
             database.write((byte *)&header, sizeof(header));
             database.flush();
             database.close();
@@ -27,8 +30,14 @@ bool OpenBookDatabase::connect() {
         device->removeFile(OPEN_BOOK_BACKUP_FILENAME);
     }
     File database = device->openFile(OPEN_BOOK_LIBRARY_FILENAME);
+    uint64_t magic;
+    database.read((byte *)&magic, sizeof(magic));
     database.read((byte *)&header, sizeof(BookDatabaseHeader));
     database.close();
+
+    if (magic != DATABASE_FILE_IDENTIFIER) {
+        return false;
+    }
 
     if (header.version != OPEN_BOOK_DATABASE_VERSION) {
         return false;
@@ -78,6 +87,7 @@ bool OpenBookDatabase::scanForNewBooks() {
     BookDatabaseHeader header;
     header.numBooks = numBooks;
     File temp = device->openFile(OPEN_BOOK_WORKING_FILENAME, O_RDWR | O_CREAT);
+    temp.write((byte *)&DATABASE_FILE_IDENTIFIER, sizeof(DATABASE_FILE_IDENTIFIER));
     temp.write((byte *)&header, sizeof(BookDatabaseHeader));
     temp.flush();
     temp.close();
@@ -164,7 +174,7 @@ BookRecord OpenBookDatabase::getBookRecord(uint32_t i) {
     BookRecord retval;
     File database = OpenBookDevice::sharedInstance()->openFile(OPEN_BOOK_LIBRARY_FILENAME);
 
-    database.seekSet(sizeof(BookDatabaseHeader) + i * sizeof(BookRecord));
+    database.seekSet(sizeof(DATABASE_FILE_IDENTIFIER) + sizeof(BookDatabaseHeader) + i * sizeof(BookRecord));
     database.read((byte *)&retval, sizeof(BookRecord));
     database.close();
 

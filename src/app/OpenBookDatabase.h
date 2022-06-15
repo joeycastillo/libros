@@ -32,9 +32,13 @@ typedef struct {
 } BookRecord;
 
 typedef struct {
-  uint16_t version = OPEN_BOOK_DATABASE_VERSION;
+  uint64_t flags = 0;
+  uint32_t version = OPEN_BOOK_DATABASE_VERSION;
   uint16_t numFields = OPEN_BOOK_NUM_FIELDS;
+  uint16_t reserved1 = 0;
   uint32_t numBooks = 0;
+  uint32_t reserved2 = 0;
+  uint64_t reserved3 = 0;
 } BookDatabaseHeader;
 
 class OpenBookDatabase {
