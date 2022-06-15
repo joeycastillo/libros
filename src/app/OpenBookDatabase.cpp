@@ -1,5 +1,6 @@
 #include "OpenBookDatabase.h"
 #include "OpenBookDevice.h"
+#include "sha256.h"
 #include <map>
 
 static const uint64_t DATABASE_FILE_IDENTIFIER = 6825903261955698688;
@@ -68,6 +69,8 @@ bool OpenBookDatabase::scanForNewBooks() {
     OpenBookDevice *device = OpenBookDevice::sharedInstance();
     uint32_t numBooks = 0;
     File root, entry;
+    SHA256 sha256;
+    std::string hash;
 
     // TODO: scan the existing database for book progress and store it in a map
 
@@ -98,7 +101,8 @@ bool OpenBookDatabase::scanForNewBooks() {
         if (_fileLooksLikeBook(entry)) {
             BookRecord record = {0};
             entry.getName(record.filename, 128);
-            record.fileHash = 1234; // TODO: hash the filename
+            hash = sha256(std::string(record.filename));
+            memcpy((void *)&record.fileHash, hash.c_str(), sizeof(record.fileHash));
             record.fileSize = entry.size();
             record.currentPosition = 0; // TODO: copy from map
             uint32_t tag;
