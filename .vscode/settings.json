@@ -66,7 +66,8 @@
         "clocks.h": "c",
         "openbook.h": "c",
         "openbookapplication.h": "c",
-        "arduino.h": "c"
+        "arduino.h": "c",
+        "openbookdevice.h": "c"
     },
     "C_Cpp.intelliSenseEngine": "Tag Parser",
 }

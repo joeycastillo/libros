@@ -1,3 +1,6 @@
+#ifndef OpenBookTasks_h
+#define OpenBookTasks_h
+
 #include "Focus.h"
 #include "OpenBookDevice.h"
 
@@ -20,3 +23,5 @@ public:
     OpenBookLockScreen() {};
     int16_t run(Application *application);
 };
+
+#endif // OpenBookTasks_h

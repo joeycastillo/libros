@@ -1,3 +1,6 @@
+#ifndef OpenBookApplication_h
+#define OpenBookApplication_h
+
 #include "Focus.h"
 #include "OpenBookDevice.h"
 #include "OpenBookWidgets.h"
@@ -20,3 +23,5 @@ public:
     std::shared_ptr<ProgressView> progressView;
     std::shared_ptr<OpenBookLabel> bookText;
 };
+
+#endif // OpenBookApplication_h

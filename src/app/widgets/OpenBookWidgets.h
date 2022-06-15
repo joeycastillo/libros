@@ -1,5 +1,5 @@
-#ifndef BabelWidgets_h
-#define BabelWidgets_h
+#ifndef OpenBookWidgets_h
+#define OpenBookWidgets_h
 
 #include "Focus.h"
 #include "FocusWidgets.h"
@@ -66,4 +66,4 @@ protected:
     const unsigned char *image;
 };
 
-#endif // BabelWidgets_h
+#endif // OpenBookWidgets_h
