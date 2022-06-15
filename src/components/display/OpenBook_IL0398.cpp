@@ -542,8 +542,8 @@ void OpenBook_IL0398::setWindow(uint16_t x, uint16_t y, uint16_t w, uint16_t h) 
     uint8_t buf[9];
     buf[0] = x >> 8;
     buf[1] = x & 0xf8; // x should be a multiple of 8, the last 3 bits will always be ignored
-    buf[2] = ((x & 0xf8) + w  - 1) >> 8;
-    buf[3] = ((x & 0xf8) + w  - 1) | 0x07;
+    buf[2] = (x + w - 1) >> 8;
+    buf[3] = (x + w - 1) | 0x07;
     buf[4] = y >> 8;
     buf[5] = y & 0xff;
     buf[6] = (y + h - 1) >> 8;
