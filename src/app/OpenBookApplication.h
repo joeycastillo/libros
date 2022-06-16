@@ -14,7 +14,7 @@ public:
     bool bookAtEnd;
     bool bookNeedsRefresh;
 
-    std::string currentBook;
+    BookRecord currentBook;
 
     std::vector<BookRecord> books;
     std::shared_ptr<View> mainMenu;

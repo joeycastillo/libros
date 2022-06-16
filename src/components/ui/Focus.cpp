@@ -6,21 +6,21 @@ Task::Task() {
 }
 
 View::View(Rect rect) {
-    Serial.print("Creating view ");
-    Serial.println((int32_t) this);
+    // Serial.print("Creating view ");
+    // Serial.println((int32_t) this);
     this->frame = rect;
     this->window.reset();
     this->superview.reset();
 }
 
 View::~View() {
-    Serial.print("Destroying view ");
-    Serial.println((int32_t) this);
+    // Serial.print("Destroying view ");
+    // Serial.println((int32_t) this);
 }
 
 void View::draw(Adafruit_GFX *display, int16_t x, int16_t y) {
-    Serial.print("Drawing view ");
-    Serial.println((int32_t) this);
+    // Serial.print("Drawing view ");
+    // Serial.println((int32_t) this);
     if (this->opaque || this->backgroundColor) {
         display->fillRect(x + this->frame.origin.x, y + this->frame.origin.y, this->frame.size.width, this->frame.size.height, this->backgroundColor);
     }

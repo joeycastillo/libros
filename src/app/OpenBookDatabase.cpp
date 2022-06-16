@@ -110,6 +110,11 @@ bool OpenBookDatabase::scanForNewBooks() {
             entry.seekSet(4);
             while(!done) {
                 entry.read((byte *)&tag, sizeof(tag));
+                if (tag == 170732845) { // ---\n, end of front matter
+                    done = true;
+                    record.textStart = entry.position();
+                    break;
+                }
                 do {
                     c = entry.read();
                 } while (c != ':');
@@ -142,9 +147,6 @@ bool OpenBookDatabase::scanForNewBooks() {
                         break;
                     case 1196310860: // LANG
                         record.metadata[OPEN_BOOK_LANGUAGE_INDEX] = field;
-                        break;
-                    case 170732845: // ---\n, end of front matter
-                        done = true;
                         break;
                     default:
                         break;
@@ -196,16 +198,6 @@ std::string OpenBookDatabase::getBookDescription(BookRecord record) {
     return this->_getMetadataAtIndex(record, OPEN_BOOK_DESCRIPTION_INDEX);
 }
 
-bool OpenBookDatabase::bookIsPaginated(BookRecord record) {
-    char pagefile[128];
-    const uint32_t extension = 1734438958; // four ASCII characters, .pag
-
-    memcpy(pagefile, record.filename, 128);
-    memcpy((byte *)&pagefile + (strlen(record.filename) - 4), (byte *)&extension, sizeof(extension));
-
-    return OpenBookDevice::sharedInstance()->fileExists(pagefile);
-}
-
 std::string OpenBookDatabase::_getMetadataAtIndex(BookRecord record, uint16_t i) {
     BookField field = record.metadata[i];
     char *value = (char *)malloc(field.len + 1);
@@ -219,4 +211,69 @@ std::string OpenBookDatabase::_getMetadataAtIndex(BookRecord record, uint16_t i)
     free(value);
 
     return retval;
+}
+
+bool OpenBookDatabase::bookIsPaginated(BookRecord record) {
+    char paginationFilename[128];
+    return this->_getPaginationFile(record, paginationFilename);
+}
+
+void OpenBookDatabase::paginateBook(BookRecord record) {
+    OpenBookDevice *device = OpenBookDevice::sharedInstance();
+    BookPaginationHeader header;
+    File paginationFile;
+    char paginationFilename[128];
+
+    // to start with, write the empty header just as a placeholder
+    if (this->_getPaginationFile(record, paginationFilename)) {
+        paginationFile = device->openFile(paginationFilename, O_RDWR | O_TRUNC);
+    } else {
+        paginationFile = device->openFile(paginationFilename, O_CREAT | O_RDWR);
+    }
+    paginationFile.write((byte *)&header, sizeof(BookPaginationHeader));
+    paginationFile.flush();
+    paginationFile.close();
+
+    // now process the whole file and seek out chapter headings.
+    BookChapter chapter;
+    File f = device->openFile(record.filename);
+    f.seekSet(record.textStart);
+    do {
+        if (f.read() == 0x1e) {
+            chapter.loc = f.position() - 1;
+            chapter.len++;
+            header.numChapters++;
+            while(f.read() != '\n') chapter.len++;
+            f.close();
+            paginationFile = device->openFile(paginationFilename, O_RDWR | O_AT_END);
+            paginationFile.write((byte *)&chapter, sizeof(BookChapter));
+            paginationFile.flush();
+            paginationFile.close();
+            f = device->openFile(record.filename);
+            f.seekSet(chapter.loc + chapter.len);
+            chapter = {0};
+        }
+    } while (f.available());
+    f.close();
+
+    // if we found chapters, mark the TOC as starting right after the header.
+    if (header.numChapters) header.tocStart = sizeof(BookPaginationHeader);
+
+    // TODO: pages
+
+    paginationFile = device->openFile(paginationFilename, O_RDWR);
+    paginationFile.write((byte *)&header, sizeof(BookPaginationHeader));
+    paginationFile.flush();
+    paginationFile.close();
+
+    BookPage page;
+}
+
+bool OpenBookDatabase::_getPaginationFile(BookRecord record, char *outFilename) {
+    const uint32_t extension = 1734438958; // four ASCII characters, .pag
+
+    memcpy(outFilename, record.filename, 128);
+    memcpy((byte *)outFilename + (strlen(outFilename) - 4), (byte *)&extension, sizeof(extension));
+
+    return OpenBookDevice::sharedInstance()->fileExists(outFilename);
 }
