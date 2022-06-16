@@ -14,10 +14,12 @@ class OpenBookLabel : public Label {
 public:
     OpenBookLabel(Rect rect, std::string text);
     void draw(Adafruit_GFX *display, int16_t x, int16_t y) override;
+    void setWordWrap(bool value);
     void setBold(bool value);
     void setItalic(bool value);
     void setTextSize(uint16_t value);
 protected:
+    bool wrap = false;
     bool bold = false;
     bool italic = false;
     uint16_t textSize = 1;

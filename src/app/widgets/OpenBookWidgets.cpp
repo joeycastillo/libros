@@ -30,10 +30,19 @@ void OpenBookLabel::draw(Adafruit_GFX *display, int16_t x, int16_t y) {
     BabelTypesetterGFX *typesetter = OpenBookDevice::sharedInstance()->getTypesetter();
     typesetter->setLayoutArea(this->frame.origin.x + x, this->frame.origin.y + y, this->frame.size.width, this->frame.size.height);
     typesetter->setTextColor(this->foregroundColor);
+    typesetter->setWordWrap(this->wrap);
     typesetter->setBold(this->bold);
     typesetter->setItalic(this->italic);
     typesetter->setTextSize(this->textSize);
     typesetter->print(this->text.c_str());
+}
+
+void OpenBookLabel::setWordWrap(bool value) {
+    this->wrap = value;
+    // TODO: setNeedsDisplay should be a method on View
+    if (auto window = this->getWindow().lock()) {
+        window->setNeedsDisplayInRect(this->frame, window);
+    }
 }
 
 void OpenBookLabel::setBold(bool value) {
