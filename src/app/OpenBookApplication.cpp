@@ -41,6 +41,8 @@ OpenBookApplication::OpenBookApplication(const std::shared_ptr<Window>& window) 
     this->page = std::make_shared<Control>(MakeRect(0, 0, 300, 400));
     this->bookText = std::make_shared<OpenBookLabel>(MakeRect(6, 6, 300 - 12, 400 - 26), "");
     this->bookText->setWordWrap(true);
+    this->bookText->setLineSpacing(2);
+    this->bookText->setParagraphSpacing(8);
     this->page->addSubview(this->bookText);
     this->progressView = std::make_shared<ProgressView>(MakeRect(0, 400 - 8, 300, 8));
     this->progressView->setBackgroundColor(EPD_DARK);

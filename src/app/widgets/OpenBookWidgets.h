@@ -18,11 +18,15 @@ public:
     void setBold(bool value);
     void setItalic(bool value);
     void setTextSize(uint16_t value);
+    void setLineSpacing(uint16_t value);
+    void setParagraphSpacing(uint16_t value);
 protected:
     bool wrap = false;
     bool bold = false;
     bool italic = false;
     uint16_t textSize = 1;
+    uint16_t lineSpacing = 0;
+    uint16_t paragraphSpacing = 0;
 };
 
 typedef enum {

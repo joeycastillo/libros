@@ -39,8 +39,8 @@ void OpenBookLabel::draw(Adafruit_GFX *display, int16_t x, int16_t y) {
     typesetter->setBold(this->bold);
     typesetter->setItalic(this->italic);
     typesetter->setTextSize(this->textSize);
-    typesetter->setLineSpacing(2);
-    typesetter->setParagraphSpacing(8);
+    typesetter->setLineSpacing(this->lineSpacing);
+    typesetter->setParagraphSpacing(this->paragraphSpacing);
     typesetter->print(this->text.c_str());
 }
 
@@ -69,6 +69,20 @@ void OpenBookLabel::setItalic(bool value) {
 
 void OpenBookLabel::setTextSize(uint16_t value) {
     this->textSize = value;
+    if (auto window = this->getWindow().lock()) {
+        window->setNeedsDisplayInRect(this->frame, window);
+    }
+}
+
+void OpenBookLabel::setLineSpacing(uint16_t value) {
+    this->lineSpacing = value;
+    if (auto window = this->getWindow().lock()) {
+        window->setNeedsDisplayInRect(this->frame, window);
+    }
+}
+
+void OpenBookLabel::setParagraphSpacing(uint16_t value) {
+    this->paragraphSpacing = value;
     if (auto window = this->getWindow().lock()) {
         window->setNeedsDisplayInRect(this->frame, window);
     }
