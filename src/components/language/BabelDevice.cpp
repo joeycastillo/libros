@@ -226,6 +226,9 @@ int16_t BabelDevice::word_wrap_position(BABEL_CODEPOINT *buf, size_t len, int16_
     bool wrapped = true;
     
     while(cursor_location < line_width) {
+        if (buf[position_in_string] == '\n') {
+            return position_in_string + 1;
+        }
         uint32_t glyph_info = this->fetch_glyph_basic_info(buf[position_in_string]);
         if (BABEL_INFO_GET_LINEBREAK_OPPORTUNITY(glyph_info)) {
             wrap_candidate = position_in_string;
