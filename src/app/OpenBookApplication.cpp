@@ -141,6 +141,8 @@ void updateBooks(OpenBookApplication *myApp) {
 
 void updatePage(std::shared_ptr<OpenBookApplication>myApp) {
     std::string text = OpenBookDatabase::sharedInstance()->getBookPage(myApp->currentBook, myApp->currentPage);
+    if (text[0] == 0x1e)myApp->bookText->setTextSize(2);
+    else myApp->bookText->setTextSize(1);
     myApp->bookText->setText(text.c_str());
     // myApp->progressView->setProgress((float)(pos - textStart) / (float)(len - textStart));
 }

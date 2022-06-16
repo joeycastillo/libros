@@ -142,9 +142,10 @@ public:
      @param buf A buffer of BABEL_CODEPOINTS that you want to wrap.
      @param len number of codepoints in buf
      @param line_width the width in pixels that you want to wrap to
+     @param text_size scaling factor for the text (1 for 1x, 2 for 2x, etc.)
      @return the position where a newline should be added in order to wrap to a given line length, or -1 if no newline is required.
      */
-    int16_t word_wrap_position(BABEL_CODEPOINT *buf, size_t len, int16_t line_width);
+    int16_t word_wrap_position(BABEL_CODEPOINT *buf, size_t len, int16_t line_width, int16_t text_size);
 
 protected:
     virtual void read(uint32_t addr, void *data, uint32_t len) = 0;

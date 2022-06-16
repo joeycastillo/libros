@@ -361,7 +361,7 @@ void OpenBookDatabase::paginateBook(BookRecord record) {
                     paginationFile.close();
                     f = device->openFile(record.filename);
                     f.seekSet(lastPosition);
-                    page.loc = f.position() - 3;
+                    page.loc = f.position() - 4;
                     page.len = 0;
                     header.numPages++;
                     x = 0;
@@ -389,7 +389,7 @@ void OpenBookDatabase::paginateBook(BookRecord record) {
                     y = 0;
                     f = device->openFile(record.filename);
                     f.seekSet(lastPosition);
-                    page.loc = f.position() - 3;
+                    page.loc = f.position() - 4;
                     page.len = 0;
                     header.numPages++;
                 }
@@ -424,7 +424,7 @@ void OpenBookDatabase::paginateBook(BookRecord record) {
             paginationFile.close();
             f = device->openFile(record.filename);
             f.seekSet(lastPosition);
-            page.loc = f.position() - 3;
+            page.loc = f.position() - 4;
             page.len = 0;
             header.numPages++;
         }

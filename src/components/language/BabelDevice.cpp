@@ -219,7 +219,7 @@ BABEL_CODEPOINT BabelDevice::lowercase_mapping_for_codepoint(BABEL_CODEPOINT cod
     return BABEL_MAPPING_GET_VALUE(mapping);
 }
 
-int16_t BabelDevice::word_wrap_position(BABEL_CODEPOINT *buf, size_t len, int16_t line_width) {
+int16_t BabelDevice::word_wrap_position(BABEL_CODEPOINT *buf, size_t len, int16_t line_width, int16_t text_size) {
     size_t wrap_candidate = 0;
     size_t position_in_string = 0;
     int16_t cursor_location = 0;
@@ -231,7 +231,7 @@ int16_t BabelDevice::word_wrap_position(BABEL_CODEPOINT *buf, size_t len, int16_
             wrap_candidate = position_in_string;
         }
         if (!(BABEL_INFO_GET_MARK_IS_NON_SPACING(glyph_info) || BABEL_INFO_GET_CONTROL_CHARACTER(glyph_info))) {
-            cursor_location += BABEL_INFO_GET_GLYPH_WIDTH(glyph_info);
+            cursor_location += BABEL_INFO_GET_GLYPH_WIDTH(glyph_info) * text_size;
         }
         position_in_string++;
         if (position_in_string >= len) {

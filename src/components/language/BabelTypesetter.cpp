@@ -235,7 +235,7 @@ size_t BabelTypesetter::writeCodepoints(BABEL_CODEPOINT codepoints[], size_t len
         size_t pos = 0;
         while (pos < len) {
             bool write_newline = false;
-            int32_t num_glyphs_to_draw = this->babelDevice->word_wrap_position(codepoints + pos, len - pos, this->lineWidth);
+            int32_t num_glyphs_to_draw = this->babelDevice->word_wrap_position(codepoints + pos, len - pos, this->lineWidth, this->textSize);
             if (num_glyphs_to_draw < 0){
                 num_glyphs_to_draw = (int32_t)(len - pos);
             }
