@@ -282,7 +282,7 @@ void OpenBookDatabase::paginateBook(BookRecord record) {
     paginationFile.close();
 
     // now process the whole file and seek out chapter headings.
-    BookChapter chapter;
+    BookChapter chapter = {0};
     File f = device->openFile(record.filename);
     f.seekSet(record.textStart);
     do {
@@ -290,7 +290,11 @@ void OpenBookDatabase::paginateBook(BookRecord record) {
             chapter.loc = f.position() - 1;
             chapter.len++;
             header.numChapters++;
-            while(f.read() != '\n') chapter.len++;
+            char c;
+            do {
+                c = f.read();
+                chapter.len++;
+            } while(c != '\n');
             f.close();
             paginationFile = device->openFile(paginationFilename, O_RDWR | O_AT_END);
             paginationFile.write((byte *)&chapter, sizeof(BookChapter));
@@ -306,78 +310,148 @@ void OpenBookDatabase::paginateBook(BookRecord record) {
     // if we found chapters, mark the TOC as starting right after the header.
     if (header.numChapters) header.tocStart = sizeof(BookPaginationHeader);
 
+    header.pageStart = header.tocStart + header.numChapters * sizeof(BookChapter);
+
     // OKAY! Time to do pages. For this we have to traverse the whole file again,
     // but this time we need to simulate actually laying it out.
-    BookPage page;
+    BabelDevice *babel = device->getTypesetter()->getBabel();
+    BookPage page = {0};
+    uint32_t codepoint;
+    uint32_t lastPosition;
+    uint16_t x = 0;
+    uint16_t y = 0;
+    int error;
     union {
         uint32_t value;
         unsigned char buf[4];
     } data;
-    uint32_t codepoint;
-    int error;
-    BabelDevice *babel = device->getTypesetter()->getBabel();
 
     f = device->openFile(record.filename);
     f.seekSet(record.textStart);
-    f.read(data.buf, 4);
-    uint16_t x = 0;
-    uint16_t y = 0;
-    page.loc = f.position();
-    page.len = 1; // we read four bytes right at the outset
     header.numPages = 1;
     data.buf[0] = f.read();
-    // this is ugly but i'm moving fast. if high bit is not set, this is a single byte
-    if (data.buf[0] & 0b01111111) {
-        // from here we just read in more bytes as needed.
-        // this guarantees we only read in one codepoint at the outset.
-        if ((data.buf[0] & 0b11000000) == 0b11000000) {
-            data.buf[1] = f.read();
-            page.len++;
-        }
-        if ((data.buf[0] & 0b11100000) == 0b11100000) {
-            data.buf[2] = f.read();
-            page.len++;
-        }
-        if ((data.buf[0] & 0b11110000) == 0b11110000) {
-            data.buf[3] = f.read();
-            page.len++;
-        }
-    }
+    data.buf[1] = f.read();
+    data.buf[2] = f.read();
+    data.buf[3] = f.read();
+    page.loc = record.textStart;
+    page.len = 1;
+    bool forceBreakAtNextNewline = false;
+    void *next;
     do {
-        void *next = _utf8_decode(data.buf, &codepoint, &error);
-        int8_t shift = (uint32_t) next - (uint32_t)&(data.buf);
-        page.len += shift;
-        data.value >>= shift * 8;
-        f.read(data.buf + 4 - shift, shift);
-        if (codepoint == 0x0a) {
-            x = 0;
-            y += 16 + 8;
-        } else {
-            uint32_t info = babel->fetch_glyph_basic_info((BABEL_CODEPOINT)codepoint);
-            x += BABEL_INFO_GET_GLYPH_WIDTH(info);
+        next = _utf8_decode(data.buf, &codepoint, &error);
+        if (error) {
+            char temp[32] = {0};
+            sprintf(temp, "%02x %02x %02x %02x %c %d", data.buf[0], data.buf[1], data.buf[2], data.buf[3], data.buf[0], error);
+            Serial.println(temp);
+        }
+        switch (codepoint) {
+            case '\n':
+                if (forceBreakAtNextNewline) {
+                    forceBreakAtNextNewline = false;
+                    // Serial.print("Breaking for chapter title page: ");
+                    // Serial.print(page.loc);
+                    // Serial.print(", ");
+                    // Serial.print(page.len);
+                    // Serial.println();
+                    lastPosition = f.position();
+                    f.close();
+                    paginationFile = device->openFile(paginationFilename, O_RDWR | O_AT_END);
+                    paginationFile.write((byte *)&page, sizeof(BookPage));
+                    paginationFile.flush();
+                    paginationFile.close();
+                    f = device->openFile(record.filename);
+                    f.seekSet(lastPosition);
+                    page.loc = f.position() - 3;
+                    page.len = 0;
+                    header.numPages++;
+                    x = 0;
+                    y = 0;
+                } else {
+                    x = 0;
+                    y += 16 + 8;
+                    // Serial.print(".");
+                }
+                break;
+            case 0x1e:
+                if (page.loc != record.textStart) {
+                    // Serial.print("Breaking for end of chapter: ");
+                    // Serial.print(page.loc);
+                    // Serial.print(", ");
+                    // Serial.print(page.len);
+                    // Serial.println();
+                    lastPosition = f.position();
+                    f.close();
+                    paginationFile = device->openFile(paginationFilename, O_RDWR | O_AT_END);
+                    paginationFile.write((byte *)&page, sizeof(BookPage));
+                    paginationFile.flush();
+                    paginationFile.close();
+                    x = 0;
+                    y = 0;
+                    f = device->openFile(record.filename);
+                    f.seekSet(lastPosition);
+                    page.loc = f.position() - 3;
+                    page.len = 0;
+                    header.numPages++;
+                }
+                forceBreakAtNextNewline = true;
+                break;
+            case '\r':
+            case 0x0e:
+            case 0x0f:
+                goto SKIP;
+            default:
+                x += BABEL_INFO_GET_GLYPH_WIDTH(babel->fetch_glyph_basic_info((BABEL_CODEPOINT)codepoint));
         }
         if (x > 288) {
             x = 0;
             y += 16 + 2;
+            // Serial.print(",");
         }
         if (y > 368) {
+            // Serial.print(" Page break: ");
+            // Serial.print(page.loc);
+            // Serial.print(", ");
+            // Serial.print(page.len);
+            // Serial.println();
             x = 0;
             y = 0;
+            f.close();
+            lastPosition = f.position();
             f.close();
             paginationFile = device->openFile(paginationFilename, O_RDWR | O_AT_END);
             paginationFile.write((byte *)&page, sizeof(BookPage));
             paginationFile.flush();
             paginationFile.close();
             f = device->openFile(record.filename);
-            f.seekSet(page.loc + page.len);
-            page.loc = f.position();
+            f.seekSet(lastPosition);
+            page.loc = f.position() - 3;
             page.len = 0;
             header.numPages++;
         }
-    } while (f.available());
-    f.close();
 
-    header.pageStart = header.tocStart + header.numChapters * sizeof(BookChapter);
+SKIP:
+        int8_t bytesParsed = (uint32_t) next - (uint32_t)&(data.buf);
+        page.len += bytesParsed;
+        data.value >>= bytesParsed * 8;
+        for(int8_t i = 4 - bytesParsed; i < 4; i++) {
+            data.buf[i] = f.read();
+        }
+    } while (f.available());
+
+    // Serial.print("Breaking for end of book: ");
+    // Serial.print(page.loc);
+    // Serial.print(", ");
+    // Serial.print(page.len);
+    // Serial.println();
+
+    f.close();
+    lastPosition = f.position();
+    f.close();
+    paginationFile = device->openFile(paginationFilename, O_RDWR | O_AT_END);
+    paginationFile.write((byte *)&page, sizeof(BookPage));
+    paginationFile.flush();
+    paginationFile.close();
+    header.numPages++;
 
     paginationFile = device->openFile(paginationFilename, O_RDWR);
     paginationFile.seekSet(0);

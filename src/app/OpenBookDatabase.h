@@ -56,19 +56,19 @@ typedef struct {
 } BookPaginationHeader;
 
 typedef struct {
-    uint32_t loc;       // Location in the text file of the RS indicating chapter separation
-    uint16_t len;       // Length of the chapter header, including RS character
-    uint16_t reserved;  // Reserved for future use
+    uint32_t loc = 0;       // Location in the text file of the RS indicating chapter separation
+    uint16_t len = 0;       // Length of the chapter header, including RS character
+    uint16_t reserved = 0;  // Reserved for future use
 } BookChapter;
 
 typedef struct {
-    uint32_t loc;                           // Location in the text file of the page
-    uint16_t len;                           // Length of the page in characters
+    uint32_t loc = 0;                       // Location in the text file of the page
+    uint16_t len = 0;                       // Length of the page in characters
     struct {
         uint16_t isChapterSeparator : 1;    // 1 if this is a chapter separator page
         uint16_t activeShifts : 2;          // 0-3 for number of format shifts
         uint16_t reserved : 13;             // Reserved for future use
-    } flags;
+    } flags = {0};
 } BookPage;
 
 class OpenBookDatabase {

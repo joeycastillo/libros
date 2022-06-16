@@ -186,7 +186,6 @@ size_t BabelTypesetter::writeCodepoint(BABEL_CODEPOINT codepoint) {
             }
             return 1;
         case 0x1e: // record separator
-        case 0xfeff: // record separator
             return 1; // ignore it
     }
 
