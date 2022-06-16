@@ -39,7 +39,7 @@ OpenBookApplication::OpenBookApplication(const std::shared_ptr<Window>& window) 
     updateBooks(this);
 
     this->page = std::make_shared<Control>(MakeRect(0, 0, 300, 400));
-    this->bookText = std::make_shared<OpenBookLabel>(MakeRect(16, 16, 300 - 32, 400 - 32), "");
+    this->bookText = std::make_shared<OpenBookLabel>(MakeRect(6, 6, 300 - 12, 400 - 26), "");
     this->bookText->setWordWrap(true);
     this->page->addSubview(this->bookText);
     this->progressView = std::make_shared<ProgressView>(MakeRect(0, 400 - 8, 300, 8));
@@ -91,13 +91,21 @@ void turnPage(std::shared_ptr<Application>application, Event event) {
 
     switch (event.type) {
         case BUTTON_NEXT:
+            // FIXME: check if this is the last page
+            if (true) {
+                myApp->currentPage++;
+                updatePage(myApp);
+            }
             break;
         case BUTTON_PREV:
+            if (myApp->currentPage > 0) {
+                myApp->currentPage--;
+                updatePage(myApp);
+            }
             break;
         default:
             break;
     }
-    updatePage(myApp);
 }
 
 void returnHome(std::shared_ptr<Application>application, Event event) {
@@ -130,7 +138,7 @@ void updateBooks(OpenBookApplication *myApp) {
 }
 
 void updatePage(std::shared_ptr<OpenBookApplication>myApp) {
-    std::string text = OpenBookDatabase::sharedInstance()->getBookPage(myApp->currentBook, 5);
+    std::string text = OpenBookDatabase::sharedInstance()->getBookPage(myApp->currentBook, myApp->currentPage);
     myApp->bookText->setText(text.c_str());
     // myApp->progressView->setProgress((float)(pos - textStart) / (float)(len - textStart));
 }

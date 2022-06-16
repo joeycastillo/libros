@@ -9,6 +9,11 @@ void OpenBookButton::draw(Adafruit_GFX *display, int16_t x, int16_t y) {
     if (std::shared_ptr<Window> window = this->getWindow().lock()) {
         View::draw(display, x, y);
         BabelTypesetterGFX *typesetter = OpenBookDevice::sharedInstance()->getTypesetter();
+        typesetter->setWordWrap(false);
+        typesetter->setBold(false);
+        typesetter->setItalic(false);
+        typesetter->setTextSize(1);
+        typesetter->setParagraphSpacing(0);
         typesetter->setCursor(this->frame.origin.x + x + 8, this->frame.origin.y + y + this->frame.size.height / 2 - 8);
         if (this->isFocused()) {
             typesetter->display->fillRect(x + this->frame.origin.x, y + this->frame.origin.y, this->frame.size.width, this->frame.size.height, this->foregroundColor);
@@ -34,6 +39,8 @@ void OpenBookLabel::draw(Adafruit_GFX *display, int16_t x, int16_t y) {
     typesetter->setBold(this->bold);
     typesetter->setItalic(this->italic);
     typesetter->setTextSize(this->textSize);
+    typesetter->setLineSpacing(2);
+    typesetter->setParagraphSpacing(8);
     typesetter->print(this->text.c_str());
 }
 
@@ -78,6 +85,8 @@ void OpenBookCell::draw(Adafruit_GFX *display, int16_t x, int16_t y) {
         BabelTypesetterGFX *typesetter = OpenBookDevice::sharedInstance()->getTypesetter();
         typesetter->setBold(false);
         typesetter->setItalic(false);
+        typesetter->setTextSize(1);
+        typesetter->setParagraphSpacing(0);
         Point cursorPosition = {0};
         uint16_t textColor = this->foregroundColor;
         switch (this->selectionStyle) {

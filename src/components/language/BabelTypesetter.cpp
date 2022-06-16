@@ -79,7 +79,7 @@ int BabelTypesetter::drawGlyph(int16_t x, int16_t y, BabelGlyph glyph, uint16_t 
     for (uint8_t i = 0; i < (this->bold ? 2 : 1); i++) {
         if (this->italic) {
             for(uint8_t j = 0; j < 4; j++) {
-                retVal = this->drawGlyph(x + i + 4 - j, y, glyph, color, size, j * 4, j * 4 + 4);
+                retVal = this->drawGlyph(x + i + 2 - j, y, glyph, color, size, j * 4, j * 4 + 4);
             }
         } else {
             retVal = this->drawGlyph(x + i, y, glyph, color, size, 0, this->babelDevice->getHeight());
@@ -150,6 +150,46 @@ int BabelTypesetter::drawGlyph(int16_t x, int16_t y, BabelGlyph glyph, uint16_t 
 }
 
 size_t BabelTypesetter::writeCodepoint(BABEL_CODEPOINT codepoint) {
+    // before we start, we don't need to fetch anything for control characters.
+    switch (codepoint) {
+        case '\n':
+            this->cursor.y += this->paragraphSpacing;
+            // fall through
+        case '\r':
+            this->cursor.y += 16 * this->textSize + this->lineSpacing;
+            if (this->direction == 1) {
+                this->cursor.x = this->minX;
+            } else {
+                this->cursor.x = this->maxX;
+            }
+            this->hasLastGlyph = false;
+            return 1;
+            this->hasLastGlyph = false;
+            return 1;
+        case 0x0f: // shift in
+            if (this->bold) {
+                this->italic = true;
+            } else if (this->italic) {
+                this->bold = true;
+                this->italic = false;
+            } else {
+                this->italic = true;
+            }
+            return 1;
+        case 0x0e: // shift out
+            if (this->bold && this->italic) {
+                this->italic = false;
+            } else if (this->bold) {
+                this->bold = false;
+            } else {
+                this->italic = false;
+            }
+            return 1;
+        case 0x1e: // record separator
+        case 0xfeff: // record separator
+            return 1; // ignore it
+    }
+
     BabelGlyph glyph;
     this->babelDevice->fetch_glyph_data(codepoint, &glyph);
 
@@ -165,33 +205,18 @@ size_t BabelTypesetter::writeCodepoint(BABEL_CODEPOINT codepoint) {
         this->cursor.x = this->minX;
     }
 
-    // TODO: handle control characters, like, properly?
-
-    if(codepoint == '\n') {
-        if (this->direction == 1) {
-            this->cursor.x = this->minX;
-        } else {
-            this->cursor.x = this->maxX;
-        }
-        this->cursor.y += 16 * this->textSize;
-        this->hasLastGlyph = false;
-    } else if(codepoint == '\r') {
-        this->hasLastGlyph = false;
-        return 1;
+    // word wrap should go here
+    if (BABEL_INFO_GET_MARK_IS_NON_SPACING(glyph.info) && this->hasLastGlyph) {
+        // Draw over the last glyph, and do not add to advance
+        drawGlyph(this->lastGlyphPosition.x, this->lastGlyphPosition.y, glyph, this->textColor, this->textSize);
     } else {
-        // word wrap should go here
-        if (BABEL_INFO_GET_MARK_IS_NON_SPACING(glyph.info) && this->hasLastGlyph) {
-            // Draw over the last glyph, and do not add to advance
-            drawGlyph(this->lastGlyphPosition.x, this->lastGlyphPosition.y, glyph, this->textColor, this->textSize);
-        } else {
-            // stash current cursor position
-            this->hasLastGlyph = true;
-            this->lastGlyphPosition = this->cursor;
-            // draw glyph
-            int advance = drawGlyph(this->cursor.x, this->cursor.y, glyph, this->textColor, this->textSize);
-            // advance cursor
-            this->cursor.x += advance * this->direction;
-        }
+        // stash current cursor position
+        this->hasLastGlyph = true;
+        this->lastGlyphPosition = this->cursor;
+        // draw glyph
+        int advance = drawGlyph(this->cursor.x, this->cursor.y, glyph, this->textColor, this->textSize);
+        // advance cursor
+        this->cursor.x += advance * this->direction;
     }
 
     return 1;
@@ -223,7 +248,7 @@ size_t BabelTypesetter::writeCodepoints(BABEL_CODEPOINT codepoints[], size_t len
             }
             pos += num_glyphs_to_draw;
             if (write_newline) {
-                retVal += this->writeCodepoint(0x000A); // newline
+                retVal += this->writeCodepoint(0x000d); // carriage return (soft wrap)
             }
 
             if (this->cursor.y >= this->maxY) break;
@@ -265,4 +290,12 @@ void BabelTypesetter::setBold(bool bold) {
 
 void BabelTypesetter::setWordWrap(bool wordWrap) {
     this->lineWidth = wordWrap ? this->maxX - this->minX : 0;
+}
+
+void BabelTypesetter::setLineSpacing(int8_t spacing) {
+    this->lineSpacing = spacing;
+}
+
+void BabelTypesetter::setParagraphSpacing(int8_t spacing) {
+    this->paragraphSpacing = spacing;
 }

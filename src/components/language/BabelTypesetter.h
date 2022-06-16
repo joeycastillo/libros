@@ -168,11 +168,25 @@ public:
     void setBold(bool bold);
 
     /*!
-     @brief sets the line width for word wrapping
-     @param lineWidth 0 to disable word wrapping, or the max width in pixels of a line
+     @brief sets whether we should word wrap
+     @param wordWrap true to word wrap, false to keep text on the same line
     */
     /**************************************************************************/
     void setWordWrap(bool wordWrap);
+
+    /*!
+     @brief sets additional spacing between soft-wrapped lines
+     @param spacing additional pixels to advance after a word wrapped line
+    */
+    /**************************************************************************/
+    void setLineSpacing(int8_t spacing);
+
+    /*!
+     @brief sets additional spacing between paragraphs
+     @param spacing additional pixels to advance after a newline
+    */
+    /**************************************************************************/
+    void setParagraphSpacing(int8_t spacing);
 protected:
     BabelDevice *babelDevice = NULL;
     uint16_t textColor = 0;
@@ -180,6 +194,8 @@ protected:
     bool italic = false;
     bool bold = false;
     uint16_t lineWidth = 0;
+    uint16_t lineSpacing = 0;
+    uint16_t paragraphSpacing = 0;
     Point cursor;
     int16_t minX = 0;
     int16_t minY = 0;

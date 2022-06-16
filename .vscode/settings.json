@@ -71,5 +71,4 @@
         "iostream": "cpp",
         "mstd_iterator": "cpp"
     },
-    "C_Cpp.intelliSenseEngine": "Tag Parser",
 }

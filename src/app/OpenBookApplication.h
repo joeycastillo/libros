@@ -15,6 +15,7 @@ public:
     bool bookNeedsRefresh;
 
     BookRecord currentBook;
+    uint32_t currentPage = 0;
 
     std::vector<BookRecord> books;
     std::shared_ptr<View> mainMenu;

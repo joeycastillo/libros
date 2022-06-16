@@ -349,11 +349,16 @@ void OpenBookDatabase::paginateBook(BookRecord record) {
         page.len += shift;
         data.value >>= shift * 8;
         f.read(data.buf + 4 - shift, shift);
-        uint32_t info = babel->fetch_glyph_basic_info((BABEL_CODEPOINT)codepoint);
-        x += BABEL_INFO_GET_GLYPH_WIDTH(info);
+        if (codepoint == 0x0a) {
+            x = 0;
+            y += 16 + 8;
+        } else {
+            uint32_t info = babel->fetch_glyph_basic_info((BABEL_CODEPOINT)codepoint);
+            x += BABEL_INFO_GET_GLYPH_WIDTH(info);
+        }
         if (x > 288) {
             x = 0;
-            y += 16;
+            y += 16 + 2;
         }
         if (y > 368) {
             x = 0;
