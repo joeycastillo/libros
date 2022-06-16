@@ -218,6 +218,52 @@ bool OpenBookDatabase::bookIsPaginated(BookRecord record) {
     return this->_getPaginationFile(record, paginationFilename);
 }
 
+// Branchless UTF-8 decoder by Chris Wellons
+// Public domain
+// https://nullprogram.com/blog/2017/10/06/
+// NOTE: the optimizations here are kind of wasted on us since we have 
+// a TON of conditionals right after doing this, but oh well.
+static void * _utf8_decode(unsigned char *buf, uint32_t *c, int *e) {
+    static const char lengths[] = {
+        1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+        0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 2, 3, 3, 4, 0
+    };
+    static const int masks[]  = {0x00, 0x7f, 0x1f, 0x0f, 0x07};
+    static const uint32_t mins[] = {4194304, 0, 128, 2048, 65536};
+    static const int shiftc[] = {0, 18, 12, 6, 0};
+    static const int shifte[] = {0, 6, 4, 2, 0};
+
+    unsigned char *s = buf;
+    int len = lengths[s[0] >> 3];
+
+    /* Compute the pointer to the next character early so that the next
+     * iteration can start working on the next character. Neither Clang
+     * nor GCC figure out this reordering on their own.
+     */
+    unsigned char *next = s + len + !len;
+
+    /* Assume a four-byte character and load four bytes. Unused bits are
+     * shifted out.
+     */
+    *c  = (uint32_t)(s[0] & masks[len]) << 18;
+    *c |= (uint32_t)(s[1] & 0x3f) << 12;
+    *c |= (uint32_t)(s[2] & 0x3f) <<  6;
+    *c |= (uint32_t)(s[3] & 0x3f) <<  0;
+    *c >>= shiftc[len];
+
+    /* Accumulate the various error conditions. */
+    *e  = (*c < mins[len]) << 6; // non-canonical encoding
+    *e |= ((*c >> 11) == 0x1b) << 7;  // surrogate half?
+    *e |= (*c > 0x10FFFF) << 8;  // out of range?
+    *e |= (s[1] & 0xc0) >> 2;
+    *e |= (s[2] & 0xc0) >> 4;
+    *e |= (s[3]       ) >> 6;
+    *e ^= 0x2a; // top two bits of each tail byte correct?
+    *e >>= shifte[len];
+
+    return next;
+}
+
 void OpenBookDatabase::paginateBook(BookRecord record) {
     OpenBookDevice *device = OpenBookDevice::sharedInstance();
     BookPaginationHeader header;
@@ -231,6 +277,7 @@ void OpenBookDatabase::paginateBook(BookRecord record) {
         paginationFile = device->openFile(paginationFilename, O_CREAT | O_RDWR);
     }
     paginationFile.write((byte *)&header, sizeof(BookPaginationHeader));
+    paginationFile.seekSet(0);
     paginationFile.flush();
     paginationFile.close();
 
@@ -259,14 +306,120 @@ void OpenBookDatabase::paginateBook(BookRecord record) {
     // if we found chapters, mark the TOC as starting right after the header.
     if (header.numChapters) header.tocStart = sizeof(BookPaginationHeader);
 
-    // TODO: pages
+    // OKAY! Time to do pages. For this we have to traverse the whole file again,
+    // but this time we need to simulate actually laying it out.
+    BookPage page;
+    union {
+        uint32_t value;
+        unsigned char buf[4];
+    } data;
+    uint32_t codepoint;
+    int error;
+    BabelDevice *babel = device->getTypesetter()->getBabel();
+
+    f = device->openFile(record.filename);
+    f.seekSet(record.textStart);
+    f.read(data.buf, 4);
+    uint16_t x = 0;
+    uint16_t y = 0;
+    page.loc = f.position();
+    page.len = 1; // we read four bytes right at the outset
+    header.numPages = 1;
+    data.buf[0] = f.read();
+    // this is ugly but i'm moving fast. if high bit is not set, this is a single byte
+    if (data.buf[0] & 0b01111111) {
+        // from here we just read in more bytes as needed.
+        // this guarantees we only read in one codepoint at the outset.
+        if ((data.buf[0] & 0b11000000) == 0b11000000) {
+            data.buf[1] = f.read();
+            page.len++;
+        }
+        if ((data.buf[0] & 0b11100000) == 0b11100000) {
+            data.buf[2] = f.read();
+            page.len++;
+        }
+        if ((data.buf[0] & 0b11110000) == 0b11110000) {
+            data.buf[3] = f.read();
+            page.len++;
+        }
+    }
+    do {
+        void *next = _utf8_decode(data.buf, &codepoint, &error);
+        int8_t shift = (uint32_t) next - (uint32_t)&(data.buf);
+        page.len += shift;
+        data.value >>= shift * 8;
+        f.read(data.buf + 4 - shift, shift);
+        uint32_t info = babel->fetch_glyph_basic_info((BABEL_CODEPOINT)codepoint);
+        x += BABEL_INFO_GET_GLYPH_WIDTH(info);
+        if (x > 288) {
+            x = 0;
+            y += 16;
+        }
+        if (y > 368) {
+            x = 0;
+            y = 0;
+            f.close();
+            paginationFile = device->openFile(paginationFilename, O_RDWR | O_AT_END);
+            paginationFile.write((byte *)&page, sizeof(BookPage));
+            paginationFile.flush();
+            paginationFile.close();
+            f = device->openFile(record.filename);
+            f.seekSet(page.loc + page.len);
+            page.loc = f.position();
+            page.len = 0;
+            header.numPages++;
+        }
+    } while (f.available());
+    f.close();
+
+    header.pageStart = header.tocStart + header.numChapters * sizeof(BookChapter);
 
     paginationFile = device->openFile(paginationFilename, O_RDWR);
+    paginationFile.seekSet(0);
     paginationFile.write((byte *)&header, sizeof(BookPaginationHeader));
     paginationFile.flush();
     paginationFile.close();
+}
 
-    BookPage page;
+uint32_t OpenBookDatabase::numPages(BookRecord record) {
+    char paginationFilename[128];
+    if (this->_getPaginationFile(record, paginationFilename)) {
+        BookPaginationHeader header;
+        File f = OpenBookDevice::sharedInstance()->openFile(paginationFilename);
+        f.read(&header, sizeof(BookPaginationHeader));
+        return header.numPages;
+    }
+
+    return 0;
+}
+
+std::string OpenBookDatabase::getBookPage(BookRecord record, uint32_t page) {
+    char paginationFilename[128];
+
+    if (this->_getPaginationFile(record, paginationFilename)) {
+        BookPaginationHeader header;
+        BookPage pageInfo;
+
+        File f = OpenBookDevice::sharedInstance()->openFile(paginationFilename);
+        f.read(&header, sizeof(BookPaginationHeader));
+        if (page >= header.numPages) return "";
+
+        f.seekSet(header.pageStart + page * sizeof(BookPage));
+        f.read(&pageInfo, sizeof(BookPage));
+        f.close();
+        f = OpenBookDevice::sharedInstance()->openFile(record.filename);
+        f.seekSet(pageInfo.loc);
+        char *buf = (char *)malloc(pageInfo.len + 1);
+        f.read(buf, pageInfo.len);
+        f.close();
+        buf[pageInfo.len] = 0;
+        std::string retval = std::string(buf);
+        free(buf);
+
+        return retval;
+    }
+
+    return "";
 }
 
 bool OpenBookDatabase::_getPaginationFile(BookRecord record, char *outFilename) {

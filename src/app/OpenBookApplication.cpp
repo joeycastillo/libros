@@ -129,7 +129,8 @@ void updateBooks(OpenBookApplication *myApp) {
 }
 
 void updatePage(std::shared_ptr<OpenBookApplication>myApp) {
-    myApp->bookText->setText("TODO: new pagination work");
+    std::string text = OpenBookDatabase::sharedInstance()->getBookPage(myApp->currentBook, 5);
+    myApp->bookText->setText(text.c_str());
     // myApp->progressView->setProgress((float)(pos - textStart) / (float)(len - textStart));
 }
 
