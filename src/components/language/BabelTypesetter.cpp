@@ -149,21 +149,21 @@ int BabelTypesetter::drawGlyph(int16_t x, int16_t y, BabelGlyph glyph, uint16_t 
     return width * this->textSize;
 }
 
+#include <Arduino.h>
+
 size_t BabelTypesetter::writeCodepoint(BABEL_CODEPOINT codepoint) {
     // before we start, we don't need to fetch anything for control characters.
     switch (codepoint) {
         case '\n':
-            this->cursor.y += this->paragraphSpacing;
-            // fall through
         case '\r':
-            this->cursor.y += 16 * this->textSize + this->lineSpacing;
+            this->cursor.y += 16 * this->textSize + ((codepoint == '\n') ? this->paragraphSpacing : this->lineSpacing);
             if (this->direction == 1) {
                 this->cursor.x = this->minX;
             } else {
                 this->cursor.x = this->maxX;
             }
-            this->hasLastGlyph = false;
-            return 1;
+            Serial.print(this->cursor.y - 6);
+            Serial.print(" ");
             this->hasLastGlyph = false;
             return 1;
         case 0x0f: // shift in
@@ -185,9 +185,9 @@ size_t BabelTypesetter::writeCodepoint(BABEL_CODEPOINT codepoint) {
                 this->italic = false;
             }
             return 1;
-        case 0x1e: // record separator
-            return 1; // ignore it
     }
+    // skip all control characters
+    if (codepoint < 0x20) return 1;
 
     BabelGlyph glyph;
     this->babelDevice->fetch_glyph_data(codepoint, &glyph);
@@ -235,7 +235,8 @@ size_t BabelTypesetter::writeCodepoints(BABEL_CODEPOINT codepoints[], size_t len
         size_t pos = 0;
         while (pos < len) {
             bool write_newline = false;
-            int32_t num_glyphs_to_draw = this->babelDevice->word_wrap_position(codepoints + pos, len - pos, this->lineWidth, this->textSize);
+            bool wrapped = false;
+            int32_t num_glyphs_to_draw = this->babelDevice->word_wrap_position(codepoints + pos, len - pos, &wrapped, this->lineWidth, this->textSize);
             if (num_glyphs_to_draw < 0){
                 num_glyphs_to_draw = (int32_t)(len - pos);
             }

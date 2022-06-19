@@ -46,6 +46,8 @@ bool OpenBookDatabase::connect() {
     this->numBooks = header.numBooks;
     this->numFields = header.numFields;
 
+    device->removeFile("ernest-hemingway-shorts.pag");
+
     return true;
 }
 
@@ -218,52 +220,6 @@ bool OpenBookDatabase::bookIsPaginated(BookRecord record) {
     return this->_getPaginationFile(record, paginationFilename);
 }
 
-// Branchless UTF-8 decoder by Chris Wellons
-// Public domain
-// https://nullprogram.com/blog/2017/10/06/
-// NOTE: the optimizations here are kind of wasted on us since we have 
-// a TON of conditionals right after doing this, but oh well.
-static void * _utf8_decode(unsigned char *buf, uint32_t *c, int *e) {
-    static const char lengths[] = {
-        1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-        0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 2, 3, 3, 4, 0
-    };
-    static const int masks[]  = {0x00, 0x7f, 0x1f, 0x0f, 0x07};
-    static const uint32_t mins[] = {4194304, 0, 128, 2048, 65536};
-    static const int shiftc[] = {0, 18, 12, 6, 0};
-    static const int shifte[] = {0, 6, 4, 2, 0};
-
-    unsigned char *s = buf;
-    int len = lengths[s[0] >> 3];
-
-    /* Compute the pointer to the next character early so that the next
-     * iteration can start working on the next character. Neither Clang
-     * nor GCC figure out this reordering on their own.
-     */
-    unsigned char *next = s + len + !len;
-
-    /* Assume a four-byte character and load four bytes. Unused bits are
-     * shifted out.
-     */
-    *c  = (uint32_t)(s[0] & masks[len]) << 18;
-    *c |= (uint32_t)(s[1] & 0x3f) << 12;
-    *c |= (uint32_t)(s[2] & 0x3f) <<  6;
-    *c |= (uint32_t)(s[3] & 0x3f) <<  0;
-    *c >>= shiftc[len];
-
-    /* Accumulate the various error conditions. */
-    *e  = (*c < mins[len]) << 6; // non-canonical encoding
-    *e |= ((*c >> 11) == 0x1b) << 7;  // surrogate half?
-    *e |= (*c > 0x10FFFF) << 8;  // out of range?
-    *e |= (s[1] & 0xc0) >> 2;
-    *e |= (s[2] & 0xc0) >> 4;
-    *e |= (s[3]       ) >> 6;
-    *e ^= 0x2a; // top two bits of each tail byte correct?
-    *e >>= shifte[len];
-
-    return next;
-}
-
 void OpenBookDatabase::paginateBook(BookRecord record) {
     OpenBookDevice *device = OpenBookDevice::sharedInstance();
     BookPaginationHeader header;
@@ -316,142 +272,122 @@ void OpenBookDatabase::paginateBook(BookRecord record) {
     // but this time we need to simulate actually laying it out.
     BabelDevice *babel = device->getTypesetter()->getBabel();
     BookPage page = {0};
-    uint32_t codepoint;
-    uint32_t lastPosition;
-    uint16_t x = 0;
-    uint16_t y = 0;
-    int error;
-    union {
-        uint32_t value;
-        unsigned char buf[4];
-    } data;
+    uint16_t yPos = 0;
+    char utf8bytes[128];
+    BABEL_CODEPOINT codepoints[127];
 
+    Serial.print("Starting page parsing at ");
+    Serial.println(record.textStart);
     f = device->openFile(record.filename);
     f.seekSet(record.textStart);
-    header.numPages = 1;
-    data.buf[0] = f.read();
-    data.buf[1] = f.read();
-    data.buf[2] = f.read();
-    data.buf[3] = f.read();
-    page.loc = record.textStart;
-    page.len = 1;
-    bool forceBreakAtNextNewline = false;
-    void *next;
+    Serial.println(f.position());
+    const int16_t pageWidth = 288;
+    const int16_t pageHeight = 374;
+    uint32_t nextPosition = 0;
+    bool firstLoop = true;
+
+    page.loc = f.position();
+    page.len = 0;
+    Serial.print(yPos);
     do {
-        next = _utf8_decode(data.buf, &codepoint, &error);
-        if (error) {
-            char temp[32] = {0};
-            sprintf(temp, "%02x %02x %02x %02x %c %d", data.buf[0], data.buf[1], data.buf[2], data.buf[3], data.buf[0], error);
-            Serial.println(temp);
+        uint32_t startPosition = f.position();
+        int bytesRead = f.read(utf8bytes, 127);
+        utf8bytes[127] = 0;
+        bool wrapped = false;
+        babel->utf8_parse(utf8bytes, codepoints);
+
+        if (codepoints[0] == 0x1e) {
+            if (!firstLoop) {
+                // close out the last chapter
+                nextPosition = f.position();
+                f.close();
+                Serial.print(" Closing out chapter at page ");
+                Serial.print(header.numPages);
+                Serial.print(" : ");
+                Serial.print(page.loc);
+                Serial.print(", ");
+                Serial.print(page.len);
+                Serial.println();
+                paginationFile = device->openFile(paginationFilename, O_RDWR | O_AT_END);
+                paginationFile.write((byte *)&page, sizeof(BookPage));
+                paginationFile.flush();
+                paginationFile.close();
+                f = device->openFile(record.filename);
+                header.numPages++;
+                page.loc = nextPosition;
+                page.len = 0;
+                f.seekSet(nextPosition);
+            }
+
+            int32_t line_end = 0;
+            // FIXME: handle case where no newline in 127 code points
+            while(codepoints[line_end++] != '\n');
+            nextPosition = startPosition + line_end;
+            page.len = line_end;
+            goto BREAK_PAGE;
+        } else {
+            int32_t line_end = babel->word_wrap_position(codepoints, bytesRead, &wrapped, pageWidth, 1);
+            if (line_end > 0) {
+                page.len += line_end;
+                nextPosition = startPosition + line_end;
+            } else {
+                page.len += bytesRead;
+                nextPosition = startPosition + bytesRead;
+            }
         }
-        switch (codepoint) {
-            case '\n':
-                if (forceBreakAtNextNewline) {
-                    forceBreakAtNextNewline = false;
-                    // Serial.print("Breaking for chapter title page: ");
-                    // Serial.print(page.loc);
-                    // Serial.print(", ");
-                    // Serial.print(page.len);
-                    // Serial.println();
-                    lastPosition = f.position();
-                    f.close();
-                    paginationFile = device->openFile(paginationFilename, O_RDWR | O_AT_END);
-                    paginationFile.write((byte *)&page, sizeof(BookPage));
-                    paginationFile.flush();
-                    paginationFile.close();
-                    f = device->openFile(record.filename);
-                    f.seekSet(lastPosition);
-                    page.loc = f.position() - 4;
-                    page.len = 0;
-                    header.numPages++;
-                    x = 0;
-                    y = 0;
-                } else {
-                    x = 0;
-                    y += 16 + 8;
-                    // Serial.print(".");
-                }
-                break;
-            case 0x1e:
-                if (page.loc != record.textStart) {
-                    // Serial.print("Breaking for end of chapter: ");
-                    // Serial.print(page.loc);
-                    // Serial.print(", ");
-                    // Serial.print(page.len);
-                    // Serial.println();
-                    lastPosition = f.position();
-                    f.close();
-                    paginationFile = device->openFile(paginationFilename, O_RDWR | O_AT_END);
-                    paginationFile.write((byte *)&page, sizeof(BookPage));
-                    paginationFile.flush();
-                    paginationFile.close();
-                    x = 0;
-                    y = 0;
-                    f = device->openFile(record.filename);
-                    f.seekSet(lastPosition);
-                    page.loc = f.position() - 4;
-                    page.len = 0;
-                    header.numPages++;
-                }
-                forceBreakAtNextNewline = true;
-                break;
-            case '\r':
-            case 0x0e:
-            case 0x0f:
-                goto SKIP;
-            default:
-                x += BABEL_INFO_GET_GLYPH_WIDTH(babel->fetch_glyph_basic_info((BABEL_CODEPOINT)codepoint));
+
+        if (wrapped) {
+            Serial.print(",");
+            yPos += 16 + 2;
+        } else {
+            Serial.print(".");
+            yPos += 16 + 8;
         }
-        if (x > 288) {
-            x = 0;
-            y += 16 + 2;
-            // Serial.print(",");
-        }
-        if (y > 368) {
-            // Serial.print(" Page break: ");
-            // Serial.print(page.loc);
-            // Serial.print(", ");
-            // Serial.print(page.len);
-            // Serial.println();
-            x = 0;
-            y = 0;
+        Serial.print(yPos);
+        
+        if (yPos > pageHeight - 16 - 16) {
+BREAK_PAGE:
             f.close();
-            lastPosition = f.position();
-            f.close();
+            Serial.print(" Breaking for page ");
+            Serial.print(header.numPages);
+            Serial.print(" : ");
+            Serial.print(page.loc);
+            Serial.print(", ");
+            Serial.print(page.len);
+            Serial.println();
             paginationFile = device->openFile(paginationFilename, O_RDWR | O_AT_END);
             paginationFile.write((byte *)&page, sizeof(BookPage));
             paginationFile.flush();
             paginationFile.close();
             f = device->openFile(record.filename);
-            f.seekSet(lastPosition);
-            page.loc = f.position() - 4;
-            page.len = 0;
             header.numPages++;
+            yPos = 0;
+            Serial.print(yPos);
+            page.loc = nextPosition;
+            page.len = 0;
         }
-
-SKIP:
-        int8_t bytesParsed = (uint32_t) next - (uint32_t)&(data.buf);
-        page.len += bytesParsed;
-        data.value >>= bytesParsed * 8;
-        for(int8_t i = 4 - bytesParsed; i < 4; i++) {
-            data.buf[i] = f.read();
-        }
+        f.seekSet(nextPosition);
+        firstLoop = false;
     } while (f.available());
 
-    // Serial.print("Breaking for end of book: ");
-    // Serial.print(page.loc);
-    // Serial.print(", ");
-    // Serial.print(page.len);
-    // Serial.println();
+    Serial.print(" Breaking for end of book: ");
+    Serial.print(page.loc);
+    Serial.print(", ");
+    Serial.print(page.len);
+    Serial.println();
 
-    f.close();
-    lastPosition = f.position();
     f.close();
     paginationFile = device->openFile(paginationFilename, O_RDWR | O_AT_END);
     paginationFile.write((byte *)&page, sizeof(BookPage));
     paginationFile.flush();
     paginationFile.close();
     header.numPages++;
+
+    Serial.print("Writing final header: ");
+    Serial.print(header.numChapters);
+    Serial.print(" chapters, ");
+    Serial.print(header.numPages);
+    Serial.println(" pages.");
 
     paginationFile = device->openFile(paginationFilename, O_RDWR);
     paginationFile.seekSet(0);
@@ -475,6 +411,10 @@ uint32_t OpenBookDatabase::numPages(BookRecord record) {
 std::string OpenBookDatabase::getBookPage(BookRecord record, uint32_t page) {
     char paginationFilename[128];
 
+    // Serial.print(" Requesting page ");
+    // Serial.print(page);
+    // Serial.print(": ");
+
     if (this->_getPaginationFile(record, paginationFilename)) {
         BookPaginationHeader header;
         BookPage pageInfo;
@@ -486,12 +426,19 @@ std::string OpenBookDatabase::getBookPage(BookRecord record, uint32_t page) {
         f.seekSet(header.pageStart + page * sizeof(BookPage));
         f.read(&pageInfo, sizeof(BookPage));
         f.close();
+
+        // Serial.print(pageInfo.loc);
+        // Serial.print(", ");
+        // Serial.print(pageInfo.len);
+        // Serial.println();
+
         f = OpenBookDevice::sharedInstance()->openFile(record.filename);
         f.seekSet(pageInfo.loc);
         char *buf = (char *)malloc(pageInfo.len + 1);
         f.read(buf, pageInfo.len);
         f.close();
         buf[pageInfo.len] = 0;
+        // Serial.println(buf);
         std::string retval = std::string(buf);
         free(buf);
 

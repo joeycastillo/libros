@@ -219,16 +219,25 @@ BABEL_CODEPOINT BabelDevice::lowercase_mapping_for_codepoint(BABEL_CODEPOINT cod
     return BABEL_MAPPING_GET_VALUE(mapping);
 }
 
-int16_t BabelDevice::word_wrap_position(BABEL_CODEPOINT *buf, size_t len, int16_t line_width, int16_t text_size) {
+#include <Arduino.h>
+
+int16_t BabelDevice::word_wrap_position(BABEL_CODEPOINT *buf, size_t len, bool *wrapped, int16_t line_width, int16_t text_size) {
     size_t wrap_candidate = 0;
     size_t position_in_string = 0;
     int16_t cursor_location = 0;
-    bool wrapped = true;
+    *wrapped = true; // assume we wrapped unless set otherwise below
     
     while(cursor_location < line_width) {
         if (buf[position_in_string] == '\n') {
-            return position_in_string + 1;
+            *wrapped = false;
+            return position_in_string + 1; // "wrap" at the newline
         }
+        // skip control characters
+        if (buf[position_in_string] < 0x20) {
+            position_in_string++;
+            continue;
+        }
+
         uint32_t glyph_info = this->fetch_glyph_basic_info(buf[position_in_string]);
         if (BABEL_INFO_GET_LINEBREAK_OPPORTUNITY(glyph_info)) {
             wrap_candidate = position_in_string;
@@ -238,15 +247,11 @@ int16_t BabelDevice::word_wrap_position(BABEL_CODEPOINT *buf, size_t len, int16_
         }
         position_in_string++;
         if (position_in_string >= len) {
-            wrapped = false;
-            break;
+            *wrapped = false;
+            return -1; // we didn't have to word wrap
         }
     }
     
-    if (wrapped) {
-        if (wrap_candidate) return wrap_candidate + 1; // if we found a wrap point, return it.
-        else return len; // otherwise, they'll just need to break at the end of the line even though it's in the middle of a word. 
-    }
-    
-    return -1; // we didn't have to word wrap
+    if (wrap_candidate) return wrap_candidate + 1; // if we found a wrap point, return it.
+    else return len; // otherwise, they'll just need to break at the end of the line even though it's in the middle of a word.     
 }
