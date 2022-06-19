@@ -5,6 +5,7 @@
 #include <vector>
 #include <memory>
 #include <map>
+#include <functional>
 #include "Adafruit_GFX.h"
 
 typedef enum {
@@ -56,7 +57,7 @@ typedef enum {
     DirectionalAffinityHorizontal,
 } DirectionalAffinity;
 
-typedef void (*Action)(std::shared_ptr<Application>application, Event);
+typedef std::function<void(Event)> Action;
 
 class Task {
 public:
@@ -81,7 +82,7 @@ public:
     virtual void willResignFocus();
     virtual void didResignFocus();
     virtual bool handleEvent(Event event);
-    void setAction(Action action, EventType type);
+    void setAction(const Action &action, EventType type);
     void removeAction(EventType type);
     virtual std::weak_ptr<View>getSuperview();
     virtual std::weak_ptr<Window> getWindow();

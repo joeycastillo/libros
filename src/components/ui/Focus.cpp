@@ -144,7 +144,7 @@ bool View::handleEvent(Event event) {
 
     if (this->actions.count(event.type)) {
         if (std::shared_ptr<Application> application = window->application.lock()) {
-            this->actions[event.type](application, event);
+            this->actions[event.type](event);
         }
     } else if (event.type < BUTTON_CENTER) {
         uint32_t index = std::distance(this->subviews.begin(), std::find(this->subviews.begin(), this->subviews.end(), focusedView));
@@ -193,7 +193,7 @@ bool View::handleEvent(Event event) {
     return false;
 }
 
-void View::setAction(Action action, EventType type) {
+void View::setAction(const Action &action, EventType type) {
     this->actions[type] = action;
 }
 

@@ -17,6 +17,14 @@ public:
     BookRecord currentBook;
     uint32_t currentPage = 0;
 
+// Callbacks
+    void selectBook(Event event);
+    void turnPage(Event event);
+    void returnHome(Event event);
+    void lockScreen(Event event);
+    void dismiss(Event event);
+    void paginate(Event event);
+
     std::vector<BookRecord> books;
     std::shared_ptr<View> mainMenu;
     std::shared_ptr<OpenBookTable> table;
