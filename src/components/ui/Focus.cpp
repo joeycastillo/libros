@@ -25,7 +25,7 @@ void View::draw(Adafruit_GFX *display, int16_t x, int16_t y) {
         display->fillRect(x + this->frame.origin.x, y + this->frame.origin.y, this->frame.size.width, this->frame.size.height, this->backgroundColor);
     }
     for(std::shared_ptr<View> view : this->subviews) {
-        view->draw(display, this->frame.origin.x, this->frame.origin.y);
+        if (!view->hidden) view->draw(display, this->frame.origin.x, this->frame.origin.y);
     }
 }
 
@@ -236,7 +236,25 @@ bool View::isOpaque() {
 }
 
 void View::setOpaque(bool value) {
+    if (this-> opaque == value) return;
+
     this->opaque = value;
+    if (std::shared_ptr<Window> window = this->getWindow().lock()) {
+        window->setNeedsDisplayInRect(this->frame, window);
+    }
+}
+
+bool View::isHidden() {
+    return this->hidden;
+}
+
+void View::setHidden(bool value) {
+    if (this-> hidden == value) return;
+
+    this->hidden = value;
+    if (std::shared_ptr<Window> window = this->getWindow().lock()) {
+        window->setNeedsDisplayInRect(this->frame, window);
+    }
 }
 
 uint16_t View::getBackgroundColor() {

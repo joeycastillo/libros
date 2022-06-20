@@ -13,14 +13,17 @@ public:
     void selectBook(Event event);
     void dismiss(Event event);
     void paginate(Event event);
+    void updateBatteryIcon(Event event = {0});
 protected:
     virtual void createView() override;
 
+    std::vector<BookRecord> books;
     BookRecord currentBook = {0};
 
-    std::vector<BookRecord> books;
     std::shared_ptr<OpenBookTable> table;
     std::shared_ptr<BorderedView> modal;
+    std::shared_ptr<BitmapView> batteryIcon;
+    std::shared_ptr<BitmapView> usbIcon;
 };
 
 #endif // BookListViewController_h

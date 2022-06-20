@@ -90,11 +90,14 @@ public:
     void setFrame(Rect rect);
     bool isOpaque();
     void setOpaque(bool value);
+    bool isHidden();
+    void setHidden(bool value);
     uint16_t getBackgroundColor();
     void setBackgroundColor(uint16_t value);
 protected:
     bool focused = false;
     bool opaque = false;
+    bool hidden = false;
     uint16_t backgroundColor = 0;
     uint16_t foregroundColor = 1;
     Rect frame = {0};
