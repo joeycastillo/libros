@@ -58,7 +58,7 @@ public:
     int32_t getSelectedIndex();
 protected:
     void updateCells();
-    int32_t selectedIndex;
+    int32_t selectedIndex = 0;
     int16_t cellHeight;
     int16_t cellsPerPage;
     int16_t startOffset;

@@ -8,11 +8,7 @@
 
 class BookListViewController : public ViewController {
 public:
-    virtual void viewDidLoad() override;
     virtual void viewWillAppear() override;
-    virtual void viewDidAppear() override;
-    virtual void viewWillDisappear() override;
-    virtual void viewDidDisappear() override;
 
     void selectBook(Event event);
     void dismiss(Event event);
@@ -20,7 +16,7 @@ public:
 protected:
     virtual void createView() override;
 
-    BookRecord currentBook;
+    BookRecord currentBook = {0};
 
     std::vector<BookRecord> books;
     std::shared_ptr<OpenBookTable> table;

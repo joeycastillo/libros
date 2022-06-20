@@ -8,22 +8,20 @@
 
 class BookReaderViewController : public ViewController {
 public:
-    virtual void viewDidLoad() override;
+    BookReaderViewController(BookRecord book);
     virtual void viewWillAppear() override;
-    virtual void viewDidAppear() override;
-    virtual void viewWillDisappear() override;
-    virtual void viewDidDisappear() override;
 
     void turnPage(Event event);
     void returnHome(Event event);
 
 protected:
     virtual void createView() override;
+    void _updateView();
 
-    BookRecord currentBook;
+    BookRecord book = {0};
     uint32_t currentPage = 0;
 
-    std::shared_ptr<Control> page;
+    std::shared_ptr<Control> eventReceiver;
     std::shared_ptr<ProgressView> progressView;
     std::shared_ptr<OpenBookLabel> bookText;
 };

@@ -1,11 +1,6 @@
 #include "BookListViewController.h"
+#include "OpenBookEvents.h"
 #include "bitmaps.h"
-
-void BookListViewController::viewDidLoad() {
-    ViewController::viewDidLoad();
-
-    this->view->setAction(std::bind(&BookListViewController::selectBook, this, std::placeholders::_1), FOCUS_EVENT_BUTTON_CENTER);
-}
 
 void BookListViewController::viewWillAppear() {
     ViewController::viewWillAppear();
@@ -24,18 +19,6 @@ void BookListViewController::viewWillAppear() {
     this->table->setItems(titles);
 }
 
-void BookListViewController::viewDidAppear() {
-    ViewController::viewDidAppear();
-}
-
-void BookListViewController::viewWillDisappear() {
-    ViewController::viewWillDisappear();
-}
-
-void BookListViewController::viewDidDisappear() {
-    ViewController::viewDidDisappear();
-}
-
 void BookListViewController::createView() {
     ViewController::createView();
     this->view = std::make_shared<View>(MakeRect(0, 0, 300, 400));
@@ -50,6 +33,8 @@ void BookListViewController::createView() {
     this->view->addSubview(shelfIcon);
     this->view->addSubview(batteryLabel);
     this->view->addSubview(this->table);
+
+    this->view->setAction(std::bind(&BookListViewController::selectBook, this, std::placeholders::_1), FOCUS_EVENT_BUTTON_CENTER);
 }
 
 void BookListViewController::selectBook(Event event) {
@@ -57,7 +42,7 @@ void BookListViewController::selectBook(Event event) {
         this->currentBook = this->books[event.userInfo];
 
         if (OpenBookDatabase::sharedDatabase()->bookIsPaginated(this->currentBook)) {
-            // TODO: Somehow get application to present book reader
+            this->generateEvent(OPEN_BOOK_EVENT_BOOK_SELECTED, (int32_t)&this->currentBook);
         } else {
             this->modal = std::make_shared<BorderedView>(MakeRect(20, 100, 300 - 20 * 2, 200));
             int16_t subviewWidth = this->modal->getFrame().size.width - 40;
@@ -71,10 +56,9 @@ void BookListViewController::selectBook(Event event) {
             no->setAction(std::bind(&BookListViewController::dismiss, this, std::placeholders::_1), FOCUS_EVENT_BUTTON_CENTER);
             this->modal->addSubview(no);
             this->modal->becomeFocused();
-            // this->requestedRefreshMode = OPEN_BOOK_DISPLAY_MODE_GRAYSCALE;
+            this->generateEvent(OPEN_BOOK_EVENT_REQUEST_REFRESH_MODE, OPEN_BOOK_DISPLAY_MODE_GRAYSCALE);
         }
     }
-
 }
 
 void BookListViewController::dismiss(Event event) {

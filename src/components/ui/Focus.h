@@ -139,6 +139,7 @@ protected:
 
     friend class Application;
     friend class View;
+    friend class ViewController;
 };
 
 class Application : public std::enable_shared_from_this<Application> {
@@ -161,11 +162,12 @@ class ViewController : public std::enable_shared_from_this<ViewController> {
 public:
     ViewController() {};
 
-    virtual void viewDidLoad() {};
     virtual void viewWillAppear();
     virtual void viewDidAppear() {};
     virtual void viewWillDisappear() {};
     virtual void viewDidDisappear();
+
+    void generateEvent(int32_t eventType, int32_t userInfo = 0);
 
 protected:
     virtual void createView();
