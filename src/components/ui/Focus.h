@@ -96,6 +96,8 @@ public:
     void setBackgroundColor(uint16_t value);
     uint16_t getForegroundColor();
     void setForegroundColor(uint16_t value);
+    uint16_t getDirectionalAffinity();
+    void setDirectionalAffinity(DirectionalAffinity value);
 protected:
     bool focused = false;
     bool opaque = false;

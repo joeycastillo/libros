@@ -272,6 +272,14 @@ void View::setForegroundColor(uint16_t value) {
     this->foregroundColor = value;
 }
 
+uint16_t View::getDirectionalAffinity() {
+    return this->affinity;
+}
+
+void View::setDirectionalAffinity(DirectionalAffinity value) {
+    this->affinity = value;
+}
+
 Control::Control(Rect rect) : View(rect) {
 }
 
