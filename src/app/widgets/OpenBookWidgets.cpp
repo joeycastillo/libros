@@ -209,11 +209,11 @@ int32_t OpenBookTable::getSelectedIndex() {
 }
 
 bool OpenBookTable::handleEvent(Event event) {
-    if (event.type == FOCUS_EVENT_BUTTON_CENTER) {
+    if (event.type == FOCUS_EVENT_BUTTON_TAP) {
         // if user selected an item in the table, add that user info to the event
         event.userInfo = this->selectedIndex;
         return View::handleEvent(event);
-    } else if (event.type < FOCUS_EVENT_BUTTON_CENTER) {
+    } else if (event.type < FOCUS_EVENT_BUTTON_TAP) {
         // if the user moved the cursor around, first let the view select what to focus...
         bool retval = View::handleEvent(event);
         // then see if one of our views is focused; if so, update our index.

@@ -146,7 +146,7 @@ bool View::handleEvent(Event event) {
         if (std::shared_ptr<Application> application = window->application.lock()) {
             this->actions[event.type](event);
         }
-    } else if (event.type < FOCUS_EVENT_BUTTON_CENTER) {
+    } else if (event.type < FOCUS_EVENT_BUTTON_TAP) {
         uint32_t index = std::distance(this->subviews.begin(), std::find(this->subviews.begin(), this->subviews.end(), focusedView));
         if (this->affinity == DirectionalAffinityVertical) {
             switch (event.type) {

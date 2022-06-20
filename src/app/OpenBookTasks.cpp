@@ -22,7 +22,7 @@ int16_t OpenBookRawButtonInput::run(Application *application) {
             application->generateEvent(FOCUS_EVENT_BUTTON_RIGHT, 0);
         }
         if (buttons & OPENBOOK_BUTTONMASK_SELECT) {
-            application->generateEvent(FOCUS_EVENT_BUTTON_CENTER, 0);
+            application->generateEvent(FOCUS_EVENT_BUTTON_TAP, 0);
         }
         if (buttons & OPENBOOK_BUTTONMASK_PREVIOUS) {
             application->generateEvent(FOCUS_EVENT_BUTTON_PREV, 0);

@@ -31,7 +31,7 @@ void BookReaderViewController::createView() {
     this->eventReceiver = std::make_shared<Control>(MakeRect(0, 0, 0, 0));
     this->view->addSubview(this->eventReceiver);
 
-    this->view->setAction(std::bind(&BookReaderViewController::returnHome, this, std::placeholders::_1), FOCUS_EVENT_BUTTON_CENTER);
+    this->view->setAction(std::bind(&BookReaderViewController::returnHome, this, std::placeholders::_1), FOCUS_EVENT_BUTTON_TAP);
     this->view->setAction(std::bind(&BookReaderViewController::turnPage, this, std::placeholders::_1), FOCUS_EVENT_BUTTON_PREV);
     this->view->setAction(std::bind(&BookReaderViewController::turnPage, this, std::placeholders::_1), FOCUS_EVENT_BUTTON_NEXT);
 }
