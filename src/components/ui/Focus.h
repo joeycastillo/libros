@@ -181,7 +181,7 @@ public:
 
 protected:
     virtual void createView();
-    void destroyView();
+    virtual void destroyView();
     std::shared_ptr<View> view;
 
     friend class Application;
