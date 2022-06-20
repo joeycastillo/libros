@@ -94,6 +94,8 @@ public:
     void setHidden(bool value);
     uint16_t getBackgroundColor();
     void setBackgroundColor(uint16_t value);
+    uint16_t getForegroundColor();
+    void setForegroundColor(uint16_t value);
 protected:
     bool focused = false;
     bool opaque = false;

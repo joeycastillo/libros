@@ -264,6 +264,14 @@ void View::setBackgroundColor(uint16_t value) {
     this->backgroundColor = value;
 }
 
+uint16_t View::getForegroundColor() {
+    return this->foregroundColor;
+}
+
+void View::setForegroundColor(uint16_t value) {
+    this->foregroundColor = value;
+}
+
 Control::Control(Rect rect) : View(rect) {
 }
 
