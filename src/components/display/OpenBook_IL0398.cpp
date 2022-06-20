@@ -702,8 +702,6 @@ void OpenBook_IL0398::displayPartial(uint16_t x, uint16_t y, uint16_t w, uint16_
         this->display(); // partial update not yet supported from SRAM.
     }
 
-    if (this->currentDisplayMode != OPEN_BOOK_DISPLAY_MODE_PARTIAL) this->init(OPEN_BOOK_DISPLAY_MODE_PARTIAL);
-
     switch (this->getRotation())
     {
         case 0:
@@ -722,13 +720,29 @@ void OpenBook_IL0398::displayPartial(uint16_t x, uint16_t y, uint16_t w, uint16_
             y = WIDTH - y - h;
             break;
     }
+
+    // expand window to multiples of 8 on the x-axis:
+    if (x % 8) {
+        w += x % 8;
+        x -= x % 8;
+    }
+    if ((w % 8) > 0) w += 8 - (w % 8);
+
+    // Partial update area out of range. Do a full update instead of hanging.
+    if (x + w > 400 || y + h > 300) {
+        this->update();
+        return;
+    }
+
+    if (this->currentDisplayMode != OPEN_BOOK_DISPLAY_MODE_PARTIAL) this->init(OPEN_BOOK_DISPLAY_MODE_PARTIAL);
+
     EPD_command(IL0398_PARTIALIN);
     this->setWindow(x, y, w, h);
 
     // determine the area of buffer to transfer
-    x /= 8; // we're dealing with bytes now, not pixels
-    w += w % 8; // round width up to the nearest multiple of 8...
-    w /= 8; // ...and put it in terms of bytes
+    // we're dealing with bytes now, not pixels
+    x /= 8; 
+    w /= 8;
     uint16_t buffer_width = HEIGHT / 8;
 
     this->writeRAMCommand(0);
