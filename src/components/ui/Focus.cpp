@@ -362,3 +362,44 @@ void Application::generateEvent(EventType eventType, int32_t userInfo) {
 std::shared_ptr<Window> Application::getWindow() {
     return this->window;
 }
+
+void Application::setRootViewController(std::shared_ptr<ViewController> viewController) {
+    if (this->rootViewController) {
+        // clean up old view controller
+        this->rootViewController->viewWillDisappear();
+        this->window->removeSubview(this->rootViewController->getView());
+        this->rootViewController->viewDidDisappear();
+    }
+
+    // set up new view controller
+    this->rootViewController = viewController;
+    this->rootViewController->viewWillAppear();
+    this->window->addSubview(this->rootViewController->getView());
+    this->rootViewController->viewDidAppear();
+}
+
+std::shared_ptr<View> ViewController::getView() {
+    return this->view;
+}
+
+void ViewController::viewWillAppear() {
+    if (!this->view) {
+        this->createView();
+        this->viewDidLoad();
+    }
+}
+
+void ViewController::viewDidDisappear() {
+    this->destroyView();
+}
+
+void ViewController::createView() {
+    if (this->view) {
+        this->destroyView();
+    }
+    // subclasses must override to create view here
+}
+
+void ViewController::destroyView() {
+    this->view.reset();
+}

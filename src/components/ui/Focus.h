@@ -46,6 +46,7 @@ class Application;
 class Window;
 class View;
 class Task;
+class ViewController;
 
 typedef struct {
     EventType type;
@@ -150,9 +151,32 @@ public:
     void generateEvent(EventType eventType, int32_t userInfo);
     std::shared_ptr<Window> getWindow();
 
+    void setRootViewController(std::shared_ptr<ViewController> viewController);
+
 protected:
     std::vector<std::shared_ptr<Task>> tasks;
     std::shared_ptr<Window> window;
+    std::shared_ptr<ViewController> rootViewController;
+};
+
+class ViewController : public std::enable_shared_from_this<ViewController> {
+public:
+    ViewController() {};
+
+    virtual void viewDidLoad() {};
+    virtual void viewWillAppear();
+    virtual void viewDidAppear() {};
+    virtual void viewWillDisappear() {};
+    virtual void viewDidDisappear();
+
+    std::shared_ptr<View> getView();
+
+protected:
+    virtual void createView();
+    void destroyView();
+    std::shared_ptr<View> view;
+
+    friend class Application;
 };
 
 #endif // Focus_h
