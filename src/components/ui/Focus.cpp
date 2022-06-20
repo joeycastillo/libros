@@ -146,18 +146,18 @@ bool View::handleEvent(Event event) {
         if (std::shared_ptr<Application> application = window->application.lock()) {
             this->actions[event.type](event);
         }
-    } else if (event.type < BUTTON_CENTER) {
+    } else if (event.type < FOCUS_EVENT_BUTTON_CENTER) {
         uint32_t index = std::distance(this->subviews.begin(), std::find(this->subviews.begin(), this->subviews.end(), focusedView));
         if (this->affinity == DirectionalAffinityVertical) {
             switch (event.type) {
-                case BUTTON_UP:
+                case FOCUS_EVENT_BUTTON_UP:
                     while (index > 0) {
                         if (this->subviews[index - 1]->canBecomeFocused()) this->subviews[index - 1]->becomeFocused();
                         else index--;
                         return true;
                     }
                     break;
-                case BUTTON_DOWN:
+                case FOCUS_EVENT_BUTTON_DOWN:
                     while ((index + 1) < this->subviews.size()) {
                         if (this->subviews[index + 1]->canBecomeFocused()) this->subviews[index + 1]->becomeFocused();
                         else index--;
@@ -169,13 +169,13 @@ bool View::handleEvent(Event event) {
             }
         } else if (this->affinity == DirectionalAffinityHorizontal) {
             switch (event.type) {
-                case BUTTON_LEFT:
+                case FOCUS_EVENT_BUTTON_LEFT:
                     while (index > 0) {
                         if (this->subviews[index - 1]->canBecomeFocused()) this->subviews[index - 1]->becomeFocused();
                         return true;
                     }
                     break;
-                case BUTTON_RIGHT:
+                case FOCUS_EVENT_BUTTON_RIGHT:
                     while ((index + 1) < this->subviews.size()) {
                         if (this->subviews[index + 1]->canBecomeFocused()) this->subviews[index + 1]->becomeFocused();
                         return true;
@@ -193,11 +193,11 @@ bool View::handleEvent(Event event) {
     return false;
 }
 
-void View::setAction(const Action &action, EventType type) {
+void View::setAction(const Action &action, int32_t type) {
     this->actions[type] = action;
 }
 
-void View::removeAction(EventType type) {
+void View::removeAction(int32_t type) {
     // TODO: remove the action
 }
 
@@ -350,7 +350,7 @@ void Application::run() {
     }
 }
 
-void Application::generateEvent(EventType eventType, int32_t userInfo) {
+void Application::generateEvent(int32_t eventType, int32_t userInfo) {
     Event event;
     event.type = eventType;
     event.userInfo = userInfo;
@@ -367,19 +367,15 @@ void Application::setRootViewController(std::shared_ptr<ViewController> viewCont
     if (this->rootViewController) {
         // clean up old view controller
         this->rootViewController->viewWillDisappear();
-        this->window->removeSubview(this->rootViewController->getView());
+        this->window->removeSubview(this->rootViewController->view);
         this->rootViewController->viewDidDisappear();
     }
 
     // set up new view controller
     this->rootViewController = viewController;
     this->rootViewController->viewWillAppear();
-    this->window->addSubview(this->rootViewController->getView());
+    this->window->addSubview(this->rootViewController->view);
     this->rootViewController->viewDidAppear();
-}
-
-std::shared_ptr<View> ViewController::getView() {
-    return this->view;
 }
 
 void ViewController::viewWillAppear() {

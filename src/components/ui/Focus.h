@@ -8,16 +8,14 @@
 #include <functional>
 #include "Adafruit_GFX.h"
 
-typedef enum {
-    BUTTON_LEFT,
-    BUTTON_DOWN,
-    BUTTON_UP,
-    BUTTON_RIGHT,
-    BUTTON_CENTER,
-    BUTTON_PREV,
-    BUTTON_NEXT,
-    BUTTON_LOCK,
-} EventType;
+#define FOCUS_EVENT_BUTTON_LEFT (0)
+#define FOCUS_EVENT_BUTTON_DOWN (1)
+#define FOCUS_EVENT_BUTTON_UP (2)
+#define FOCUS_EVENT_BUTTON_RIGHT (3)
+#define FOCUS_EVENT_BUTTON_CENTER (4)
+#define FOCUS_EVENT_BUTTON_PREV (5)
+#define FOCUS_EVENT_BUTTON_NEXT (6)
+#define FOCUS_EVENT_BUTTON_LOCK (7)
 
 typedef struct {
     int16_t x;
@@ -49,7 +47,7 @@ class Task;
 class ViewController;
 
 typedef struct {
-    EventType type;
+    int32_t type;
     int32_t userInfo;
 } Event;
 
@@ -83,8 +81,8 @@ public:
     virtual void willResignFocus();
     virtual void didResignFocus();
     virtual bool handleEvent(Event event);
-    void setAction(const Action &action, EventType type);
-    void removeAction(EventType type);
+    void setAction(const Action &action, int32_t type);
+    void removeAction(int32_t type);
     virtual std::weak_ptr<View>getSuperview();
     virtual std::weak_ptr<Window> getWindow();
     virtual void setWindow(std::shared_ptr<Window> window);
@@ -102,7 +100,7 @@ protected:
     Rect frame = {0};
     DirectionalAffinity affinity = DirectionalAffinityVertical;
     std::vector<std::shared_ptr<View>> subviews;
-    std::map<EventType, Action> actions;
+    std::map<int32_t, Action> actions;
     std::weak_ptr<View> superview;
 private:
     std::weak_ptr<Window> window;
@@ -148,7 +146,7 @@ public:
     Application(const std::shared_ptr<Window>& window);
     void run();
     void addTask(std::shared_ptr<Task> task);
-    void generateEvent(EventType eventType, int32_t userInfo);
+    void generateEvent(int32_t eventType, int32_t userInfo);
     std::shared_ptr<Window> getWindow();
 
     void setRootViewController(std::shared_ptr<ViewController> viewController);
@@ -168,8 +166,6 @@ public:
     virtual void viewDidAppear() {};
     virtual void viewWillDisappear() {};
     virtual void viewDidDisappear();
-
-    std::shared_ptr<View> getView();
 
 protected:
     virtual void createView();

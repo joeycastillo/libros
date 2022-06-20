@@ -4,7 +4,7 @@
 void BookListViewController::viewDidLoad() {
     ViewController::viewDidLoad();
 
-    this->view->setAction(std::bind(&BookListViewController::selectBook, this, std::placeholders::_1), BUTTON_CENTER);
+    this->view->setAction(std::bind(&BookListViewController::selectBook, this, std::placeholders::_1), FOCUS_EVENT_BUTTON_CENTER);
 }
 
 void BookListViewController::viewWillAppear() {
@@ -65,10 +65,10 @@ void BookListViewController::selectBook(Event event) {
             std::shared_ptr<OpenBookLabel> label = std::make_shared<OpenBookLabel>(MakeRect(20, 20, subviewWidth, 32), "This book is not paginated.\nPaginate it now?");
             this->modal->addSubview(label);
             std::shared_ptr<OpenBookButton> yes = std::make_shared<OpenBookButton>(MakeRect(20, 68, subviewWidth, 48), "Yes");
-            yes->setAction(std::bind(&BookListViewController::paginate, this, std::placeholders::_1), BUTTON_CENTER);
+            yes->setAction(std::bind(&BookListViewController::paginate, this, std::placeholders::_1), FOCUS_EVENT_BUTTON_CENTER);
             this->modal->addSubview(yes);
             std::shared_ptr<OpenBookButton> no = std::make_shared<OpenBookButton>(MakeRect(20, 132, subviewWidth, 48), "No");
-            no->setAction(std::bind(&BookListViewController::dismiss, this, std::placeholders::_1), BUTTON_CENTER);
+            no->setAction(std::bind(&BookListViewController::dismiss, this, std::placeholders::_1), FOCUS_EVENT_BUTTON_CENTER);
             this->modal->addSubview(no);
             this->modal->becomeFocused();
             // this->requestedRefreshMode = OPEN_BOOK_DISPLAY_MODE_GRAYSCALE;

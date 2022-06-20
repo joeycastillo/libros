@@ -35,21 +35,21 @@ void BookReaderViewController::createView() {
     this->page->addSubview(this->progressView);
 
     // Actions for the book reading mode
-    this->page->setAction(std::bind(&BookReaderViewController::returnHome, this, std::placeholders::_1), BUTTON_CENTER);
-    this->page->setAction(std::bind(&BookReaderViewController::turnPage, this, std::placeholders::_1), BUTTON_PREV);
-    this->page->setAction(std::bind(&BookReaderViewController::turnPage, this, std::placeholders::_1), BUTTON_NEXT);
+    this->page->setAction(std::bind(&BookReaderViewController::returnHome, this, std::placeholders::_1), FOCUS_EVENT_BUTTON_CENTER);
+    this->page->setAction(std::bind(&BookReaderViewController::turnPage, this, std::placeholders::_1), FOCUS_EVENT_BUTTON_PREV);
+    this->page->setAction(std::bind(&BookReaderViewController::turnPage, this, std::placeholders::_1), FOCUS_EVENT_BUTTON_NEXT);
 
 }
 
 void BookReaderViewController::turnPage(Event event) {
     switch (event.type) {
-        case BUTTON_NEXT:
+        case FOCUS_EVENT_BUTTON_NEXT:
             // FIXME: check if this is the last page
             if (true) {
                 this->currentPage++;
             }
             break;
-        case BUTTON_PREV:
+        case FOCUS_EVENT_BUTTON_PREV:
             if (this->currentPage > 0) {
                 this->currentPage--;
             }

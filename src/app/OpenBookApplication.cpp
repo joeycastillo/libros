@@ -16,7 +16,7 @@ OpenBookApplication::OpenBookApplication(const std::shared_ptr<Window>& window) 
     this->setRootViewController(bookList);
 
     // Actions for any mode
-    this->window->setAction(std::bind(&OpenBookApplication::lockScreen, this, std::placeholders::_1), BUTTON_LOCK);
+    this->window->setAction(std::bind(&OpenBookApplication::lockScreen, this, std::placeholders::_1), FOCUS_EVENT_BUTTON_LOCK);
 }
 
 void OpenBookApplication::lockScreen(Event event) {
