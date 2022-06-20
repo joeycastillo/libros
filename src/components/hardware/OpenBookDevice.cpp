@@ -175,7 +175,7 @@ double OpenBookDevice::getSystemVoltage() {
     analogReadResolution(16);
     pinMode(29, INPUT);
     int32_t value = analogRead(A3);
-    return 3.3 * 3.3333333333 * value / 65535;
+    return 3.3 * 3 * value / 65535;
 #endif
     return 0;
 }

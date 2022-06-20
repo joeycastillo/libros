@@ -81,6 +81,6 @@ void Label::draw(Adafruit_GFX *display, int16_t x, int16_t y) {
 void Label::setText(std::string text) {
     this->text = text;
     if (std::shared_ptr<Window> window = this->getWindow().lock()) {
-        window->setNeedsDisplay(true);
+        window->setNeedsDisplayInRect(this->frame, window);
     }
 }

@@ -1,5 +1,6 @@
 #include "OpenBookTasks.h"
 #include "OpenBookApplication.h"
+#include "OpenBookEvents.h"
 #include <memory>
 
 int16_t OpenBookRawButtonInput::run(Application *application) {
@@ -100,6 +101,18 @@ int16_t OpenBookLockScreen::run(Application *application) {
         window->setNeedsDisplay(true);
         myApp->locked = false;
     }
+
+    return 0;
+}
+
+int16_t OpenBookPowerMonitor::run(Application *application) {
+    float systemVoltage = OpenBookDevice::sharedDevice()->getSystemVoltage();
+    bool onBattery = systemVoltage < 4.5;
+
+    if (onBattery != this->wasOnBattery) {
+        application->generateEvent(OPEN_BOOK_EVENT_POWER_CHANGED, (int32_t) (systemVoltage * 100));
+    }
+    this->wasOnBattery = onBattery;
 
     return 0;
 }

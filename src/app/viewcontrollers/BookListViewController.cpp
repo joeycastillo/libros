@@ -27,15 +27,17 @@ void BookListViewController::createView() {
     titleLabel->setBold(true);
     this->batteryIcon = std::make_shared<BitmapView>(MakeRect(267, 9, 24, 9), BatteryIcon);
     this->usbIcon = std::make_shared<BitmapView>(MakeRect(267, 9, 24, 9), PlugIcon);
+    this->batteryIcon->setHidden(true);
+    this->usbIcon->setHidden(true);
     this->table = std::make_shared<OpenBookTable>(MakeRect(0, 32, 300, 360), 24, CellSelectionStyleIndicatorLeading);
     this->view->addSubview(this->table);
     this->view->addSubview(titleLabel);
     this->view->addSubview(shelfIcon);
     this->view->addSubview(this->batteryIcon);
     this->view->addSubview(this->usbIcon);
-    this->updateBatteryIcon();
 
     this->view->setAction(std::bind(&BookListViewController::selectBook, this, std::placeholders::_1), FOCUS_EVENT_BUTTON_CENTER);
+    this->view->setAction(std::bind(&BookListViewController::updateBatteryIcon, this, std::placeholders::_1), OPEN_BOOK_EVENT_POWER_CHANGED);
 }
 
 void BookListViewController::selectBook(Event event) {
@@ -79,7 +81,8 @@ void BookListViewController::paginate(Event event) {
 }
 
 void BookListViewController::updateBatteryIcon(Event event) {
-    bool onBattery = OpenBookDevice::sharedDevice()->getSystemVoltage() < 4.4;
+    float systemVoltage = (float)event.userInfo / 100;
+    bool onBattery = systemVoltage < 4.5;
     this->batteryIcon->setHidden(!onBattery);
     this->usbIcon->setHidden(onBattery);
 }

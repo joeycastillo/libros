@@ -24,4 +24,12 @@ public:
     int16_t run(Application *application);
 };
 
+class OpenBookPowerMonitor : public Task {
+public:
+    OpenBookPowerMonitor() {};
+    int16_t run(Application *application);
+protected:
+    int8_t wasOnBattery = -1;
+};
+
 #endif // OpenBookTasks_h

@@ -226,8 +226,7 @@ void View::setFrame(Rect frame) {
         dirtyRect.size.width = max(this->frame.origin.x + this->frame.size.width, frame.origin.x + frame.size.width) - dirtyRect.origin.x;
         dirtyRect.size.height = max(this->frame.origin.y + this->frame.size.height, frame.origin.y + frame.size.height) - dirtyRect.origin.y;
         this->frame = frame;
-        std::shared_ptr<View> shared_this = this->shared_from_this();
-        window->setNeedsDisplayInRect(dirtyRect, shared_this);
+        window->setNeedsDisplayInRect(dirtyRect, window);
     }
 }
 

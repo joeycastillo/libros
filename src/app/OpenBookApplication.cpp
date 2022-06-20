@@ -9,6 +9,8 @@ OpenBookApplication::OpenBookApplication(const std::shared_ptr<Window>& window) 
     this->addTask(lockScreenTask);
     std::shared_ptr<Task> inputTask = std::make_shared<OpenBookRawButtonInput>();
     this->addTask(inputTask);
+    std::shared_ptr<Task> powerTask = std::make_shared<OpenBookPowerMonitor>();
+    this->addTask(powerTask);
     std::shared_ptr<Task> displayTask = std::make_shared<OpenBookDisplay>();
     this->addTask(displayTask);
 
