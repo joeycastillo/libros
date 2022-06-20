@@ -196,16 +196,38 @@ void OpenBookTable::updateCells() {
     }
 }
 
-bool OpenBookTable::handleEvent(Event event) {
-    if (event.type == BUTTON_CENTER) {
-        if (std::shared_ptr<Window> window = this->getWindow().lock()) {
-            if (std::shared_ptr<View> focusedView = window->getFocusedView().lock()) {
-                uint32_t index = std::distance(this->subviews.begin(), std::find(this->subviews.begin(), this->subviews.end(), focusedView));
-                event.userInfo = index;
-            }
-        }
+bool OpenBookTable::becomeFocused() {
+    if (this->selectedIndex >= 0 && this->selectedIndex < ((int32_t)this->subviews.size())) {
+        return this->subviews[this->selectedIndex]->becomeFocused();
     }
 
+    return Control::becomeFocused();
+}
+
+int32_t OpenBookTable::getSelectedIndex() {
+    return this->selectedIndex;
+}
+
+bool OpenBookTable::handleEvent(Event event) {
+    if (event.type == BUTTON_CENTER) {
+        // if user selected an item in the table, add that user info to the event
+        event.userInfo = this->selectedIndex;
+        return View::handleEvent(event);
+    } else if (event.type < BUTTON_CENTER) {
+        // if the user moved the cursor around, first let the view select what to focus...
+        bool retval = View::handleEvent(event);
+        // then see if one of our views is focused; if so, update our index.
+        this->selectedIndex = -1;
+        if (std::shared_ptr<Window> window = this->getWindow().lock()) {
+            if (std::shared_ptr<View> focusedView = window->getFocusedView().lock()) {
+                this->selectedIndex = std::distance(this->subviews.begin(), std::find(this->subviews.begin(), this->subviews.end(), focusedView));
+            }
+        }
+        // and return the value of View::handleEvent
+        return retval;
+    }
+
+    // all other event types, just pass it along.
     return View::handleEvent(event);
 }
 

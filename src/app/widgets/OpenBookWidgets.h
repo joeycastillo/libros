@@ -54,8 +54,11 @@ public:
     OpenBookTable(Rect rect, int16_t cellHeight, OpenBookCellSelectionStyle selectionStyle);
     void setItems(std::vector<std::string> items);
     bool handleEvent(Event event) override;
+    bool becomeFocused() override;
+    int32_t getSelectedIndex();
 protected:
     void updateCells();
+    int32_t selectedIndex;
     int16_t cellHeight;
     int16_t cellsPerPage;
     int16_t startOffset;
