@@ -256,6 +256,14 @@ void View::setHidden(bool value) {
     }
 }
 
+int32_t View::getTag() {
+    return this->tag;
+}
+
+void View::setTag(int32_t value) {
+    this->tag = value;
+}
+
 uint16_t View::getBackgroundColor() {
     return this->backgroundColor;
 }

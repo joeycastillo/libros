@@ -92,6 +92,8 @@ public:
     void setOpaque(bool value);
     bool isHidden();
     void setHidden(bool value);
+    int32_t getTag();
+    void setTag(int32_t value);
     uint16_t getBackgroundColor();
     void setBackgroundColor(uint16_t value);
     uint16_t getForegroundColor();
@@ -102,6 +104,7 @@ protected:
     bool focused = false;
     bool opaque = false;
     bool hidden = false;
+    int32_t tag = 0;
     uint16_t backgroundColor = 0;
     uint16_t foregroundColor = 1;
     Rect frame = {0};
