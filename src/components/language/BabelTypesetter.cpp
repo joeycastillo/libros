@@ -149,8 +149,6 @@ int BabelTypesetter::drawGlyph(int16_t x, int16_t y, BabelGlyph glyph, uint16_t 
     return width * this->textSize;
 }
 
-#include <Arduino.h>
-
 size_t BabelTypesetter::writeCodepoint(BABEL_CODEPOINT codepoint) {
     // before we start, we don't need to fetch anything for control characters.
     switch (codepoint) {
@@ -162,8 +160,6 @@ size_t BabelTypesetter::writeCodepoint(BABEL_CODEPOINT codepoint) {
             } else {
                 this->cursor.x = this->maxX;
             }
-            Serial.print(this->cursor.y - 6);
-            Serial.print(" ");
             this->hasLastGlyph = false;
             return 1;
         case 0x0f: // shift in
