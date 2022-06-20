@@ -12,11 +12,11 @@ void BookListViewController::viewWillAppear() {
 
     // update books whenever the view appears
     std::vector<std::string> titles;
-    uint32_t numBooks = OpenBookDatabase::sharedInstance()->getNumberOfBooks();
+    uint32_t numBooks = OpenBookDatabase::sharedDatabase()->getNumberOfBooks();
 
     for (uint32_t i = 0 ; i < numBooks ; i++) {
-        BookRecord record = OpenBookDatabase::sharedInstance()->getBookRecord(i);
-        std::string title = OpenBookDatabase::sharedInstance()->getBookTitle(record);
+        BookRecord record = OpenBookDatabase::sharedDatabase()->getBookRecord(i);
+        std::string title = OpenBookDatabase::sharedDatabase()->getBookTitle(record);
         titles.push_back(title);
         this->books.push_back(record);
     }
@@ -43,7 +43,7 @@ void BookListViewController::createView() {
     std::shared_ptr<BitmapView> shelfIcon = std::make_shared<BitmapView>(MakeRect(9, 9, 16, 16), ShelfIcon);
     titleLabel->setBold(true);
     char buf[16];
-    sprintf(buf, "VSYS: %4.2fV", OpenBookDevice::sharedInstance()->getSystemVoltage());
+    sprintf(buf, "VSYS: %4.2fV", OpenBookDevice::sharedDevice()->getSystemVoltage());
     std::shared_ptr<OpenBookLabel> batteryLabel = std::make_shared<OpenBookLabel>(MakeRect(200, 8, 80, 16), buf);
     this->table = std::make_shared<OpenBookTable>(MakeRect(0, 32, 300, 360), 24, CellSelectionStyleIndicatorLeading);
     this->view->addSubview(titleLabel);
@@ -56,7 +56,7 @@ void BookListViewController::selectBook(Event event) {
     if (std::shared_ptr<Window>window = this->view->getWindow().lock()) {
         this->currentBook = this->books[event.userInfo];
 
-        if (OpenBookDatabase::sharedInstance()->bookIsPaginated(this->currentBook)) {
+        if (OpenBookDatabase::sharedDatabase()->bookIsPaginated(this->currentBook)) {
             // TODO: Somehow get application to present book reader
         } else {
             this->modal = std::make_shared<BorderedView>(MakeRect(20, 100, 300 - 20 * 2, 200));
@@ -89,6 +89,6 @@ void BookListViewController::paginate(Event event) {
     if (std::shared_ptr<Window>window = this->view->getWindow().lock()) {
         window->removeSubview(this->modal);
         this->modal.reset();
-        OpenBookDatabase::sharedInstance()->paginateBook(this->currentBook);
+        OpenBookDatabase::sharedDatabase()->paginateBook(this->currentBook);
     }
 }

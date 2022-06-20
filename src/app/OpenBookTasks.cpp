@@ -3,7 +3,7 @@
 #include <memory>
 
 int16_t OpenBookRawButtonInput::run(Application *application) {
-    OpenBookDevice *device = OpenBookDevice::sharedInstance();
+    OpenBookDevice *device = OpenBookDevice::sharedDevice();
 
     uint8_t buttons = device->readButtons();
     if (buttons && buttons != this->lastButtons) {
@@ -40,7 +40,7 @@ int16_t OpenBookRawButtonInput::run(Application *application) {
 }
 
 int16_t OpenBookDisplay::run(Application *application) {
-    OpenBookDevice *device = OpenBookDevice::sharedInstance();
+    OpenBookDevice *device = OpenBookDevice::sharedDevice();
     OpenBookApplication *myApp = (OpenBookApplication *)application;
 
     std::shared_ptr<Window> window = application->getWindow();
@@ -70,7 +70,7 @@ int16_t OpenBookDisplay::run(Application *application) {
 }
 
 int16_t OpenBookLockScreen::run(Application *application) {
-    OpenBookDevice *device = OpenBookDevice::sharedInstance();
+    OpenBookDevice *device = OpenBookDevice::sharedDevice();
 
     OpenBookApplication *myApp = (OpenBookApplication *)application;
     if (myApp->locked) {

@@ -39,7 +39,7 @@ typedef struct {
 
 class OpenBookDevice {
 public:
-    static OpenBookDevice *sharedInstance() {
+    static OpenBookDevice *sharedDevice() {
         static OpenBookDevice instance;
         return &instance;
     }

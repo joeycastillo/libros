@@ -58,7 +58,7 @@ void BookReaderViewController::turnPage(Event event) {
             return;
     }
 
-    std::string text = OpenBookDatabase::sharedInstance()->getBookPage(this->currentBook, this->currentPage);
+    std::string text = OpenBookDatabase::sharedDatabase()->getBookPage(this->currentBook, this->currentPage);
     if (text[0] == 0x1e)this->bookText->setTextSize(2);
     else this->bookText->setTextSize(1);
     this->bookText->setText(text.c_str());

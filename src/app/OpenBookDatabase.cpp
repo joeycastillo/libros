@@ -9,7 +9,7 @@ OpenBookDatabase::OpenBookDatabase() {
 }
 
 bool OpenBookDatabase::connect() {
-    OpenBookDevice *device = OpenBookDevice::sharedInstance();
+    OpenBookDevice *device = OpenBookDevice::sharedDevice();
     BookDatabaseHeader header;
 
     if (!device->fileExists(OPEN_BOOK_LIBRARY_FILENAME)) {
@@ -67,7 +67,7 @@ bool OpenBookDatabase::_fileLooksLikeBook(File entry) {
 }
 
 bool OpenBookDatabase::scanForNewBooks() {
-    OpenBookDevice *device = OpenBookDevice::sharedInstance();
+    OpenBookDevice *device = OpenBookDevice::sharedDevice();
     uint32_t numBooks = 0;
     File root, entry;
     SHA256 sha256;
@@ -179,7 +179,7 @@ uint32_t OpenBookDatabase::getNumberOfBooks() {
 
 BookRecord OpenBookDatabase::getBookRecord(uint32_t i) {
     BookRecord retval;
-    File database = OpenBookDevice::sharedInstance()->openFile(OPEN_BOOK_LIBRARY_FILENAME);
+    File database = OpenBookDevice::sharedDevice()->openFile(OPEN_BOOK_LIBRARY_FILENAME);
 
     database.seekSet(sizeof(DATABASE_FILE_IDENTIFIER) + sizeof(BookDatabaseHeader) + i * sizeof(BookRecord));
     database.read((byte *)&retval, sizeof(BookRecord));
@@ -203,7 +203,7 @@ std::string OpenBookDatabase::getBookDescription(BookRecord record) {
 std::string OpenBookDatabase::_getMetadataAtIndex(BookRecord record, uint16_t i) {
     BookField field = record.metadata[i];
     char *value = (char *)malloc(field.len + 1);
-    File f = OpenBookDevice::sharedInstance()->openFile(record.filename);
+    File f = OpenBookDevice::sharedDevice()->openFile(record.filename);
 
     f.seekSet(field.loc);
     f.read((void *)value, field.len);
@@ -221,7 +221,7 @@ bool OpenBookDatabase::bookIsPaginated(BookRecord record) {
 }
 
 void OpenBookDatabase::paginateBook(BookRecord record) {
-    OpenBookDevice *device = OpenBookDevice::sharedInstance();
+    OpenBookDevice *device = OpenBookDevice::sharedDevice();
     BookPaginationHeader header;
     File paginationFile;
     char paginationFilename[128];
@@ -400,7 +400,7 @@ uint32_t OpenBookDatabase::numPages(BookRecord record) {
     char paginationFilename[128];
     if (this->_getPaginationFile(record, paginationFilename)) {
         BookPaginationHeader header;
-        File f = OpenBookDevice::sharedInstance()->openFile(paginationFilename);
+        File f = OpenBookDevice::sharedDevice()->openFile(paginationFilename);
         f.read(&header, sizeof(BookPaginationHeader));
         return header.numPages;
     }
@@ -419,7 +419,7 @@ std::string OpenBookDatabase::getBookPage(BookRecord record, uint32_t page) {
         BookPaginationHeader header;
         BookPage pageInfo;
 
-        File f = OpenBookDevice::sharedInstance()->openFile(paginationFilename);
+        File f = OpenBookDevice::sharedDevice()->openFile(paginationFilename);
         f.read(&header, sizeof(BookPaginationHeader));
         if (page >= header.numPages) return "";
 
@@ -432,7 +432,7 @@ std::string OpenBookDatabase::getBookPage(BookRecord record, uint32_t page) {
         // Serial.print(pageInfo.len);
         // Serial.println();
 
-        f = OpenBookDevice::sharedInstance()->openFile(record.filename);
+        f = OpenBookDevice::sharedDevice()->openFile(record.filename);
         f.seekSet(pageInfo.loc);
         char *buf = (char *)malloc(pageInfo.len + 1);
         f.read(buf, pageInfo.len);
@@ -454,5 +454,5 @@ bool OpenBookDatabase::_getPaginationFile(BookRecord record, char *outFilename) 
     memcpy(outFilename, record.filename, 128);
     memcpy((byte *)outFilename + (strlen(outFilename) - 4), (byte *)&extension, sizeof(extension));
 
-    return OpenBookDevice::sharedInstance()->fileExists(outFilename);
+    return OpenBookDevice::sharedDevice()->fileExists(outFilename);
 }

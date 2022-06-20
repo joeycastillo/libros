@@ -8,7 +8,7 @@ OpenBookButton::OpenBookButton(Rect rect, std::string text) : Button(rect, text)
 void OpenBookButton::draw(Adafruit_GFX *display, int16_t x, int16_t y) {
     if (std::shared_ptr<Window> window = this->getWindow().lock()) {
         View::draw(display, x, y);
-        BabelTypesetterGFX *typesetter = OpenBookDevice::sharedInstance()->getTypesetter();
+        BabelTypesetterGFX *typesetter = OpenBookDevice::sharedDevice()->getTypesetter();
         typesetter->setWordWrap(false);
         typesetter->setBold(false);
         typesetter->setItalic(false);
@@ -32,7 +32,7 @@ OpenBookLabel::OpenBookLabel(Rect rect, std::string text) : Label(rect, text) {
 
 void OpenBookLabel::draw(Adafruit_GFX *display, int16_t x, int16_t y) {
     View::draw(display, x, y);
-    BabelTypesetterGFX *typesetter = OpenBookDevice::sharedInstance()->getTypesetter();
+    BabelTypesetterGFX *typesetter = OpenBookDevice::sharedDevice()->getTypesetter();
     typesetter->setLayoutArea(this->frame.origin.x + x, this->frame.origin.y + y, this->frame.size.width, this->frame.size.height);
     typesetter->setTextColor(this->foregroundColor);
     typesetter->setWordWrap(this->wrap);
@@ -96,7 +96,7 @@ OpenBookCell::OpenBookCell(Rect rect, std::string text, OpenBookCellSelectionSty
 void OpenBookCell::draw(Adafruit_GFX *display, int16_t x, int16_t y) {
     if (std::shared_ptr<Window> window = this->getWindow().lock()) {
         View::draw(display, x, y);
-        BabelTypesetterGFX *typesetter = OpenBookDevice::sharedInstance()->getTypesetter();
+        BabelTypesetterGFX *typesetter = OpenBookDevice::sharedDevice()->getTypesetter();
         typesetter->setBold(false);
         typesetter->setItalic(false);
         typesetter->setTextSize(1);

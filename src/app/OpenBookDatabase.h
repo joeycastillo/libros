@@ -73,7 +73,7 @@ typedef struct {
 
 class OpenBookDatabase {
 public:
-    static OpenBookDatabase *sharedInstance() {
+    static OpenBookDatabase *sharedDatabase() {
         static OpenBookDatabase instance;
         return &instance;
     }
