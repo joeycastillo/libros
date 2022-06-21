@@ -17,7 +17,7 @@ Button::Button(Rect rect, std::string text) : Control(rect) {
 void Button::draw(Adafruit_GFX *display, int16_t x, int16_t y) {
     if (std::shared_ptr<Window> window = this->getWindow().lock()) {
         View::draw(display, x, y);
-        display->setCursor(this->frame.origin.x + x + 8, this->frame.origin.y + y + this->frame.size.height / 2 - 8);
+        display->setCursor(this->frame.origin.x + x + 4, this->frame.origin.y + y + this->frame.size.height / 2 - 4);
         if (this->focused) {
             display->fillRect(x + this->frame.origin.x, y + this->frame.origin.y, this->frame.size.width, this->frame.size.height, this->foregroundColor);
             display->setTextColor(this->backgroundColor);
