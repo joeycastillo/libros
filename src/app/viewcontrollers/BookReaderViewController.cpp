@@ -14,7 +14,7 @@ void BookReaderViewController::viewWillAppear() {
 
 void BookReaderViewController::createView() {
     ViewController::createView();
-    this->view = std::make_shared<View>(MakeRect(0, 0, 300, 400));
+    this->view = std::make_shared<Control>(MakeRect(0, 0, 300, 400));
 
     this->bookText = std::make_shared<OpenBookLabel>(MakeRect(6, 6, 300 - 12, 400 - 26), "");
     this->bookText->setWordWrap(true);
@@ -23,13 +23,6 @@ void BookReaderViewController::createView() {
     this->view->addSubview(this->bookText);
     this->progressView = std::make_shared<ProgressView>(MakeRect(0, 400 - 8, 300, 8));
     this->view->addSubview(this->progressView);
-
-    // This view is a little bit interesting: none of the above views are focusable!
-    // That's because this isn't a menu or a dialog box; there's nothing to navigate,
-    // therefore nothing to focus on.
-    // So here we add an invisible control, just to receive events.
-    this->eventReceiver = std::make_shared<Control>(MakeRect(0, 0, 0, 0));
-    this->view->addSubview(this->eventReceiver);
 
     this->view->setAction(std::bind(&BookReaderViewController::returnHome, this, std::placeholders::_1), FOCUS_EVENT_BUTTON_TAP);
     this->view->setAction(std::bind(&BookReaderViewController::turnPage, this, std::placeholders::_1), FOCUS_EVENT_BUTTON_PREV);
