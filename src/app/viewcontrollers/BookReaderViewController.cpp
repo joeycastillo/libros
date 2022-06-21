@@ -8,6 +8,7 @@ BookReaderViewController::BookReaderViewController(BookRecord book) : ViewContro
 void BookReaderViewController::viewWillAppear() {
     ViewController::viewWillAppear();
 
+    this->numPages = max(OpenBookDatabase::sharedDatabase()->numPages(this->book), 1);
     this->_updateView();
 }
 
@@ -21,7 +22,6 @@ void BookReaderViewController::createView() {
     this->bookText->setParagraphSpacing(8);
     this->view->addSubview(this->bookText);
     this->progressView = std::make_shared<ProgressView>(MakeRect(0, 400 - 8, 300, 8));
-    this->progressView->setBackgroundColor(EPD_DARK);
     this->view->addSubview(this->progressView);
 
     // This view is a little bit interesting: none of the above views are focusable!
@@ -65,5 +65,6 @@ void BookReaderViewController::_updateView() {
     if (text[0] == 0x1e)this->bookText->setTextSize(2);
     else this->bookText->setTextSize(1);
     this->bookText->setText(text.c_str());
-    // this->progressView->setProgress((float)(pos - textStart) / (float)(len - textStart));
+    this->generateEvent(OPEN_BOOK_EVENT_REQUEST_REFRESH_MODE, OPEN_BOOK_DISPLAY_MODE_QUICK);
+    this->progressView->setProgress((float)(this->currentPage) / (float)(this->numPages));
 }

@@ -20,6 +20,7 @@ protected:
 
     BookRecord book = {0};
     uint32_t currentPage = 0;
+    uint32_t numPages = 1;
 
     std::shared_ptr<Control> eventReceiver;
     std::shared_ptr<ProgressView> progressView;

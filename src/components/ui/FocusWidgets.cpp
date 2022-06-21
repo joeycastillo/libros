@@ -56,7 +56,6 @@ void BorderedView::draw(Adafruit_GFX *display, int16_t x, int16_t y) {
 
 void ProgressView::draw(Adafruit_GFX *display, int16_t x, int16_t y) {
     View::draw(display, x, y);
-    display->fillRect(x + this->frame.origin.x, y + this->frame.origin.y, this->frame.size.width, this->frame.size.height, this->backgroundColor);
     display->fillRect(x + this->frame.origin.x, y + this->frame.origin.y, (int16_t)(this->frame.size.width * this->progress), this->frame.size.height, this->foregroundColor);
 }
 
