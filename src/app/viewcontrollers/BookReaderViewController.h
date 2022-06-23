@@ -24,6 +24,7 @@ protected:
 
     std::shared_ptr<Control> eventReceiver;
     std::shared_ptr<ProgressView> progressView;
+    std::shared_ptr<Label> progressLabel;
     std::shared_ptr<OpenBookLabel> bookText;
 };
 
