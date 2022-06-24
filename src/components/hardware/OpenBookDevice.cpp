@@ -166,6 +166,15 @@ bool OpenBookDevice::startBabel() {
 */
 void OpenBookDevice::lockDevice() {
 #ifdef ARDUINO_ARCH_RP2040
+    pinMode(0, OUTPUT);
+    digitalWrite(0, HIGH);
+    for(int i = 1; i <= 21; i++) {
+        if (i != 22) {
+            pinMode(i, OUTPUT);
+            digitalWrite(i, LOW);
+        }
+    }
+
     sleep_run_from_rosc();
     sleep_goto_dormant_until_pin(12, true, false);
     // reset the device
