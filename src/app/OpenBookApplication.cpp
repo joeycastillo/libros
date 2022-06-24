@@ -2,6 +2,7 @@
 #include "OpenBookTasks.h"
 #include "OpenBookEvents.h"
 #include "BookReaderViewController.h"
+#include "FatalErrorViewController.h"
 
 OpenBookApplication::OpenBookApplication(const std::shared_ptr<Window>& window) : Application(window) {
     // set up tasks for input, output and the lock screen
@@ -14,8 +15,22 @@ OpenBookApplication::OpenBookApplication(const std::shared_ptr<Window>& window) 
     std::shared_ptr<Task> displayTask = std::make_shared<OpenBookDisplay>();
     this->addTask(displayTask);
 
-    this->mainMenu = std::make_shared<BookListViewController>();
-    this->setRootViewController(this->mainMenu);
+    bool ready = true;
+    if (!OpenBookDevice::sharedDevice()->startSD()) {
+        this->requestedRefreshMode = OPEN_BOOK_DISPLAY_MODE_DEFAULT;
+        std::shared_ptr<FatalErrorViewController> modal = std::make_shared<FatalErrorViewController>("Please insert a MicroSD card.");
+        this->setRootViewController(modal);
+        ready = false;
+    }
+    OpenBookDevice::sharedDevice()->startBabel();
+
+    if (ready) {
+        OpenBookDatabase::sharedDatabase()->connect();
+        OpenBookDatabase::sharedDatabase()->scanForNewBooks();
+
+        this->mainMenu = std::make_shared<BookListViewController>();
+        this->setRootViewController(this->mainMenu);
+    }
 
     this->window->setAction(std::bind(&OpenBookApplication::showLockScreen, this, std::placeholders::_1), FOCUS_EVENT_BUTTON_LOCK);
     this->window->setAction(std::bind(&OpenBookApplication::showBookReader, this, std::placeholders::_1), OPEN_BOOK_EVENT_BOOK_SELECTED);

@@ -177,9 +177,12 @@ void OpenBookDevice::lockDevice() {
 
     sleep_run_from_rosc();
     sleep_goto_dormant_until_pin(12, true, false);
-    // reset the device
-    (*((volatile uint32_t*)(PPB_BASE + 0x0ED0C))) = 0x5FA0004;
+    this->reset();
 #endif
+}
+
+void OpenBookDevice::reset() {
+    (*((volatile uint32_t*)(PPB_BASE + 0x0ED0C))) = 0x5FA0004;
 }
 
 double OpenBookDevice::getSystemVoltage() {

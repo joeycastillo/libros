@@ -52,6 +52,8 @@ public:
 
     void lockDevice();
 
+    void reset();
+
     double getSystemVoltage();
 
     uint8_t readButtons();
