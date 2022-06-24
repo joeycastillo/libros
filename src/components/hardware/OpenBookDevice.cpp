@@ -4,9 +4,12 @@
 
 OpenBookDevice::OpenBookDevice() {
 #ifdef ARDUINO_ARCH_RP2040
-    // enable secondary voltage regulator
+    // enable power to peripherals
     pinMode(0, OUTPUT);
-    digitalWrite(0, HIGH);
+    digitalWrite(0, LOW);
+    // set SMPS to low power mode
+    pinMode(0, 23);
+    digitalWrite(0, LOW);
 
     MbedSPI* SPI0 = new MbedSPI(4, 3, 2);
     MbedSPI* SPI1 = new MbedSPI(12, 11, 10);
