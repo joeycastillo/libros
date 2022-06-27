@@ -3,7 +3,7 @@
 #include "OpenBookEvents.h"
 #include <memory>
 
-int16_t OpenBookRawButtonInput::run(Application *application) {
+bool OpenBookRawButtonInput::run(Application *application) {
     OpenBookDevice *device = OpenBookDevice::sharedDevice();
 
     uint8_t buttons = device->readButtons();
@@ -37,10 +37,10 @@ int16_t OpenBookRawButtonInput::run(Application *application) {
 
     if (!buttons) this->lastButtons = 0;
 
-    return 0;
+    return false;
 }
 
-int16_t OpenBookDisplay::run(Application *application) {
+bool OpenBookDisplay::run(Application *application) {
     OpenBookDevice *device = OpenBookDevice::sharedDevice();
     OpenBookApplication *myApp = (OpenBookApplication *)application;
 
@@ -67,10 +67,10 @@ int16_t OpenBookDisplay::run(Application *application) {
         window->setNeedsDisplay(false);
     }
 
-    return 0;
+    return false;
 }
 
-int16_t OpenBookLockScreen::run(Application *application) {
+bool OpenBookLockScreen::run(Application *application) {
     OpenBookDevice *device = OpenBookDevice::sharedDevice();
 
     OpenBookApplication *myApp = (OpenBookApplication *)application;
@@ -102,10 +102,10 @@ int16_t OpenBookLockScreen::run(Application *application) {
         myApp->locked = false;
     }
 
-    return 0;
+    return false;
 }
 
-int16_t OpenBookPowerMonitor::run(Application *application) {
+bool OpenBookPowerMonitor::run(Application *application) {
     float systemVoltage = OpenBookDevice::sharedDevice()->getSystemVoltage();
     bool onBattery = systemVoltage < 4.5;
 
@@ -114,5 +114,5 @@ int16_t OpenBookPowerMonitor::run(Application *application) {
     }
     this->wasOnBattery = onBattery;
 
-    return 0;
+    return false;
 }

@@ -386,7 +386,10 @@ void Application::run() {
     this->window->setNeedsDisplay(true);
     while(true) {
         for(std::shared_ptr<Task> task : this->tasks) {
-            if (task->run(this) != 0) return;
+            if (task->run(this)) {
+                int index = std::distance(this->tasks.begin(), std::find(this->tasks.begin(), this->tasks.end(), task));
+                this->tasks.erase(this->tasks.begin() + index);
+            }
         }
     }
 }

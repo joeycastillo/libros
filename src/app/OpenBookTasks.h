@@ -7,7 +7,7 @@
 class OpenBookRawButtonInput : public Task {
 public:
     OpenBookRawButtonInput() {};
-    int16_t run(Application *application);
+    bool run(Application *application);
 protected:
     uint8_t lastButtons = 0;
 };
@@ -15,19 +15,19 @@ protected:
 class OpenBookDisplay : public Task {
 public:
     OpenBookDisplay() {};
-    int16_t run(Application *application);
+    bool run(Application *application);
 };
 
 class OpenBookLockScreen : public Task {
 public:
     OpenBookLockScreen() {};
-    int16_t run(Application *application);
+    bool run(Application *application);
 };
 
 class OpenBookPowerMonitor : public Task {
 public:
     OpenBookPowerMonitor() {};
-    int16_t run(Application *application);
+    bool run(Application *application);
 protected:
     int8_t wasOnBattery = -1;
 };
