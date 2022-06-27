@@ -340,6 +340,70 @@ const unsigned char OpenBook_IL0398::LUT_VCOM_PARTIAL[] PROGMEM =
 
 /**************************************************************************/
 /*!
+    @brief Lookup tables for fast partial update, from Adafruit's 2.9" ThinkInk.
+    @note Works OK for big areas of color. Not great for graphics.
+*/
+/**************************************************************************/
+
+const unsigned char OpenBook_IL0398::LUT_WW_FASTPARTIAL[] PROGMEM =
+{
+    0x00, 0x01, 0x0E, 0x00, 0x00, 0x01,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+};
+
+const unsigned char OpenBook_IL0398::LUT_WB_FASTPARTIAL[] PROGMEM =
+{
+    0x10, 0x01, 0x0E, 0x00, 0x00, 0x01,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+};
+
+const unsigned char OpenBook_IL0398::LUT_BW_FASTPARTIAL[] PROGMEM =
+{
+    0x20, 0x01, 0x0E, 0x00, 0x00, 0x01,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+};
+
+const unsigned char OpenBook_IL0398::LUT_BB_FASTPARTIAL[] PROGMEM =
+{
+    0x00, 0x01, 0x0E, 0x00, 0x00, 0x01,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+};
+
+const unsigned char OpenBook_IL0398::LUT_VCOM_FASTPARTIAL[] PROGMEM =
+{
+    0x00, 0x01, 0x0E, 0x00, 0x00, 0x01,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00,
+    0x00,
+};
+
+/**************************************************************************/
+/*!
     @brief Lookup tables for 4-color grayscale. These come direct from the manufacturer.
     @note displaying grayscale takes A LOT longer than plain black and white.
 */
@@ -488,6 +552,13 @@ void OpenBook_IL0398::init(OpenBookDisplayMode displayMode) {
         EPD_command(IL0398_LUTWB, LUT_WB_PARTIAL, sizeof(LUT_WB_PARTIAL));
         EPD_command(IL0398_LUTBB, LUT_BB_PARTIAL, sizeof(LUT_BB_PARTIAL));
         break;
+    case OPEN_BOOK_DISPLAY_MODE_FASTPARTIAL:
+        EPD_command(IL0398_LUT1, LUT_VCOM_FASTPARTIAL, sizeof(LUT_VCOM_FASTPARTIAL));
+        EPD_command(IL0398_LUTWW, LUT_WW_FASTPARTIAL, sizeof(LUT_WW_FASTPARTIAL));
+        EPD_command(IL0398_LUTBW, LUT_BW_FASTPARTIAL, sizeof(LUT_BW_FASTPARTIAL));
+        EPD_command(IL0398_LUTWB, LUT_WB_FASTPARTIAL, sizeof(LUT_WB_FASTPARTIAL));
+        EPD_command(IL0398_LUTBB, LUT_BB_FASTPARTIAL, sizeof(LUT_BB_FASTPARTIAL));
+        break;
     case OPEN_BOOK_DISPLAY_MODE_GRAYSCALE:
         EPD_command(IL0398_LUT1, LUT_VCOM_GRAYSCALE, sizeof(LUT_VCOM_GRAYSCALE));
         EPD_command(IL0398_LUTWW, LUT_WW_GRAYSCALE, sizeof(LUT_WW_GRAYSCALE));
@@ -549,16 +620,12 @@ void OpenBook_IL0398::setWindow(uint16_t x, uint16_t y, uint16_t w, uint16_t h) 
 /**************************************************************************/
 /*!
     @brief Sets the display waveforms for a particular display mode
-    @param displayMode the desired mode from, except for OPEN_BOOK_DISPLAY_MODE_PARTIAL.
-    @note If you call this with OPEN_BOOK_DISPLAY_MODE_PARTIAL, nothing will happen; that 
-          state is for internal use only.
+    @param displayMode the desired mode
 
 */
 /**************************************************************************/
 void OpenBook_IL0398::setDisplayMode(OpenBookDisplayMode displayMode) {
-    if (displayMode != OPEN_BOOK_DISPLAY_MODE_PARTIAL) {
-        this->init(displayMode);
-    }
+    this->init(displayMode);
 }
 
 /**************************************************************************/
@@ -734,7 +801,7 @@ void OpenBook_IL0398::displayPartial(uint16_t x, uint16_t y, uint16_t w, uint16_
         return;
     }
 
-    if (this->currentDisplayMode != OPEN_BOOK_DISPLAY_MODE_PARTIAL) this->init(OPEN_BOOK_DISPLAY_MODE_PARTIAL);
+    if (this->currentDisplayMode != OPEN_BOOK_DISPLAY_MODE_PARTIAL && this->currentDisplayMode != OPEN_BOOK_DISPLAY_MODE_FASTPARTIAL) this->init(OPEN_BOOK_DISPLAY_MODE_PARTIAL);
 
     EPD_command(IL0398_PARTIALIN);
     this->setWindow(x, y, w, h);

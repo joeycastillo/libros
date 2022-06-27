@@ -27,6 +27,7 @@ typedef enum OpenBookDisplayMode {
     OPEN_BOOK_DISPLAY_MODE_DEFAULT,
     OPEN_BOOK_DISPLAY_MODE_QUICK,
     OPEN_BOOK_DISPLAY_MODE_PARTIAL,
+    OPEN_BOOK_DISPLAY_MODE_FASTPARTIAL,
     OPEN_BOOK_DISPLAY_MODE_GRAYSCALE
 }
 OpenBookDisplayMode;
@@ -46,6 +47,7 @@ class OpenBook_IL0398 : public Adafruit_EPD {
     void update();
     void powerDown();
     void setDisplayMode(OpenBookDisplayMode displayMode);
+    OpenBookDisplayMode getDisplayMode();
     void drawPixel(int16_t x, int16_t y, uint16_t color);
     void display();
     void displayGrayscale(uint16_t x, uint16_t y, const unsigned char *bitmap, uint16_t w, uint16_t h);
@@ -68,6 +70,12 @@ private:
     static const unsigned char LUT_WB_PARTIAL[];
     static const unsigned char LUT_BW_PARTIAL[];
     static const unsigned char LUT_BB_PARTIAL[];
+
+    static const unsigned char LUT_VCOM_FASTPARTIAL[];
+    static const unsigned char LUT_WW_FASTPARTIAL[];
+    static const unsigned char LUT_WB_FASTPARTIAL[];
+    static const unsigned char LUT_BW_FASTPARTIAL[];
+    static const unsigned char LUT_BB_FASTPARTIAL[];
 
     static const unsigned char LUT_VCOM_GRAYSCALE[];
     static const unsigned char LUT_WW_GRAYSCALE[];

@@ -53,7 +53,7 @@ bool OpenBookDisplay::run(std::shared_ptr<Application> application) {
 
         Rect dirtyRect = window->getDirtyRect();
 
-        if (myApp->requestedRefreshMode != -1) {
+        if (myApp->requestedRefreshMode == OPEN_BOOK_DISPLAY_MODE_DEFAULT || myApp->requestedRefreshMode == OPEN_BOOK_DISPLAY_MODE_QUICK || myApp->requestedRefreshMode == OPEN_BOOK_DISPLAY_MODE_GRAYSCALE) {
             display->setDisplayMode((OpenBookDisplayMode)myApp->requestedRefreshMode);
             myApp->requestedRefreshMode = -1;
             display->display();
@@ -61,7 +61,12 @@ bool OpenBookDisplay::run(std::shared_ptr<Application> application) {
             display->setDisplayMode(OPEN_BOOK_DISPLAY_MODE_QUICK);
             display->display();
         } else {
-            display->setDisplayMode(OPEN_BOOK_DISPLAY_MODE_PARTIAL);
+            if (myApp->requestedRefreshMode == OPEN_BOOK_DISPLAY_MODE_FASTPARTIAL || myApp->requestedRefreshMode == OPEN_BOOK_DISPLAY_MODE_PARTIAL) {
+                display->setDisplayMode((OpenBookDisplayMode)myApp->requestedRefreshMode);
+                myApp->requestedRefreshMode = -1;
+            } else {
+                display->setDisplayMode(OPEN_BOOK_DISPLAY_MODE_PARTIAL);
+            }
             display->displayPartial(dirtyRect.origin.x, dirtyRect.origin.y, dirtyRect.size.width, dirtyRect.size.height);
         }
         window->setNeedsDisplay(false);
@@ -119,10 +124,15 @@ bool OpenBookPowerMonitor::run(std::shared_ptr<Application> application) {
 
 bool BurnBabelImage::run(std::shared_ptr<Application> application) {
     application->generateEvent(OPEN_BOOK_EVENT_PROGRESS, this->page++);
-    Serial.println(page);
+    // TODO: Flash the language chip.
 
     if (page > 100) {
+        OpenBookDevice::sharedDevice()->startBabel();
+        OpenBookDatabase::sharedDatabase()->connect();
+        OpenBookDatabase::sharedDatabase()->scanForNewBooks();
+
         std::shared_ptr<BookListViewController> mainViewController = std::make_shared<BookListViewController>(application);
+        application->generateEvent(OPEN_BOOK_EVENT_REQUEST_REFRESH_MODE, OPEN_BOOK_DISPLAY_MODE_DEFAULT);
         application->setRootViewController(mainViewController);
         return true;
     }

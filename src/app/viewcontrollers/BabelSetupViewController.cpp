@@ -21,6 +21,7 @@ void BabelSetupViewController::createView() {
         std::shared_ptr<Button> button = std::make_shared<Button>(MakeRect(20, 60, 180, 20), "Restart Now");
         modal->addSubview(button);
         this->view->setAction(std::bind(&BabelSetupViewController::dismiss, this, std::placeholders::_1), FOCUS_EVENT_BUTTON_TAP);
+        this->view->addSubview(modal);
     } else {
         std::shared_ptr<Label> label1 = std::make_shared<Label>(MakeRect(20, 20, 180, 8), "Flashing language chip...");
         modal->addSubview(label1);
@@ -35,9 +36,9 @@ void BabelSetupViewController::createView() {
         if (std::shared_ptr<Application> app = this->application.lock()) {
             app->addTask(flashLanguageChip);
         }
+        this->view->addSubview(modal);
+        this->view->addSubview(this->progressView);
     }
-    this->view->addSubview(modal);
-    this->view->addSubview(this->progressView);
 }
 
 void BabelSetupViewController::dismiss(Event event) {
@@ -45,9 +46,9 @@ void BabelSetupViewController::dismiss(Event event) {
 }
 
 void BabelSetupViewController::updateProgress(Event event) {
-    if (event.userInfo % 10 == 0) {
+    if (event.userInfo % 5 == 0) {
         float progress = (float) event.userInfo / 100.0;
-        Serial.println(progress);
+        this->generateEvent(OPEN_BOOK_EVENT_REQUEST_REFRESH_MODE, OPEN_BOOK_DISPLAY_MODE_FASTPARTIAL);
         this->progressView->setProgress(progress);
     }
 }
