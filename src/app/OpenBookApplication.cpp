@@ -3,6 +3,7 @@
 #include "OpenBookEvents.h"
 #include "BookReaderViewController.h"
 #include "FatalErrorViewController.h"
+#include "BabelSetupViewController.h"
 
 OpenBookApplication::OpenBookApplication(const std::shared_ptr<Window>& window) : Application(window) {
     // set up tasks for input, output and the lock screen
@@ -24,7 +25,7 @@ OpenBookApplication::OpenBookApplication(const std::shared_ptr<Window>& window) 
     }
     if (!OpenBookDevice::sharedDevice()->startBabel()) {
         this->requestedRefreshMode = OPEN_BOOK_DISPLAY_MODE_DEFAULT;
-        std::shared_ptr<FatalErrorViewController> modal = std::make_shared<FatalErrorViewController>("Language chip not initialized.");
+        std::shared_ptr<BabelSetupViewController> modal = std::make_shared<BabelSetupViewController>();
         this->setRootViewController(modal);
         ready = false;
     }
