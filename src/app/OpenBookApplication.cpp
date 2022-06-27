@@ -22,7 +22,12 @@ OpenBookApplication::OpenBookApplication(const std::shared_ptr<Window>& window) 
         this->setRootViewController(modal);
         ready = false;
     }
-    OpenBookDevice::sharedDevice()->startBabel();
+    if (!OpenBookDevice::sharedDevice()->startBabel()) {
+        this->requestedRefreshMode = OPEN_BOOK_DISPLAY_MODE_DEFAULT;
+        std::shared_ptr<FatalErrorViewController> modal = std::make_shared<FatalErrorViewController>("Language chip not initialized.");
+        this->setRootViewController(modal);
+        ready = false;
+    }
 
     if (ready) {
         OpenBookDatabase::sharedDatabase()->connect();

@@ -39,8 +39,8 @@ BabelTypesetterGFX::BabelTypesetterGFX(Adafruit_GFX *display, FatFileSystem *fat
 }
 #endif
 
-void BabelTypesetterGFX::begin() {
-    BabelTypesetter::begin();
+bool BabelTypesetterGFX::begin() {
+    return BabelTypesetter::begin();
 }
 
 void BabelTypesetterGFX::drawPixel(int16_t x, int16_t y, uint16_t color) {

@@ -43,7 +43,7 @@ public:
 #if BOARD_REQUIRES_BABEL_FILE
     BabelTypesetterGFX(Adafruit_GFX *display, FatFileSystem *fatfs, char *filename);
 #endif
-    void begin();
+    bool begin();
     void drawPixel(int16_t x, int16_t y, uint16_t color);
     void drawFillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color);
     Adafruit_GFX *display;

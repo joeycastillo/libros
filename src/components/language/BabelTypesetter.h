@@ -39,7 +39,7 @@ public:
     };
 
     BabelTypesetter();
-    virtual void begin();
+    virtual bool begin();
     /**
      @brief Pure virtual method for drawing a pixel. All glyph drawing methods call this to push pixels.
      @param x pixel's X coordinate

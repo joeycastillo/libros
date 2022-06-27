@@ -32,8 +32,8 @@ BabelFile::BabelFile(FatFileSystem *filesystem, char *filename) {
     this->filename = filename;
 }
 
-void BabelFile::begin() {
-    BabelDevice::begin();
+bool BabelFile::begin() {
+    return BabelDevice::begin();
 }
 
 void BabelFile::read(uint32_t addr, void *data, uint32_t len) {

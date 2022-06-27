@@ -35,8 +35,8 @@
 BabelTypesetter::BabelTypesetter() {
 }
 
-void BabelTypesetter::begin() {
-    this->babelDevice->begin();
+bool BabelTypesetter::begin() {
+    return this->babelDevice->begin();
 }
 
 void BabelTypesetter::setCursor(int16_t x, int16_t y) {

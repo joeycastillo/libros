@@ -151,10 +151,7 @@ bool OpenBookDevice::startSD() {
 }
 
 bool OpenBookDevice::startBabel() {
-    this->typesetter->begin();
-
-    // TODO: Babel should return a boolean to indicate success or failure.
-    return true;
+    return this->typesetter->begin();
 }
 
 /**

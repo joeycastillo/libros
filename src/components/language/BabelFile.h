@@ -34,7 +34,7 @@
 class BabelFile: public BabelDevice {
 public:
     BabelFile(FatFileSystem *filesystem, char *filename);
-    void begin();
+    bool begin();
     void read(uint32_t addr, void *data, uint32_t len);
 private:
     FatFileSystem *filesystem;

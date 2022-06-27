@@ -41,7 +41,7 @@ BabelSPIFlash::BabelSPIFlash(uint8_t cs, SPIClass *spi) {
     this->spi = spi;
 }
 
-void BabelSPIFlash::begin() {
+bool BabelSPIFlash::begin() {
     pinMode(this->cs, OUTPUT);
     digitalWrite(this->cs, HIGH);
     this->spi->begin();
@@ -64,7 +64,7 @@ void BabelSPIFlash::begin() {
 
     delay(50);
 
-    BabelDevice::begin();
+    return BabelDevice::begin();
 }
 
 void BabelSPIFlash::read(uint32_t addr, void *data, uint32_t len) {

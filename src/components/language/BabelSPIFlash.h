@@ -32,7 +32,7 @@
 class BabelSPIFlash: public BabelDevice {
 public:
     BabelSPIFlash(uint8_t cs, SPIClass *spi);
-    void begin();
+    bool begin();
     void read(uint32_t addr, void *data, uint32_t len);
 private:
     uint8_t cs;
