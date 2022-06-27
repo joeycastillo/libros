@@ -6,7 +6,9 @@
 
 void BabelSetupViewController::createView() {
     ViewController::createView();
-    this->view = std::make_shared<HatchedView>(MakeRect(0, 0, 300, 400), EPD_BLACK);
+    this->view = std::make_shared<Control>(MakeRect(0, 0, 300, 400));
+    this->view->setOpaque(true);
+    this->view->setBackgroundColor(EPD_DARK);
     std::shared_ptr<BorderedView> modal = std::make_shared<BorderedView>(MakeRect(40, 150, 220, 100));
     modal->setOpaque(true);
     if (!OpenBookDevice::sharedDevice()->fileExists("babel.bin")) {
@@ -22,12 +24,20 @@ void BabelSetupViewController::createView() {
     } else {
         std::shared_ptr<Label> label1 = std::make_shared<Label>(MakeRect(20, 20, 180, 8), "Flashing language chip...");
         modal->addSubview(label1);
-        std::shared_ptr<ProgressView> progressView = std::make_shared<ProgressView>(MakeRect(20, 60, 180, 20));
-        modal->addSubview(progressView);
+        // FIXME: all the setNeedsDisplayInRect calls are broken and
+        // only work when the view is in screen coordinates.
+        this->progressView = std::make_shared<ProgressView>(MakeRect(60, 210, 180, 20));
+        this->progressView->setForegroundColor(EPD_BLACK);
+        this->progressView->setBackgroundColor(EPD_WHITE);
+        this->progressView->setOpaque(true);
         this->view->setAction(std::bind(&BabelSetupViewController::updateProgress, this, std::placeholders::_1), OPEN_BOOK_EVENT_PROGRESS);
-        // TODO: Flash language chip.
+        std::shared_ptr<BurnBabelImage> flashLanguageChip = std::make_shared<BurnBabelImage>();
+        if (std::shared_ptr<Application> app = this->application.lock()) {
+            app->addTask(flashLanguageChip);
+        }
     }
     this->view->addSubview(modal);
+    this->view->addSubview(this->progressView);
 }
 
 void BabelSetupViewController::dismiss(Event event) {
@@ -35,5 +45,9 @@ void BabelSetupViewController::dismiss(Event event) {
 }
 
 void BabelSetupViewController::updateProgress(Event event) {
-    this->progressView->setProgress((float) event.userInfo / 100.0);
+    if (event.userInfo % 10 == 0) {
+        float progress = (float) event.userInfo / 100.0;
+        Serial.println(progress);
+        this->progressView->setProgress(progress);
+    }
 }

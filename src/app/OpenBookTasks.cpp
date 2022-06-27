@@ -3,7 +3,7 @@
 #include "OpenBookEvents.h"
 #include <memory>
 
-bool OpenBookRawButtonInput::run(Application *application) {
+bool OpenBookRawButtonInput::run(std::shared_ptr<Application> application) {
     OpenBookDevice *device = OpenBookDevice::sharedDevice();
 
     uint8_t buttons = device->readButtons();
@@ -40,9 +40,9 @@ bool OpenBookRawButtonInput::run(Application *application) {
     return false;
 }
 
-bool OpenBookDisplay::run(Application *application) {
+bool OpenBookDisplay::run(std::shared_ptr<Application> application) {
     OpenBookDevice *device = OpenBookDevice::sharedDevice();
-    OpenBookApplication *myApp = (OpenBookApplication *)application;
+    OpenBookApplication *myApp = (OpenBookApplication *)application.get();
 
     std::shared_ptr<Window> window = application->getWindow();
     if (window->needsDisplay()) {
@@ -70,10 +70,10 @@ bool OpenBookDisplay::run(Application *application) {
     return false;
 }
 
-bool OpenBookLockScreen::run(Application *application) {
+bool OpenBookLockScreen::run(std::shared_ptr<Application> application) {
     OpenBookDevice *device = OpenBookDevice::sharedDevice();
 
-    OpenBookApplication *myApp = (OpenBookApplication *)application;
+    OpenBookApplication *myApp = (OpenBookApplication *)application.get();
     if (myApp->locked) {
         std::shared_ptr<Window> window = application->getWindow();
         OpenBook_IL0398 *display = device->getDisplay();
@@ -105,7 +105,7 @@ bool OpenBookLockScreen::run(Application *application) {
     return false;
 }
 
-bool OpenBookPowerMonitor::run(Application *application) {
+bool OpenBookPowerMonitor::run(std::shared_ptr<Application> application) {
     float systemVoltage = OpenBookDevice::sharedDevice()->getSystemVoltage();
     bool onBattery = systemVoltage < 4.5;
 
@@ -113,6 +113,19 @@ bool OpenBookPowerMonitor::run(Application *application) {
         application->generateEvent(OPEN_BOOK_EVENT_POWER_CHANGED, (int32_t) (systemVoltage * 100));
     }
     this->wasOnBattery = onBattery;
+
+    return false;
+}
+
+bool BurnBabelImage::run(std::shared_ptr<Application> application) {
+    application->generateEvent(OPEN_BOOK_EVENT_PROGRESS, this->page++);
+    Serial.println(page);
+
+    if (page > 100) {
+        std::shared_ptr<BookListViewController> mainViewController = std::make_shared<BookListViewController>(application);
+        application->setRootViewController(mainViewController);
+        return true;
+    }
 
     return false;
 }

@@ -7,7 +7,7 @@
 class OpenBookRawButtonInput : public Task {
 public:
     OpenBookRawButtonInput() {};
-    bool run(Application *application);
+    bool run(std::shared_ptr<Application> application);
 protected:
     uint8_t lastButtons = 0;
 };
@@ -15,21 +15,29 @@ protected:
 class OpenBookDisplay : public Task {
 public:
     OpenBookDisplay() {};
-    bool run(Application *application);
+    bool run(std::shared_ptr<Application> application);
 };
 
 class OpenBookLockScreen : public Task {
 public:
     OpenBookLockScreen() {};
-    bool run(Application *application);
+    bool run(std::shared_ptr<Application> application);
 };
 
 class OpenBookPowerMonitor : public Task {
 public:
     OpenBookPowerMonitor() {};
-    bool run(Application *application);
+    bool run(std::shared_ptr<Application> application);
 protected:
     int8_t wasOnBattery = -1;
+};
+
+class BurnBabelImage : public Task {
+public:
+    BurnBabelImage() {};
+    bool run(std::shared_ptr<Application> application);
+protected:
+    int32_t page = 0;
 };
 
 #endif // OpenBookTasks_h

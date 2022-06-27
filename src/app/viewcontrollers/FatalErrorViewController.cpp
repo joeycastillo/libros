@@ -8,7 +8,9 @@ FatalErrorViewController::FatalErrorViewController(std::shared_ptr<Application> 
 
 void FatalErrorViewController::createView() {
     ViewController::createView();
-    this->view = std::make_shared<HatchedView>(MakeRect(0, 0, 300, 400), EPD_BLACK);
+    this->view = std::make_shared<View>(MakeRect(0, 0, 300, 400));
+    this->view->setOpaque(true);
+    this->view->setBackgroundColor(EPD_DARK);
     std::shared_ptr<BorderedView> modal = std::make_shared<BorderedView>(MakeRect(40, 150, 220, 100));
     modal->setOpaque(true);
     std::shared_ptr<Label> label = std::make_shared<Label>(MakeRect(20, 20, 180, 8), this->message);

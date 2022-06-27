@@ -61,7 +61,7 @@ typedef std::function<void(Event)> Action;
 class Task {
 public:
     Task();
-    virtual bool run(Application *application) = 0;
+    virtual bool run(std::shared_ptr<Application> application) = 0;
 };
 
 class View : public std::enable_shared_from_this<View> {

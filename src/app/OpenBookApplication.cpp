@@ -18,13 +18,13 @@ void OpenBookApplication::setup() {
 
     bool ready = true;
     if (!OpenBookDevice::sharedDevice()->startSD()) {
-        this->requestedRefreshMode = OPEN_BOOK_DISPLAY_MODE_DEFAULT;
+        this->requestedRefreshMode = OPEN_BOOK_DISPLAY_MODE_GRAYSCALE;
         std::shared_ptr<FatalErrorViewController> modal = std::make_shared<FatalErrorViewController>(this->shared_from_this(), "Please insert a MicroSD card.");
         this->setRootViewController(modal);
         ready = false;
     }
-    if (!OpenBookDevice::sharedDevice()->startBabel()) {
-        this->requestedRefreshMode = OPEN_BOOK_DISPLAY_MODE_DEFAULT;
+    if (ready && !OpenBookDevice::sharedDevice()->startBabel()) {
+        this->requestedRefreshMode = OPEN_BOOK_DISPLAY_MODE_GRAYSCALE;
         std::shared_ptr<BabelSetupViewController> modal = std::make_shared<BabelSetupViewController>(this->shared_from_this());
         this->setRootViewController(modal);
         ready = false;

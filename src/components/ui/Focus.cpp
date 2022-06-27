@@ -382,12 +382,13 @@ void Application::addTask(std::shared_ptr<Task> task) {
 
 void Application::run() {
     this->setup();
-    this->window->application = this->shared_from_this();
+    std::shared_ptr<Application> application = this->shared_from_this();
+    this->window->application = application;
     this->window->becomeFocused();
     this->window->setNeedsDisplay(true);
     while(true) {
         for(std::shared_ptr<Task> task : this->tasks) {
-            if (task->run(this)) {
+            if (task->run(application)) {
                 int index = std::distance(this->tasks.begin(), std::find(this->tasks.begin(), this->tasks.end(), task));
                 this->tasks.erase(this->tasks.begin() + index);
             }
