@@ -8,7 +8,7 @@
 
 class BookReaderViewController : public ViewController {
 public:
-    BookReaderViewController(BookRecord book);
+    BookReaderViewController(std::shared_ptr<Application> application, BookRecord book);
     virtual void viewWillAppear() override;
 
     void turnPage(Event event);

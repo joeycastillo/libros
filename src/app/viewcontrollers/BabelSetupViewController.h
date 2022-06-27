@@ -7,7 +7,7 @@
 
 class BabelSetupViewController : public ViewController {
 public:
-    BabelSetupViewController() {};
+    BabelSetupViewController(std::shared_ptr<Application> application) : ViewController(application) {};
     void dismiss(Event event);
 protected:
     virtual void createView() override;

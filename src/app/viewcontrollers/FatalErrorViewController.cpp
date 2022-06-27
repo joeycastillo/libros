@@ -2,7 +2,7 @@
 #include "OpenBookEvents.h"
 #include "bitmaps.h"
 
-FatalErrorViewController::FatalErrorViewController(std::string message) {
+FatalErrorViewController::FatalErrorViewController(std::shared_ptr<Application> application, std::string message) : ViewController(application) {
     this->message = message;
 }
 

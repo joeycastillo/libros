@@ -381,6 +381,7 @@ void Application::addTask(std::shared_ptr<Task> task) {
 }
 
 void Application::run() {
+    this->setup();
     this->window->application = this->shared_from_this();
     this->window->becomeFocused();
     this->window->setNeedsDisplay(true);
@@ -420,6 +421,10 @@ void Application::setRootViewController(std::shared_ptr<ViewController> viewCont
     this->rootViewController->viewWillAppear();
     this->window->addSubview(this->rootViewController->view);
     this->rootViewController->viewDidAppear();
+}
+
+ViewController::ViewController(std::shared_ptr<Application> application) {
+    this->application = application;
 }
 
 void ViewController::viewWillAppear() {

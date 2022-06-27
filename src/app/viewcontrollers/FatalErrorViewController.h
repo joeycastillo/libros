@@ -8,7 +8,7 @@
 
 class FatalErrorViewController : public ViewController {
 public:
-    FatalErrorViewController(std::string message);
+    FatalErrorViewController(std::shared_ptr<Application> application, std::string message);
     void dismiss(Event event);
 protected:
     virtual void createView() override;

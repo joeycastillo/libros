@@ -155,7 +155,10 @@ protected:
 class Application : public std::enable_shared_from_this<Application> {
 public:
     Application(const std::shared_ptr<Window>& window);
+
+    virtual void setup() = 0;
     void run();
+
     void addTask(std::shared_ptr<Task> task);
     void generateEvent(int32_t eventType, int32_t userInfo);
     std::shared_ptr<Window> getWindow();
@@ -170,7 +173,7 @@ protected:
 
 class ViewController : public std::enable_shared_from_this<ViewController> {
 public:
-    ViewController() {};
+    ViewController(std::shared_ptr<Application> application);
 
     virtual void viewWillAppear();
     virtual void viewDidAppear() {};
@@ -183,6 +186,7 @@ protected:
     virtual void createView();
     virtual void destroyView();
     std::shared_ptr<View> view;
+    std::weak_ptr<Application> application;
 
     friend class Application;
 };

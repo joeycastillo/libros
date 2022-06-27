@@ -1,7 +1,7 @@
 #include "BookReaderViewController.h"
 #include "OpenBookEvents.h"
 
-BookReaderViewController::BookReaderViewController(BookRecord book) : ViewController() {
+BookReaderViewController::BookReaderViewController(std::shared_ptr<Application> application, BookRecord book) : ViewController(application) {
     this->book = book;
 }
 

@@ -5,7 +5,7 @@
 #include "FatalErrorViewController.h"
 #include "BabelSetupViewController.h"
 
-OpenBookApplication::OpenBookApplication(const std::shared_ptr<Window>& window) : Application(window) {
+void OpenBookApplication::setup() {
     // set up tasks for input, output and the lock screen
     std::shared_ptr<Task> lockScreenTask = std::make_shared<OpenBookLockScreen>();
     this->addTask(lockScreenTask);
@@ -19,13 +19,13 @@ OpenBookApplication::OpenBookApplication(const std::shared_ptr<Window>& window) 
     bool ready = true;
     if (!OpenBookDevice::sharedDevice()->startSD()) {
         this->requestedRefreshMode = OPEN_BOOK_DISPLAY_MODE_DEFAULT;
-        std::shared_ptr<FatalErrorViewController> modal = std::make_shared<FatalErrorViewController>("Please insert a MicroSD card.");
+        std::shared_ptr<FatalErrorViewController> modal = std::make_shared<FatalErrorViewController>(this->shared_from_this(), "Please insert a MicroSD card.");
         this->setRootViewController(modal);
         ready = false;
     }
     if (!OpenBookDevice::sharedDevice()->startBabel()) {
         this->requestedRefreshMode = OPEN_BOOK_DISPLAY_MODE_DEFAULT;
-        std::shared_ptr<BabelSetupViewController> modal = std::make_shared<BabelSetupViewController>();
+        std::shared_ptr<BabelSetupViewController> modal = std::make_shared<BabelSetupViewController>(this->shared_from_this());
         this->setRootViewController(modal);
         ready = false;
     }
@@ -34,7 +34,7 @@ OpenBookApplication::OpenBookApplication(const std::shared_ptr<Window>& window) 
         OpenBookDatabase::sharedDatabase()->connect();
         OpenBookDatabase::sharedDatabase()->scanForNewBooks();
 
-        this->mainMenu = std::make_shared<BookListViewController>();
+        this->mainMenu = std::make_shared<BookListViewController>(this->shared_from_this());
         this->setRootViewController(this->mainMenu);
     }
 
@@ -50,7 +50,7 @@ void OpenBookApplication::showLockScreen(Event event) {
 
 void OpenBookApplication::showBookReader(Event event) {
     BookRecord book = *(BookRecord *)event.userInfo;
-    std::shared_ptr<BookReaderViewController> nextViewController = std::make_shared<BookReaderViewController>(book);
+    std::shared_ptr<BookReaderViewController> nextViewController = std::make_shared<BookReaderViewController>(this->shared_from_this(), book);
     this->setRootViewController(nextViewController);
 }
 

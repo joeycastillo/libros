@@ -8,6 +8,7 @@
 
 class BookListViewController : public ViewController {
 public:
+    BookListViewController(std::shared_ptr<Application> application) : ViewController(application) {};
     virtual void viewWillAppear() override;
 
     void selectBook(Event event);

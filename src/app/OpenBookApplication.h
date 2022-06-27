@@ -9,7 +9,10 @@
 
 class OpenBookApplication : public Application {
 public:
-    OpenBookApplication(const std::shared_ptr<Window>& window);    
+    OpenBookApplication(const std::shared_ptr<Window>& window) : Application(window) {};
+
+    void setup() override;
+
     bool locked = false;
 
     std::shared_ptr<BookListViewController> mainMenu;
