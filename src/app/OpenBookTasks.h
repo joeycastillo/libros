@@ -3,6 +3,7 @@
 
 #include "Focus.h"
 #include "OpenBookDevice.h"
+#include "Adafruit_SPIFlash.h"
 
 class OpenBookRawButtonInput : public Task {
 public:
@@ -37,7 +38,10 @@ public:
     BurnBabelImage() {};
     bool run(std::shared_ptr<Application> application);
 protected:
-    int32_t page = 0;
+    File babelFile;
+    int32_t page = -1;
+    int32_t numPages = 0;
+    int32_t lastUpdate = -1;
 };
 
 #endif // OpenBookTasks_h

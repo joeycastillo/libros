@@ -2,6 +2,11 @@
 #include "OpenBook_IL0398.h"
 #include "sleep.h"
 
+#ifdef ARDUINO_ARCH_RP2040
+MbedSPI* SPI0;
+MbedSPI* SPI1;
+#endif
+
 OpenBookDevice::OpenBookDevice() {
 #ifdef ARDUINO_ARCH_RP2040
     // enable power to peripherals
@@ -11,8 +16,8 @@ OpenBookDevice::OpenBookDevice() {
     pinMode(23, OUTPUT);
     digitalWrite(23, LOW);
 
-    MbedSPI* SPI0 = new MbedSPI(4, 3, 2);
-    MbedSPI* SPI1 = new MbedSPI(12, 11, 10);
+    SPI0 = new MbedSPI(4, 3, 2);
+    SPI1 = new MbedSPI(12, 11, 10);
     this->configureScreen(-1, 9, 8, 7, 6, SPI1, 300, 400);
     this->configureSD(5, SPI0);
     this->configureBabel(1, SPI0);

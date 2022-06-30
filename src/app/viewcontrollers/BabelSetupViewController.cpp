@@ -23,8 +23,10 @@ void BabelSetupViewController::createView() {
         this->view->setAction(std::bind(&BabelSetupViewController::dismiss, this, std::placeholders::_1), FOCUS_EVENT_BUTTON_TAP);
         this->view->addSubview(modal);
     } else {
-        std::shared_ptr<Label> label1 = std::make_shared<Label>(MakeRect(20, 20, 180, 8), "Flashing language chip...");
+        std::shared_ptr<Label> label1 = std::make_shared<Label>(MakeRect(20, 20, 180, 8), "Flashing language chip.");
         modal->addSubview(label1);
+        std::shared_ptr<Label> label2 = std::make_shared<Label>(MakeRect(20, 40, 180, 8), "This will take about 1 minute.");
+        modal->addSubview(label2);
         // FIXME: all the setNeedsDisplayInRect calls are broken and
         // only work when the view is in screen coordinates.
         this->progressView = std::make_shared<ProgressView>(MakeRect(60, 210, 180, 20));
@@ -46,8 +48,8 @@ void BabelSetupViewController::dismiss(Event event) {
 }
 
 void BabelSetupViewController::updateProgress(Event event) {
-    if (event.userInfo % 5 == 0) {
-        float progress = (float) event.userInfo / 100.0;
+    if (event.userInfo % 4 == 0) {
+        float progress = (float) (event.userInfo + 4.0) / 100.0;
         this->generateEvent(OPEN_BOOK_EVENT_REQUEST_REFRESH_MODE, OPEN_BOOK_DISPLAY_MODE_FASTPARTIAL);
         this->progressView->setProgress(progress);
     }
