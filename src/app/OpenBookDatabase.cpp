@@ -345,7 +345,7 @@ void OpenBookDatabase::paginateBook(BookRecord record) {
         }
         Serial.print(yPos);
         
-        if (yPos > pageHeight - 16 - 16) {
+        if (yPos > pageHeight) {
 BREAK_PAGE:
             f.close();
             Serial.print(" Breaking for page ");
