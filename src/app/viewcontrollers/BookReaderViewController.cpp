@@ -16,7 +16,7 @@ void BookReaderViewController::createView() {
     ViewController::createView();
     this->view = std::make_shared<Control>(MakeRect(0, 0, 300, 400));
 
-    this->bookText = std::make_shared<OpenBookLabel>(MakeRect(6, 6, 300 - 12, 400 - 26), "");
+    this->bookText = std::make_shared<OpenBookLabel>(MakeRect(6, 6, 300 - 12, 800 - 26), "");
     this->bookText->setWordWrap(true);
     this->bookText->setLineSpacing(2);
     this->bookText->setParagraphSpacing(8);

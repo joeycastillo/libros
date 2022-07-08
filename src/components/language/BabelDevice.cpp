@@ -226,10 +226,9 @@ BABEL_CODEPOINT BabelDevice::lowercase_mapping_for_codepoint(BABEL_CODEPOINT cod
     return BABEL_MAPPING_GET_VALUE(mapping);
 }
 
-#include <Arduino.h>
-
-int16_t BabelDevice::word_wrap_position(BABEL_CODEPOINT *buf, size_t len, bool *wrapped, int16_t line_width, int16_t text_size) {
+int16_t BabelDevice::word_wrap_position(BABEL_CODEPOINT *buf, size_t len, bool *wrapped, size_t *wrap_candidate_bytes, int16_t line_width, int16_t text_size) {
     size_t wrap_candidate = 0;
+    size_t byte_position = 0;
     size_t position_in_string = 0;
     int16_t cursor_location = 0;
     *wrapped = true; // assume we wrapped unless set otherwise below
@@ -237,10 +236,12 @@ int16_t BabelDevice::word_wrap_position(BABEL_CODEPOINT *buf, size_t len, bool *
     while(cursor_location < line_width) {
         if (buf[position_in_string] == '\n') {
             *wrapped = false;
+            *wrap_candidate_bytes = byte_position + 1;
             return position_in_string + 1; // "wrap" at the newline
         }
         // skip control characters
         if (buf[position_in_string] < 0x20) {
+            byte_position++;
             position_in_string++;
             continue;
         }
@@ -248,17 +249,24 @@ int16_t BabelDevice::word_wrap_position(BABEL_CODEPOINT *buf, size_t len, bool *
         uint32_t glyph_info = this->fetch_glyph_basic_info(buf[position_in_string]);
         if (BABEL_INFO_GET_LINEBREAK_OPPORTUNITY(glyph_info)) {
             wrap_candidate = position_in_string;
+            *wrap_candidate_bytes = byte_position;
         }
         if (!(BABEL_INFO_GET_MARK_IS_NON_SPACING(glyph_info) || BABEL_INFO_GET_CONTROL_CHARACTER(glyph_info))) {
             cursor_location += BABEL_INFO_GET_GLYPH_WIDTH(glyph_info) * text_size;
         }
+        // this first one is always false for 16-bit codepoints, but could be relevant for 32-bit codepoints
+        // if (buf[position_in_string] > 0x00ffff) byte_position++;
+        if (buf[position_in_string] > 0x0007ff) byte_position++;
+        if (buf[position_in_string] > 0x00007f) byte_position++;
+        byte_position++;
         position_in_string++;
         if (position_in_string >= len) {
             *wrapped = false;
+            // FIXME: byte position and wrap position?
             return -1; // we didn't have to word wrap
         }
     }
     
-    if (wrap_candidate) return wrap_candidate + 1; // if we found a wrap point, return it.
-    else return len; // otherwise, they'll just need to break at the end of the line even though it's in the middle of a word.     
+    if (wrap_candidate) return wrap_candidate + 1; // if we found a wrap point, return it (plus the space after).
+    else return len; // otherwise, they'll just need to break at the end of the line even though it's in the middle of a word.
 }

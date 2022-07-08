@@ -281,7 +281,7 @@ void OpenBookDatabase::paginateBook(BookRecord record) {
     f = device->openFile(record.filename);
     f.seekSet(record.textStart);
     Serial.println(f.position());
-    const int16_t pageWidth = 288;
+    const int16_t pageWidth = 294;
     const int16_t pageHeight = 374;
     uint32_t nextPosition = 0;
     bool firstLoop = true;
@@ -326,10 +326,11 @@ void OpenBookDatabase::paginateBook(BookRecord record) {
             page.len = line_end;
             goto BREAK_PAGE;
         } else {
-            int32_t line_end = babel->word_wrap_position(codepoints, bytesRead, &wrapped, pageWidth, 1);
-            if (line_end > 0) {
-                page.len += line_end;
-                nextPosition = startPosition + line_end;
+            size_t bytePosition;
+            babel->word_wrap_position(codepoints, bytesRead, &wrapped, &bytePosition, pageWidth, 1);
+            if (bytePosition > 0) {
+                page.len += bytePosition;
+                nextPosition = startPosition + bytePosition;
             } else {
                 page.len += bytesRead;
                 nextPosition = startPosition + bytesRead;
@@ -345,7 +346,7 @@ void OpenBookDatabase::paginateBook(BookRecord record) {
         }
         Serial.print(yPos);
         
-        if (yPos > pageHeight) {
+        if (yPos + 16 > pageHeight) {
 BREAK_PAGE:
             f.close();
             Serial.print(" Breaking for page ");
@@ -427,10 +428,10 @@ std::string OpenBookDatabase::getBookPage(BookRecord record, uint32_t page) {
         f.read(&pageInfo, sizeof(BookPage));
         f.close();
 
-        // Serial.print(pageInfo.loc);
-        // Serial.print(", ");
-        // Serial.print(pageInfo.len);
-        // Serial.println();
+        Serial.print(pageInfo.loc);
+        Serial.print(", ");
+        Serial.print(pageInfo.len);
+        Serial.println();
 
         f = OpenBookDevice::sharedDevice()->openFile(record.filename);
         f.seekSet(pageInfo.loc);
@@ -438,7 +439,7 @@ std::string OpenBookDatabase::getBookPage(BookRecord record, uint32_t page) {
         f.read(buf, pageInfo.len);
         f.close();
         buf[pageInfo.len] = 0;
-        // Serial.println(buf);
+        Serial.println(buf);
         std::string retval = std::string(buf);
         free(buf);
 

@@ -46,7 +46,7 @@ public:
      @param y pixel's Y coordinate
      @param color 16-bit pixel color
     */
-    virtual void drawPixel(int16_t x, int16_t y, uint16_t color) = 0;    ///< Virtual drawPixel() function to draw to the screen/framebuffer/etc, must be overridden in subclass. 
+    virtual void drawPixel(int16_t x, int16_t y, uint16_t color) = 0;    ///< Virtual drawPixel() function to draw to the screen/framebuffer/etc, must be overridden in subclass.
 
     /**
      @brief Virtual method for drawing a rect. You may override this if you have a more efficient implementation.
@@ -132,6 +132,24 @@ public:
     size_t print(const char * utf8String);
 
     /*!
+     @brief Gets the number of codepoints that will fit on the current page, starting from offset.
+     @param codepoints An array of codepoints
+     @param len The number of codepoints in the array
+     @returns the number of codepooints that fit on the page
+     @note This method handles newlines and direction changes, and updates the current cursor position. It might move 8 or 16 pixels to the right, OR it might move to the left side of the next line if the text wrapped. But it could also move to the right side of the next line if the layout direction changed to RTL mode.
+    */
+    size_t codepointsThatFit(BABEL_CODEPOINT codepoints[], size_t len);
+
+    /*!
+     @brief Gets the number of bytes that will fit on the current page, starting from offset.
+     @param codepoints An array of codepoints
+     @param len The number of codepoints in the array
+     @returns the number of codepooints that fit on the page
+     @note This method handles newlines and direction changes, and updates the current cursor position. It might move 8 or 16 pixels to the right, OR it might move to the left side of the next line if the text wrapped. But it could also move to the right side of the next line if the layout direction changed to RTL mode.
+    */
+    size_t bytesThatFit(BABEL_CODEPOINT codepoints[], size_t len);
+
+    /*!
      @brief access to the Babel abstraction, for things like getting glyphs, case mapping, word wrapping, etc.
     */
     /**************************************************************************/
@@ -203,6 +221,7 @@ protected:
     int16_t maxY = 0;
 private:
     int drawGlyph(int16_t x, int16_t y, BabelGlyph glyph, uint16_t color, uint8_t size, uint8_t startY, uint8_t endY);
+    void _carraigeReturn();
     // layout direction. 1 for LTR, -1 for RTL.
     int8_t  direction = 1;
     // these next two are for combining and enclosing marks, which should be drawn atop the previously drawn glyph.

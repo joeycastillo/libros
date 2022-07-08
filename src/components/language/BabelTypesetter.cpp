@@ -149,18 +149,15 @@ int BabelTypesetter::drawGlyph(int16_t x, int16_t y, BabelGlyph glyph, uint16_t 
     return width * this->textSize;
 }
 
+#include <Arduino.h>
+
 size_t BabelTypesetter::writeCodepoint(BABEL_CODEPOINT codepoint) {
     // before we start, we don't need to fetch anything for control characters.
     switch (codepoint) {
         case '\n':
         case '\r':
-            this->cursor.y += 16 * this->textSize + ((codepoint == '\n') ? this->paragraphSpacing : this->lineSpacing);
-            if (this->direction == 1) {
-                this->cursor.x = this->minX;
-            } else {
-                this->cursor.x = this->maxX;
-            }
-            this->hasLastGlyph = false;
+            this->cursor.y += 16 * this->textSize + this->paragraphSpacing;
+            this->_carraigeReturn();
             return 1;
         case 0x0f: // shift in
             if (this->bold) {
@@ -227,12 +224,12 @@ size_t BabelTypesetter::writeCodepoints(BABEL_CODEPOINT codepoints[], size_t len
             retVal += this->writeCodepoint(codepoints[i]);
         }
     } else {
-        // TODO: make word wrapping a boolean and just use page margins.
         size_t pos = 0;
         while (pos < len) {
             bool write_newline = false;
             bool wrapped = false;
-            int32_t num_glyphs_to_draw = this->babelDevice->word_wrap_position(codepoints + pos, len - pos, &wrapped, this->lineWidth, this->textSize);
+            size_t bytePosition;
+            int32_t num_glyphs_to_draw = this->babelDevice->word_wrap_position(codepoints + pos, len - pos, &wrapped, &bytePosition, this->lineWidth, this->textSize);
             if (num_glyphs_to_draw < 0){
                 num_glyphs_to_draw = (int32_t)(len - pos);
             }
@@ -243,8 +240,9 @@ size_t BabelTypesetter::writeCodepoints(BABEL_CODEPOINT codepoints[], size_t len
                 retVal += this->writeCodepoint(codepoints[i]);
             }
             pos += num_glyphs_to_draw;
-            if (write_newline) {
-                retVal += this->writeCodepoint(0x000d); // carriage return (soft wrap)
+            if (write_newline && wrapped) {
+                this->cursor.y += 16 * this->textSize + this->lineSpacing;
+                this->_carraigeReturn();
             }
 
             if (this->cursor.y >= this->maxY) break;
@@ -255,6 +253,9 @@ size_t BabelTypesetter::writeCodepoints(BABEL_CODEPOINT codepoints[], size_t len
 }
 
 size_t BabelTypesetter::print(const char * utf8String) {
+    // for(int i = 0; i <= 40; i++) {
+    //     this->drawFillRect(0, 6 + i * 10, 3 * (i % 5 ? 1 : (i % 10 ? 2 : 3)), 1, 1);
+    // }
     size_t len = this->babelDevice->utf8_codepoint_length((char *)utf8String);
     BABEL_CODEPOINT *codepoints = (BABEL_CODEPOINT *)malloc(len * sizeof(BABEL_CODEPOINT));
     this->babelDevice->utf8_parse((char *)utf8String, codepoints);
@@ -294,4 +295,13 @@ void BabelTypesetter::setLineSpacing(int8_t spacing) {
 
 void BabelTypesetter::setParagraphSpacing(int8_t spacing) {
     this->paragraphSpacing = spacing;
+}
+
+void BabelTypesetter::_carraigeReturn() {
+    if (this->direction == 1) {
+        this->cursor.x = this->minX;
+    } else {
+        this->cursor.x = this->maxX;
+    }
+    this->hasLastGlyph = false;
 }

@@ -145,7 +145,7 @@ public:
      @param text_size scaling factor for the text (1 for 1x, 2 for 2x, etc.)
      @return the position where a newline should be added in order to wrap to a given line length, or -1 if no newline is required.
      */
-    int16_t word_wrap_position(BABEL_CODEPOINT *buf, size_t len, bool *wrapped, int16_t line_width, int16_t text_size);
+    int16_t word_wrap_position(BABEL_CODEPOINT *buf, size_t len, bool *wrapped, size_t *bytePosition, int16_t line_width, int16_t text_size);
 
 protected:
     virtual void read(uint32_t addr, void *data, uint32_t len) = 0;
