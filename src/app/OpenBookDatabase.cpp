@@ -276,19 +276,15 @@ void OpenBookDatabase::paginateBook(BookRecord record) {
     char utf8bytes[128];
     BABEL_CODEPOINT codepoints[127];
 
-    Serial.print("Starting page parsing at ");
-    Serial.println(record.textStart);
     f = device->openFile(record.filename);
     f.seekSet(record.textStart);
-    Serial.println(f.position());
-    const int16_t pageWidth = 294;
-    const int16_t pageHeight = 374;
+    const int16_t pageWidth = 288;
+    const int16_t pageHeight = 384;
     uint32_t nextPosition = 0;
     bool firstLoop = true;
 
     page.loc = f.position();
     page.len = 0;
-    Serial.print(yPos);
     do {
         uint32_t startPosition = f.position();
         int bytesRead = f.read(utf8bytes, 127);
@@ -301,20 +297,13 @@ void OpenBookDatabase::paginateBook(BookRecord record) {
                 // close out the last chapter
                 nextPosition = f.position();
                 f.close();
-                Serial.print(" Closing out chapter at page ");
-                Serial.print(header.numPages);
-                Serial.print(" : ");
-                Serial.print(page.loc);
-                Serial.print(", ");
-                Serial.print(page.len);
-                Serial.println();
                 paginationFile = device->openFile(paginationFilename, O_RDWR | O_AT_END);
                 paginationFile.write((byte *)&page, sizeof(BookPage));
                 paginationFile.flush();
                 paginationFile.close();
                 f = device->openFile(record.filename);
                 header.numPages++;
-                page.loc = nextPosition;
+                page.loc = page.loc + page.len;
                 page.len = 0;
                 f.seekSet(nextPosition);
             }
@@ -328,6 +317,10 @@ void OpenBookDatabase::paginateBook(BookRecord record) {
         } else {
             size_t bytePosition;
             babel->word_wrap_position(codepoints, bytesRead, &wrapped, &bytePosition, pageWidth, 1);
+            for(int i = bytePosition; i < 127; i++) {
+                if (utf8bytes[i] == 0x20) bytePosition++;
+                else break;
+            }
             if (bytePosition > 0) {
                 page.len += bytePosition;
                 nextPosition = startPosition + bytePosition;
@@ -338,24 +331,14 @@ void OpenBookDatabase::paginateBook(BookRecord record) {
         }
 
         if (wrapped) {
-            Serial.print(",");
             yPos += 16 + 2;
         } else {
-            Serial.print(".");
-            yPos += 16 + 8;
+            yPos += 16 + 2 + 8;
         }
-        Serial.print(yPos);
         
         if (yPos + 16 > pageHeight) {
 BREAK_PAGE:
             f.close();
-            Serial.print(" Breaking for page ");
-            Serial.print(header.numPages);
-            Serial.print(" : ");
-            Serial.print(page.loc);
-            Serial.print(", ");
-            Serial.print(page.len);
-            Serial.println();
             paginationFile = device->openFile(paginationFilename, O_RDWR | O_AT_END);
             paginationFile.write((byte *)&page, sizeof(BookPage));
             paginationFile.flush();
@@ -363,19 +346,12 @@ BREAK_PAGE:
             f = device->openFile(record.filename);
             header.numPages++;
             yPos = 0;
-            Serial.print(yPos);
-            page.loc = nextPosition;
+            page.loc = page.loc + page.len;
             page.len = 0;
         }
         f.seekSet(nextPosition);
         firstLoop = false;
     } while (f.available());
-
-    Serial.print(" Breaking for end of book: ");
-    Serial.print(page.loc);
-    Serial.print(", ");
-    Serial.print(page.len);
-    Serial.println();
 
     f.close();
     paginationFile = device->openFile(paginationFilename, O_RDWR | O_AT_END);
@@ -383,12 +359,6 @@ BREAK_PAGE:
     paginationFile.flush();
     paginationFile.close();
     header.numPages++;
-
-    Serial.print("Writing final header: ");
-    Serial.print(header.numChapters);
-    Serial.print(" chapters, ");
-    Serial.print(header.numPages);
-    Serial.println(" pages.");
 
     paginationFile = device->openFile(paginationFilename, O_RDWR);
     paginationFile.seekSet(0);
@@ -412,10 +382,6 @@ uint32_t OpenBookDatabase::numPages(BookRecord record) {
 std::string OpenBookDatabase::getBookPage(BookRecord record, uint32_t page) {
     char paginationFilename[128];
 
-    // Serial.print(" Requesting page ");
-    // Serial.print(page);
-    // Serial.print(": ");
-
     if (this->_getPaginationFile(record, paginationFilename)) {
         BookPaginationHeader header;
         BookPage pageInfo;
@@ -428,18 +394,12 @@ std::string OpenBookDatabase::getBookPage(BookRecord record, uint32_t page) {
         f.read(&pageInfo, sizeof(BookPage));
         f.close();
 
-        Serial.print(pageInfo.loc);
-        Serial.print(", ");
-        Serial.print(pageInfo.len);
-        Serial.println();
-
         f = OpenBookDevice::sharedDevice()->openFile(record.filename);
         f.seekSet(pageInfo.loc);
         char *buf = (char *)malloc(pageInfo.len + 1);
         f.read(buf, pageInfo.len);
         f.close();
         buf[pageInfo.len] = 0;
-        Serial.println(buf);
         std::string retval = std::string(buf);
         free(buf);
 
