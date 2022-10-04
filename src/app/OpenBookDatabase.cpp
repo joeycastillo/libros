@@ -1,6 +1,7 @@
 #include "OpenBookDatabase.h"
 #include "sha256.h"
 #include <map>
+#include <sqlite3.h>
 
 static const uint64_t DATABASE_FILE_IDENTIFIER = 6825903261955698688;
 
@@ -11,6 +12,9 @@ OpenBookDatabase::OpenBookDatabase() {
 bool OpenBookDatabase::connect() {
     OpenBookDevice *device = OpenBookDevice::sharedDevice();
     BookDatabaseHeader header;
+
+    sqlite3 **db;
+    int rc = sqlite3_open("filename", db);
 
     if (!device->fileExists(OPEN_BOOK_LIBRARY_FILENAME)) {
         if (device->fileExists(OPEN_BOOK_BACKUP_FILENAME)) {

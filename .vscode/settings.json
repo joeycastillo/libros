@@ -69,6 +69,8 @@
         "arduino.h": "c",
         "openbookdevice.h": "c",
         "iostream": "cpp",
-        "mstd_iterator": "cpp"
+        "mstd_iterator": "cpp",
+        "config.h": "c",
+        "sqlite_config.h": "c"
     },
 }
