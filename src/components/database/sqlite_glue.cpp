@@ -118,6 +118,7 @@
 #include "sqlite3.h"
 
 #include "Arduino.h"
+#include "OpenBookDevice.h"
 
 #include <assert.h>
 #include <string.h>
@@ -149,7 +150,7 @@
 typedef struct DemoFile DemoFile;
 struct DemoFile {
   sqlite3_file base;              /* Base class. Must be first. */
-  int fd;                         /* File descriptor */
+  File actualFile;                /* File descriptor */
 
   char *aBuffer;                  /* Pointer to malloc'd buffer */
   int nBuffer;                    /* Valid bytes of data in zBuffer */
@@ -166,15 +167,13 @@ static int demoDirectWrite(
   int iAmt,                       /* Size of data to write in bytes */
   sqlite_int64 iOfst              /* File offset to write to */
 ){
-  off_t ofst;                     /* Return value from lseek() */
-  size_t nWrite;                  /* Return value from write() */
+  int nWrite;                  /* Return value from write() */
 
-  ofst = lseek(p->fd, iOfst, SEEK_SET);
-  if( ofst!=iOfst ){
+  if( !p->actualFile.seekSet(iOfst) ){
     return SQLITE_IOERR_WRITE;
   }
 
-  nWrite = write(p->fd, zBuf, iAmt);
+  nWrite = p->actualFile.write(zBuf, iAmt);
   if( nWrite!=iAmt ){
     return SQLITE_IOERR_WRITE;
   }
@@ -204,7 +203,7 @@ static int demoClose(sqlite3_file *pFile){
   DemoFile *p = (DemoFile*)pFile;
   rc = demoFlushBuffer(p);
   sqlite3_free(p->aBuffer);
-  close(p->fd);
+  p->actualFile.close();
   return rc;
 }
 
@@ -218,7 +217,6 @@ static int demoRead(
   sqlite_int64 iOfst
 ){
   DemoFile *p = (DemoFile*)pFile;
-  off_t ofst;                     /* Return value from lseek() */
   int nRead;                      /* Return value from read() */
   int rc;                         /* Return code from demoFlushBuffer() */
 
@@ -233,11 +231,10 @@ static int demoRead(
     return rc;
   }
 
-  ofst = lseek(p->fd, iOfst, SEEK_SET);
-  if( ofst!=iOfst ){
+  if( !p->actualFile.seekSet(iOfst) ){
     return SQLITE_IOERR_READ;
   }
-  nRead = read(p->fd, zBuf, iAmt);
+  nRead = p->actualFile.readBytes((uint8_t *)zBuf, iAmt);
 
   if( nRead==iAmt ){
     return SQLITE_OK;
@@ -325,7 +322,7 @@ static int demoSync(sqlite3_file *pFile, int flags){
     return rc;
   }
 
-  rc = fsync(p->fd);
+  rc = p->actualFile.sync();
   return (rc==0 ? SQLITE_OK : SQLITE_IOERR_FSYNC);
 }
 
@@ -347,9 +344,8 @@ static int demoFileSize(sqlite3_file *pFile, sqlite_int64 *pSize){
     return rc;
   }
 
-  rc = fstat(p->fd, &sStat);
   if( rc!=0 ) return SQLITE_IOERR_FSTAT;
-  *pSize = sStat.st_size;
+  *pSize = p->actualFile.size();
   return SQLITE_OK;
 }
 
@@ -436,8 +432,8 @@ static int demoOpen(
   if( flags&SQLITE_OPEN_READWRITE ) oflags |= O_RDWR;
 
   memset(p, 0, sizeof(DemoFile));
-  p->fd = open(zName, oflags, 0600);
-  if( p->fd<0 ){
+  p->actualFile = OpenBookDevice::sharedDevice()->openFile(zName, O_CREAT | O_RDWR);
+  if( !p->actualFile.isOpen() ){
     sqlite3_free(aBuf);
     return SQLITE_CANTOPEN;
   }
@@ -456,13 +452,13 @@ static int demoOpen(
 ** file has been synced to disk before returning.
 */
 static int demoDelete(sqlite3_vfs *pVfs, const char *zPath, int dirSync){
-  int rc;                         /* Return code */
+  bool success;                   /* Return code */
 
-  rc = unlink(zPath);
-  if( rc!=0 && errno==ENOENT ) return SQLITE_OK;
+  success = OpenBookDevice::sharedDevice()->removeFile(zPath);
+  if( success && errno==ENOENT ) return SQLITE_OK;
 
-  if( rc==0 && dirSync ){
-    int dfd;                      /* File descriptor open on directory */
+  if( success && dirSync ){
+    File dfd;                      /* File descriptor open on directory */
     int i;                        /* Iterator variable */
     char *zSlash;
     char zDir[MAXPATHNAME+1];     /* Name of directory containing file zPath */
@@ -474,16 +470,16 @@ static int demoDelete(sqlite3_vfs *pVfs, const char *zPath, int dirSync){
     if( zSlash ){
       /* Open a file-descriptor on the directory. Sync. Close. */
       zSlash[0] = 0;
-      dfd = open(zDir, O_RDONLY, 0);
+      dfd = OpenBookDevice::sharedDevice()->openFile(zDir);
       if( dfd<0 ){
-        rc = -1;
+        return SQLITE_IOERR_DELETE;
       }else{
-        rc = fsync(dfd);
-        close(dfd);
+        dfd.sync();
+        dfd.close();
       }
     }
   }
-  return (rc==0 ? SQLITE_OK : SQLITE_IOERR_DELETE);
+  return SQLITE_OK;
 }
 
 #ifndef F_OK
@@ -516,9 +512,9 @@ static int demoAccess(
 
   if( flags==SQLITE_ACCESS_READWRITE ) eAccess = R_OK|W_OK;
   if( flags==SQLITE_ACCESS_READ )      eAccess = R_OK;
-
-  rc = access(zPath, eAccess);
-  *pResOut = (rc==0);
+  File file = OpenBookDevice::sharedDevice()->openFile(zPath);
+  *pResOut = (file.isOpen());
+  if( flags==SQLITE_ACCESS_READWRITE ) *pResOut = !file.isReadOnly();
   return SQLITE_OK;
 }
 

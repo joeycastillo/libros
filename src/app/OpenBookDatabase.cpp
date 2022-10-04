@@ -13,8 +13,15 @@ bool OpenBookDatabase::connect() {
     OpenBookDevice *device = OpenBookDevice::sharedDevice();
     BookDatabaseHeader header;
 
-    sqlite3 **db;
-    int rc = sqlite3_open("filename", db);
+    sqlite3 **db = NULL;
+    int rc = sqlite3_open("/books.db", db);
+    if (rc != 0) {
+        Serial.print("Error ");
+        Serial.println(rc);
+    } else {
+        Serial.println("Database ready");
+    }
+
 
     if (!device->fileExists(OPEN_BOOK_LIBRARY_FILENAME)) {
         if (device->fileExists(OPEN_BOOK_BACKUP_FILENAME)) {
