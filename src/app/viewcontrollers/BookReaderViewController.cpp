@@ -9,6 +9,7 @@ void BookReaderViewController::viewWillAppear() {
     ViewController::viewWillAppear();
 
     this->numPages = max(OpenBookDatabase::sharedDatabase()->numPages(this->book), 1);
+    this->currentPage = OpenBookDatabase::sharedDatabase()->getCurrentPage(this->book);
     this->_updateView();
 }
 
@@ -52,11 +53,12 @@ void BookReaderViewController::turnPage(Event event) {
 }
 
 void BookReaderViewController::returnHome(Event event) {
+    OpenBookDatabase::sharedDatabase()->setCurrentPage(this->book, this->currentPage);
     this->generateEvent(OPEN_BOOK_EVENT_RETURN_HOME);
 }
 
 void BookReaderViewController::_updateView() {
-    std::string text = OpenBookDatabase::sharedDatabase()->getBookPage(this->book, this->currentPage);
+    std::string text = OpenBookDatabase::sharedDatabase()->getTextForPage(this->book, this->currentPage);
     if (text[0] == 0x1e)this->bookText->setTextSize(2);
     else this->bookText->setTextSize(1);
     this->bookText->setText(text.c_str());

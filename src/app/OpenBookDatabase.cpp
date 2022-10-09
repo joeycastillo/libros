@@ -200,6 +200,28 @@ std::string OpenBookDatabase::getBookDescription(BookRecord record) {
     return this->_getMetadataAtIndex(record, OPEN_BOOK_DESCRIPTION_INDEX);
 }
 
+uint32_t OpenBookDatabase::getCurrentPage(BookRecord record) {
+    uint32_t retval = 0;
+    std::string filename = std::string(record.filename);
+
+    filename.replace(strlen(record.filename) - 3, 3, "obp");
+    if (OpenBookDevice::sharedDevice()->fileExists(filename.c_str())) {
+        File f = OpenBookDevice::sharedDevice()->openFile(filename.c_str());
+        f.read((void *)&retval, 4);
+        f.close();
+    }
+
+    return retval;
+}
+
+void OpenBookDatabase::setCurrentPage(BookRecord record, uint32_t page) {
+    std::string filename = std::string(record.filename);
+    filename.replace(strlen(record.filename) - 3, 3, "obp");
+    File f = OpenBookDevice::sharedDevice()->openFile(filename.c_str(), O_CREAT | O_WRITE | O_TRUNC);
+    f.write(&page, 4);
+    f.close();
+}
+
 std::string OpenBookDatabase::_getMetadataAtIndex(BookRecord record, uint16_t i) {
     BookField field = record.metadata[i];
     char *value = (char *)malloc(field.len + 1);
@@ -379,7 +401,7 @@ uint32_t OpenBookDatabase::numPages(BookRecord record) {
     return 0;
 }
 
-std::string OpenBookDatabase::getBookPage(BookRecord record, uint32_t page) {
+std::string OpenBookDatabase::getTextForPage(BookRecord record, uint32_t page) {
     char paginationFilename[128];
 
     if (this->_getPaginationFile(record, paginationFilename)) {
