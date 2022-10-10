@@ -66,6 +66,10 @@ void ProgressView::setProgress(float value) {
     }
 }
 
+float ProgressView::getProgress() {
+    return this->progress;
+}
+
 Label::Label(Rect rect, std::string text) : View(rect) {
     this->text = text;
 }

@@ -40,6 +40,7 @@ public:
     ProgressView(Rect rect) : View(rect) {};
     void draw(Adafruit_GFX *display, int16_t x, int16_t y) override;
     void setProgress(float value);
+    float getProgress();
 protected:
     float progress = 0;
 };

@@ -46,8 +46,6 @@ bool OpenBookDatabase::connect() {
     this->numBooks = header.numBooks;
     this->numFields = header.numFields;
 
-    device->removeFile("ernest-hemingway-shorts.pag");
-
     return true;
 }
 

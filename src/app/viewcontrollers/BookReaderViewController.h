@@ -13,19 +13,26 @@ public:
 
     void turnPage(Event event);
     void returnHome(Event event);
+    void showMenu(Event event);
+    
+    void handleModal(Event event);
 
 protected:
     virtual void createView() override;
     void _updateView();
 
     BookRecord book = {0};
-    uint32_t currentPage = 0;
-    uint32_t numPages = 1;
+    int32_t currentPage = 0;
+    int32_t numPages = 1;
 
     std::shared_ptr<Control> eventReceiver;
     std::shared_ptr<ProgressView> progressView;
     std::shared_ptr<Label> progressLabel;
     std::shared_ptr<OpenBookLabel> bookText;
+
+    std::shared_ptr<Control> modal;
+    std::shared_ptr<ProgressView> modalSlider;
+    std::shared_ptr<OpenBookLabel> gotoPageLabel;
 };
 
 #endif // BookReaderViewController_h

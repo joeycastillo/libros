@@ -23,10 +23,10 @@ OpenBookDevice::OpenBookDevice() {
     this->configureBabel(1, SPI0);
 
     OpenBookButtonConfig buttonConfig;
-    buttonConfig.left_pin = 13;
+    buttonConfig.left_pin = 20;
     buttonConfig.down_pin = 21;
     buttonConfig.up_pin = 19;
-    buttonConfig.right_pin = 20;
+    buttonConfig.right_pin = 13;
     buttonConfig.select_pin = 14;
     buttonConfig.previous_pin = 18;
     buttonConfig.next_pin = 15;
