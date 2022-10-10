@@ -27,8 +27,8 @@ void BabelSetupViewController::createView() {
         modal->addSubview(label1);
         std::shared_ptr<Label> label2 = std::make_shared<Label>(MakeRect(20, 40, 180, 8), "This will take about 1 minute.");
         modal->addSubview(label2);
-        // FIXME: all the setNeedsDisplayInRect calls are broken and
-        // only work when the view is in screen coordinates.
+        // FIXME: move progress bar to be a subview of the modal and retest.
+        // (it was a subview of the screen because of a dirty rect bug, since fixed)
         this->progressView = std::make_shared<ProgressView>(MakeRect(60, 210, 180, 20));
         this->progressView->setForegroundColor(EPD_BLACK);
         this->progressView->setBackgroundColor(EPD_WHITE);

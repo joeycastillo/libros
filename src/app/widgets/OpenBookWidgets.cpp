@@ -48,7 +48,7 @@ void OpenBookLabel::setWordWrap(bool value) {
     this->wrap = value;
     // TODO: setNeedsDisplay should be a method on View
     if (auto window = this->getWindow().lock()) {
-        window->setNeedsDisplayInRect(this->frame, window);
+        this->setNeedsDisplayInRect(this->frame);
     }
 }
 
@@ -56,35 +56,35 @@ void OpenBookLabel::setBold(bool value) {
     this->bold = value;
     // TODO: setNeedsDisplay should be a method on View
     if (auto window = this->getWindow().lock()) {
-        window->setNeedsDisplayInRect(this->frame, window);
+        this->setNeedsDisplayInRect(this->frame);
     }
 }
 
 void OpenBookLabel::setItalic(bool value) {
     this->italic = value;
     if (auto window = this->getWindow().lock()) {
-        window->setNeedsDisplayInRect(this->frame, window);
+        this->setNeedsDisplayInRect(this->frame);
     }
 }
 
 void OpenBookLabel::setTextSize(uint16_t value) {
     this->textSize = value;
     if (auto window = this->getWindow().lock()) {
-        window->setNeedsDisplayInRect(this->frame, window);
+        this->setNeedsDisplayInRect(this->frame);
     }
 }
 
 void OpenBookLabel::setLineSpacing(uint16_t value) {
     this->lineSpacing = value;
     if (auto window = this->getWindow().lock()) {
-        window->setNeedsDisplayInRect(this->frame, window);
+        this->setNeedsDisplayInRect(this->frame);
     }
 }
 
 void OpenBookLabel::setParagraphSpacing(uint16_t value) {
     this->paragraphSpacing = value;
     if (auto window = this->getWindow().lock()) {
-        window->setNeedsDisplayInRect(this->frame, window);
+        this->setNeedsDisplayInRect(this->frame);
     }
 }
 
@@ -137,7 +137,7 @@ void OpenBookCell::didBecomeFocused() {
     if (this->superview.lock()) {
         if (std::shared_ptr<Window> window = this->getWindow().lock()) {
             std::shared_ptr<View> shared_this = this->shared_from_this();
-            window->setNeedsDisplayInRect(this->_indicatorRect(), shared_this);
+            shared_this->setNeedsDisplayInRect(this->_indicatorRect());
         }
     }
 }
@@ -146,7 +146,7 @@ void OpenBookCell::didResignFocus() {
     if (this->superview.lock()) {
         if (std::shared_ptr<Window> window = this->getWindow().lock()) {
             std::shared_ptr<View> shared_this = this->shared_from_this();
-            window->setNeedsDisplayInRect(this->_indicatorRect(), shared_this);
+            shared_this->setNeedsDisplayInRect(this->_indicatorRect());
         }
     }
 }

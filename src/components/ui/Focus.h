@@ -100,6 +100,7 @@ public:
     void setForegroundColor(uint16_t value);
     uint16_t getDirectionalAffinity();
     void setDirectionalAffinity(DirectionalAffinity value);
+    void setNeedsDisplayInRect(Rect rect);
 protected:
     bool focused = false;
     bool opaque = false;
@@ -135,8 +136,8 @@ public:
     bool canBecomeFocused() override;
     bool needsDisplay();
     void setNeedsDisplay(bool needsDisplay);
-    void setNeedsDisplayInRect(Rect rect, std::shared_ptr<View> view);
     Rect getDirtyRect();
+    void setNeedsDisplayInRect(Rect rect);
     std::weak_ptr<View> getFocusedView();
     std::weak_ptr<View>getSuperview() override;
     std::weak_ptr<Window> getWindow() override;
