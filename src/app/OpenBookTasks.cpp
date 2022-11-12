@@ -82,10 +82,12 @@ bool OpenBookLockScreen::run(std::shared_ptr<Application> application) {
     if (myApp->locked) {
         std::shared_ptr<Window> window = application->getWindow();
         OpenBook_IL0398 *display = device->getDisplay();
-        std::shared_ptr<BorderedView> lockModal = std::make_shared<BorderedView>(MakeRect(10, 168, 300 - 20, 68));
-        std::shared_ptr<OpenBookLabel> lockLabel = std::make_shared<OpenBookLabel>(MakeRect(2, 2, 300 - 24, 64), "\n  Open Book is in low power mode.\n  Press the lock button to wake.");
+        std::shared_ptr<BorderedView> lockModal = std::make_shared<BorderedView>(MakeRect(-1, 400-32, 302, 33));
+        std::shared_ptr<OpenBookLabel> lockLabel = std::make_shared<OpenBookLabel>(MakeRect(6, 8, 300 - 16, 16), "Slide the power switch to continue");
+        std::shared_ptr<OpenBookLabel> arrowLabel = std::make_shared<OpenBookLabel>(MakeRect(300-18, 10, 16, 16), "➜");
 
         lockModal->addSubview(lockLabel);
+        lockModal->addSubview(arrowLabel);
 
         lockModal->setOpaque(true);
         lockModal->setBackgroundColor(EPD_WHITE);
