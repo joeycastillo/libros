@@ -242,7 +242,7 @@ bool OpenBookDatabase::bookIsPaginated(BookRecord record) {
 
 void OpenBookDatabase::paginateBook(BookRecord record) {
     OpenBookDevice *device = OpenBookDevice::sharedDevice();
-    BookPaginationHeader header;
+    BookPaginationHeader header = {0};
     File paginationFile;
     char paginationFilename[128];
 
@@ -283,10 +283,17 @@ void OpenBookDatabase::paginateBook(BookRecord record) {
     } while (f.available());
     f.close();
 
-    // if we found chapters, mark the TOC as starting right after the header.
-    if (header.numChapters) header.tocStart = sizeof(BookPaginationHeader);
-
-    header.pageStart = header.tocStart + header.numChapters * sizeof(BookChapter);
+    if (header.numChapters) {
+        // if we found chapters, mark the table of contents as starting right after the header...
+        header.tocStart = sizeof(BookPaginationHeader);
+        // ...and the page index as starting right after that.
+        header.pageStart = header.tocStart + header.numChapters * sizeof(BookChapter);
+    } else {
+        // Otherwise we have no table of contents.
+        header.tocStart = 0;
+        // Mark page index as starting right after the header.
+        header.pageStart = sizeof(BookPaginationHeader);
+    }
 
     // OKAY! Time to do pages. For this we have to traverse the whole file again,
     // but this time we need to simulate actually laying it out.
