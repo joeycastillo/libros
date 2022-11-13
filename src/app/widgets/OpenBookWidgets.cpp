@@ -180,7 +180,6 @@ void OpenBookTable::setItems(std::vector<std::string> items) {
 }
 
 void OpenBookTable::updateCells() {
-    this->items = items;
     this->subviews.clear();
 
     uint16_t end = this->startOffset + this->cellsPerPage;

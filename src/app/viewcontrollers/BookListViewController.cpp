@@ -29,7 +29,7 @@ void BookListViewController::createView() {
     this->usbIcon = std::make_shared<BitmapView>(MakeRect(267, 9, 24, 9), PlugIcon);
     this->batteryIcon->setHidden(true);
     this->usbIcon->setHidden(true);
-    this->table = std::make_shared<OpenBookTable>(MakeRect(0, 32, 300, 360), 24, CellSelectionStyleIndicatorLeading);
+    this->table = std::make_shared<OpenBookTable>(MakeRect(0, 32, 300, 400 - 32), 24, CellSelectionStyleIndicatorLeading);
     this->view->addSubview(this->table);
     this->view->addSubview(titleLabel);
     this->view->addSubview(shelfIcon);

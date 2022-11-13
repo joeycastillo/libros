@@ -61,7 +61,7 @@ protected:
     int32_t selectedIndex = 0;
     int16_t cellHeight;
     int16_t cellsPerPage;
-    int16_t startOffset;
+    int16_t startOffset = 0;
     std::vector<std::string> items;
     std::string text;
     OpenBookCellSelectionStyle selectionStyle;

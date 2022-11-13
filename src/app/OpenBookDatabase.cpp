@@ -49,19 +49,26 @@ bool OpenBookDatabase::connect() {
     return true;
 }
 
-bool OpenBookDatabase::_fileLooksLikeBook(File entry) {
-    uint32_t magic = 0;
+bool OpenBookDatabase::_fileIsTxt(File entry) {
+    if (entry.isDirectory()) return false;
+
     uint32_t extension = 0;
     char filename[128];
 
-    if (entry.isDirectory()) return false;
-
     entry.getName(filename, 128);
     memcpy((byte *)&extension, filename + (strlen(filename) - 4), 4);
+    // return true if file extension is .txt
+    // and first character is not '.'
+    return (extension == 1954051118 && filename[0] != '.');
+}
+
+bool OpenBookDatabase::_fileLooksLikeBook(File entry) {
+    uint32_t magic = 0;
+    entry.seekSet(0);
     entry.read((void *)&magic, sizeof(magic));
-    // return true if file extension is .txt, and
-    // file begins with three hyphens followed by a newline
-    return (extension == 1954051118 && magic == 170732845);
+    entry.seekSet(0);
+    // return true if file begins with three hyphens followed by a newline
+    return (magic == 170732845);
 }
 
 bool OpenBookDatabase::scanForNewBooks() {
@@ -77,7 +84,7 @@ bool OpenBookDatabase::scanForNewBooks() {
     root = device->openFile("/");
     entry = root.openNextFile();
     while (entry) {
-        if (this->_fileLooksLikeBook(entry)) {
+        if (this->_fileIsTxt(entry)) {
             numBooks++;
         }
         entry.close();
@@ -97,72 +104,89 @@ bool OpenBookDatabase::scanForNewBooks() {
     root = device->openFile("/");
     entry = root.openNextFile();
     while (entry) {
-        if (this->_fileLooksLikeBook(entry)) {
-            BookRecord record = {0};
-            entry.getName(record.filename, 128);
+        BookRecord record = {0};
+        entry.getName(record.filename, 128);
+        if (this->_fileIsTxt(entry)) {
             hash = sha256(std::string(record.filename));
             memcpy((void *)&record.fileHash, hash.c_str(), sizeof(record.fileHash));
             record.fileSize = entry.size();
             record.currentPosition = 0; // TODO: copy from map
-            uint32_t tag;
-            char c;
-            bool done = false;
-            entry.seekSet(4);
-            while(!done) {
-                entry.read((byte *)&tag, sizeof(tag));
-                if (tag == 170732845) { // ---\n, end of front matter
-                    done = true;
-                    record.textStart = entry.position();
-                    break;
+            if (this->_fileLooksLikeBook(entry)) {
+                // if file is a text file AND it has front matter, parse the front matter.
+                uint32_t tag;
+                char c;
+                bool done = false;
+                entry.seekSet(4);
+                while(!done) {
+                    entry.read((byte *)&tag, sizeof(tag));
+                    if (tag == 170732845) { // ---\n, end of front matter
+                        done = true;
+                        record.textStart = entry.position();
+                        break;
+                    }
+                    do {
+                        c = entry.read();
+                    } while (c != ':');
+                    do {
+                        c = entry.read();
+                    } while (c == ' ');
+                    uint64_t loc = entry.position() - 1;
+                    uint64_t len = 0;
+                    do {
+                        len++;
+                        c = entry.read();
+                    } while (c != '\n');
+                    // len is now the length of the metadata
+                    BookField field;
+                    field.tag = tag;
+                    field.loc = loc;
+                    field.len = len;
+                    switch (tag) {
+                        case 1280592212: // TITL
+                            record.metadata[OPEN_BOOK_TITLE_INDEX] = field;
+                            break;
+                        case 1213486401: // AUTH
+                            record.metadata[OPEN_BOOK_AUTHOR_INDEX] = field;
+                            break;
+                        case 1163021895: // GNRE
+                            record.metadata[OPEN_BOOK_GENRE_INDEX] = field;
+                            break;
+                        case 1129530692: // DESC
+                            record.metadata[OPEN_BOOK_DESCRIPTION_INDEX] = field;
+                            break;
+                        case 1196310860: // LANG
+                            record.metadata[OPEN_BOOK_LANGUAGE_INDEX] = field;
+                            break;
+                        default:
+                            break;
+                    }            
                 }
-                do {
-                    c = entry.read();
-                } while (c != ':');
-                do {
-                    c = entry.read();
-                } while (c == ' ');
-                uint64_t loc = entry.position() - 1;
-                uint64_t len = 0;
-                do {
-                    len++;
-                    c = entry.read();
-                } while (c != '\n');
-                // len is now the length of the metadata
+            } else if (this->_fileIsTxt(entry)) {
+                // if it's just a text file, use the first line as the title.
+                record.fileSize = entry.size();
+                record.currentPosition = 0; // TODO: copy from map
+
                 BookField field;
-                field.tag = tag;
-                field.loc = loc;
-                field.len = len;
-                switch (tag) {
-                    case 1280592212: // TITL
-                        record.metadata[OPEN_BOOK_TITLE_INDEX] = field;
-                        break;
-                    case 1213486401: // AUTH
-                        record.metadata[OPEN_BOOK_AUTHOR_INDEX] = field;
-                        break;
-                    case 1163021895: // GNRE
-                        record.metadata[OPEN_BOOK_GENRE_INDEX] = field;
-                        break;
-                    case 1129530692: // DESC
-                        record.metadata[OPEN_BOOK_DESCRIPTION_INDEX] = field;
-                        break;
-                    case 1196310860: // LANG
-                        record.metadata[OPEN_BOOK_LANGUAGE_INDEX] = field;
-                        break;
-                    default:
-                        break;
+                field.tag = 1280592212; // TITL
+                field.loc = 0;
+                // up to 32 characters
+                field.len = min(record.fileSize, 32);
+                entry.seekSet(0);
+                for(int i = 0; i < field.len; i++) {
+                    // but truncate it at the first newline
+                    char c = entry.read();
+                    if ((c == '\r') || c == '\n') field.len = i;
                 }
+                record.metadata[OPEN_BOOK_TITLE_INDEX] = field;
             }
             entry.close();
-
             temp = device->openFile(OPEN_BOOK_WORKING_FILENAME, O_RDWR | O_AT_END);
             temp.write((byte *)&record, sizeof(BookRecord));
             temp.flush();
             temp.close();
         }
-        entry.close();
         entry = root.openNextFile();
     }
-    entry.close();
 
     device->renameFile(OPEN_BOOK_LIBRARY_FILENAME, OPEN_BOOK_BACKUP_FILENAME);
     device->renameFile(OPEN_BOOK_WORKING_FILENAME, OPEN_BOOK_LIBRARY_FILENAME);

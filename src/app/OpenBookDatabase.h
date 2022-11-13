@@ -101,6 +101,7 @@ public:
 
     std::string getTextForPage(BookRecord record, uint32_t page);
 protected:
+    bool _fileIsTxt(File entry);
     bool _fileLooksLikeBook(File entry);
     std::string _getMetadataAtIndex(BookRecord record, uint16_t i);
     bool _getPaginationFile(BookRecord record, char *outFilename);
