@@ -190,8 +190,20 @@ void OpenBookDevice::reset() {
 double OpenBookDevice::getSystemVoltage() {
 #ifdef ARDUINO_ARCH_RP2040
     analogReadResolution(16);
-    pinMode(29, INPUT);
+    pinMode(A3, INPUT);     // this pin is VSYS / 3
     int32_t value = analogRead(A3);
+    if (value < 2048) {
+        // on Pico W, the wifi chip holds this line low.
+        // pin 25 is wifi chip select
+        pinMode(25, OUTPUT);
+        // set it high to disable wifi and allow pin A3 to float
+        digitalWrite(25, HIGH);
+        // then read A3 again
+        value = analogRead(A3);
+        // and restore wifi chip select to its original state (?)
+        digitalWrite(25, LOW);
+    }
+    
     return 3.3 * 3 * value / 65535;
 #endif
     return 0;
