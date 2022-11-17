@@ -40,6 +40,15 @@ bool OpenBookRawButtonInput::run(std::shared_ptr<Application> application) {
     return false;
 }
 
+OpenBookDisplay::OpenBookDisplay() {
+    OpenBookDevice *device = OpenBookDevice::sharedDevice();
+    OpenBook_IL0398 *display = device->getDisplay();
+    // when first initializing the display, clear once in quick mode to reduce ghosting.
+    display->setDisplayMode(OPEN_BOOK_DISPLAY_MODE_QUICK);
+    display->clearBuffer();
+    display->display();
+}
+
 bool OpenBookDisplay::run(std::shared_ptr<Application> application) {
     OpenBookDevice *device = OpenBookDevice::sharedDevice();
     OpenBookApplication *myApp = (OpenBookApplication *)application.get();

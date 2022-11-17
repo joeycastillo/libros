@@ -15,7 +15,7 @@ protected:
 
 class OpenBookDisplay : public Task {
 public:
-    OpenBookDisplay() {};
+    OpenBookDisplay();
     bool run(std::shared_ptr<Application> application);
 };
 
