@@ -1,6 +1,8 @@
 #include "BookListViewController.h"
 #include "OpenBookEvents.h"
 #include "bitmaps.h"
+#include <sstream>
+#include <iomanip>
 
 void BookListViewController::viewWillAppear() {
     ViewController::viewWillAppear();
@@ -28,6 +30,7 @@ void BookListViewController::createView() {
     titleLabel->setBold(true);
     this->batteryIcon = std::make_shared<BitmapView>(MakeRect(267, 9, 24, 9), BatteryIcon);
     this->usbIcon = std::make_shared<BitmapView>(MakeRect(267, 9, 24, 9), PlugIcon);
+    this->voltageLabel = std::make_shared<Label>(MakeRect(228, 10, 36, 8), "0.00 V");
     this->batteryIcon->setHidden(true);
     this->usbIcon->setHidden(true);
     this->table = std::make_shared<OpenBookTable>(MakeRect(0, 32, 300, 400 - 32), 24, CellSelectionStyleIndicatorLeading);
@@ -36,6 +39,7 @@ void BookListViewController::createView() {
     this->view->addSubview(shelfIcon);
     this->view->addSubview(this->batteryIcon);
     this->view->addSubview(this->usbIcon);
+    this->view->addSubview(this->voltageLabel);
 
     this->view->setAction(std::bind(&BookListViewController::selectBook, this, std::placeholders::_1), FOCUS_EVENT_BUTTON_TAP);
     this->view->setAction(std::bind(&BookListViewController::updateBatteryIcon, this, std::placeholders::_1), OPEN_BOOK_EVENT_POWER_CHANGED);
@@ -87,4 +91,7 @@ void BookListViewController::updateBatteryIcon(Event event) {
     bool onBattery = systemVoltage < 4.5;
     this->batteryIcon->setHidden(!onBattery);
     this->usbIcon->setHidden(onBattery);
+    std::stringstream ss;
+    ss << std::right << std::setw(4) << std::setprecision(3) << systemVoltage << " V";
+    this->voltageLabel->setText(ss.str());
 }
