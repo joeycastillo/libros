@@ -17,6 +17,7 @@ void BookListViewController::viewWillAppear() {
     }
 
     this->table->setItems(titles);
+    this->updateBatteryIcon();
 }
 
 void BookListViewController::createView() {
@@ -82,7 +83,7 @@ void BookListViewController::paginate(Event event) {
 }
 
 void BookListViewController::updateBatteryIcon(Event event) {
-    float systemVoltage = (float)event.userInfo / 100;
+    float systemVoltage = OpenBookDevice::sharedDevice()->getSystemVoltage();
     bool onBattery = systemVoltage < 4.5;
     this->batteryIcon->setHidden(!onBattery);
     this->usbIcon->setHidden(onBattery);
