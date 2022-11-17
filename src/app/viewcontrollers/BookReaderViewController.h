@@ -13,6 +13,7 @@ public:
 
     void turnPage(Event event);
     void returnHome(Event event);
+    void saveProgress(Event event);
     void showMenu(Event event);
     
     void handleModal(Event event);

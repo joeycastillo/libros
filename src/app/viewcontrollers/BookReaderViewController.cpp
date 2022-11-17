@@ -29,6 +29,7 @@ void BookReaderViewController::createView() {
     this->view->addSubview(this->progressLabel);
 
     this->view->setAction(std::bind(&BookReaderViewController::returnHome, this, std::placeholders::_1), FOCUS_EVENT_BUTTON_TAP);
+    this->view->setAction(std::bind(&BookReaderViewController::saveProgress, this, std::placeholders::_1), FOCUS_EVENT_BUTTON_LOCK);
     this->view->setAction(std::bind(&BookReaderViewController::turnPage, this, std::placeholders::_1), FOCUS_EVENT_BUTTON_PREV);
     this->view->setAction(std::bind(&BookReaderViewController::turnPage, this, std::placeholders::_1), FOCUS_EVENT_BUTTON_NEXT);
     this->view->setAction(std::bind(&BookReaderViewController::showMenu, this, std::placeholders::_1), FOCUS_EVENT_BUTTON_UP);
@@ -55,8 +56,12 @@ void BookReaderViewController::turnPage(Event event) {
 }
 
 void BookReaderViewController::returnHome(Event event) {
-    OpenBookDatabase::sharedDatabase()->setCurrentPage(this->book, this->currentPage);
+    this->saveProgress(event);
     this->generateEvent(OPEN_BOOK_EVENT_RETURN_HOME);
+}
+
+void BookReaderViewController::saveProgress(Event event) {
+    OpenBookDatabase::sharedDatabase()->setCurrentPage(this->book, this->currentPage);
 }
 
 void BookReaderViewController::showMenu(Event event) {
