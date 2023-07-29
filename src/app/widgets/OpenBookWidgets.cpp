@@ -101,7 +101,7 @@ void OpenBookCell::draw(Adafruit_GFX *display, int16_t x, int16_t y) {
         typesetter->setItalic(false);
         typesetter->setTextSize(1);
         typesetter->setParagraphSpacing(0);
-        Point cursorPosition = {0};
+        Point cursorPosition = {0, 0};
         uint16_t textColor = this->foregroundColor;
         switch (this->selectionStyle) {
             case CellSelectionStyleInvert:

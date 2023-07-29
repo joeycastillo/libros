@@ -73,7 +73,7 @@ void BookListViewController::dismiss(Event event) {
     if (std::shared_ptr<Window>window = this->view->getWindow().lock()) {
         window->removeSubview(this->modal);
         this->modal.reset();
-        this->currentBook = {0};
+        this->currentBook = {};
     }
 }
 

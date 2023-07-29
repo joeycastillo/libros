@@ -108,7 +108,7 @@ protected:
     int32_t tag = 0;
     uint16_t backgroundColor = 0;
     uint16_t foregroundColor = 1;
-    Rect frame = {0};
+    Rect frame = {};
     DirectionalAffinity affinity = DirectionalAffinityVertical;
     std::vector<std::shared_ptr<View>> subviews;
     std::map<int32_t, Action> actions;

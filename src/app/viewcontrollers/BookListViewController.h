@@ -19,7 +19,7 @@ protected:
     virtual void createView() override;
 
     std::vector<BookRecord> books;
-    BookRecord currentBook = {0};
+    BookRecord currentBook = {};
 
     std::shared_ptr<OpenBookTable> table;
     std::shared_ptr<BorderedView> modal;

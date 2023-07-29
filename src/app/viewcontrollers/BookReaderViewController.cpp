@@ -9,7 +9,7 @@ BookReaderViewController::BookReaderViewController(std::shared_ptr<Application> 
 void BookReaderViewController::viewWillAppear() {
     ViewController::viewWillAppear();
 
-    this->numPages = max(OpenBookDatabase::sharedDatabase()->numPages(this->book), 1);
+    this->numPages = std::max(OpenBookDatabase::sharedDatabase()->numPages(this->book), (uint32_t)1);
     this->currentPage = OpenBookDatabase::sharedDatabase()->getCurrentPage(this->book);
     this->_updateView();
 }
@@ -145,7 +145,7 @@ void BookReaderViewController::_updateView() {
     this->progressLabel->setForegroundColor(EPD_BLACK);
     // TODO: label should be able to align itself to the right, right?
     int16_t xpos = (int16_t)(percentComplete * 300) - strlen(buf) * 6;
-    this->progressLabel->setFrame(MakeRect(max(0, xpos), 400 - 8 - 4, 90, 8));
+    this->progressLabel->setFrame(MakeRect(std::max((int16_t)0, xpos), 400 - 8 - 4, 90, 8));
 
     this->generateEvent(OPEN_BOOK_EVENT_REQUEST_REFRESH_MODE, OPEN_BOOK_DISPLAY_MODE_QUICK);
 }

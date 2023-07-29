@@ -19,8 +19,10 @@
 #define OPENBOOK_BUTTONMASK_NEXT (64)
 #define OPENBOOK_BUTTONMASK_LOCK (128)
 
+#ifdef ARDUINO_ARCH_RP2040
 extern MbedSPI* SPI0;
 extern MbedSPI* SPI1;
+#endif
 
 typedef enum {
     OPEN_BOOK_SD_CARD_PRESENT,
@@ -81,7 +83,7 @@ protected:
     SdFat *sd;
 
     Adafruit_MCP23008 *ioExpander = NULL;
-    OpenBookButtonConfig buttonConfig = {0};
+    OpenBookButtonConfig buttonConfig = {};
     int8_t activeState, buttonInterrupt, sdcs;
 private:
     OpenBookDevice();

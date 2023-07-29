@@ -22,7 +22,7 @@ protected:
     virtual void createView() override;
     void _updateView();
 
-    BookRecord book = {0};
+    BookRecord book = {};
     int32_t currentPage = 0;
     int32_t numPages = 1;
 

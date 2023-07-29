@@ -104,7 +104,7 @@ bool OpenBookDatabase::scanForNewBooks() {
     root = device->openFile("/");
     entry = root.openNextFile();
     while (entry) {
-        BookRecord record = {0};
+        BookRecord record = {};
         entry.getName(record.filename, 128);
         if (this->_fileIsTxt(entry)) {
             hash = sha256(std::string(record.filename));
@@ -170,7 +170,7 @@ bool OpenBookDatabase::scanForNewBooks() {
                 field.tag = 1280592212; // TITL
                 field.loc = 0;
                 // up to 32 characters
-                field.len = min(record.fileSize, 32);
+                field.len = std::min(record.fileSize, (uint64_t)32);
                 entry.seekSet(0);
                 for(int i = 0; i < field.len; i++) {
                     // but truncate it at the first newline
@@ -266,7 +266,7 @@ bool OpenBookDatabase::bookIsPaginated(BookRecord record) {
 
 void OpenBookDatabase::paginateBook(BookRecord record) {
     OpenBookDevice *device = OpenBookDevice::sharedDevice();
-    BookPaginationHeader header = {0};
+    BookPaginationHeader header = {};
     File paginationFile;
     char paginationFilename[128];
 
@@ -282,7 +282,7 @@ void OpenBookDatabase::paginateBook(BookRecord record) {
     paginationFile.close();
 
     // now process the whole file and seek out chapter headings.
-    BookChapter chapter = {0};
+    BookChapter chapter = {};
     File f = device->openFile(record.filename);
     f.seekSet(record.textStart);
     do {
@@ -302,7 +302,7 @@ void OpenBookDatabase::paginateBook(BookRecord record) {
             paginationFile.close();
             f = device->openFile(record.filename);
             f.seekSet(chapter.loc + chapter.len);
-            chapter = {0};
+            chapter = {};
         }
     } while (f.available());
     f.close();
@@ -322,7 +322,7 @@ void OpenBookDatabase::paginateBook(BookRecord record) {
     // OKAY! Time to do pages. For this we have to traverse the whole file again,
     // but this time we need to simulate actually laying it out.
     BabelDevice *babel = device->getTypesetter()->getBabel();
-    BookPage page = {0};
+    BookPage page = {};
     uint16_t yPos = 0;
     char utf8bytes[128];
     BABEL_CODEPOINT codepoints[127];

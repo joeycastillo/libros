@@ -68,7 +68,7 @@ typedef struct {
         uint16_t isChapterSeparator : 1;    // 1 if this is a chapter separator page
         uint16_t activeShifts : 2;          // 0-3 for number of format shifts
         uint16_t reserved : 13;             // Reserved for future use
-    } flags = {0};
+    } flags = {};
 } BookPage;
 
 class OpenBookDatabase {

@@ -1,10 +1,14 @@
 #include "OpenBookDevice.h"
 #include "OpenBook_IL0398.h"
-#include "sleep.h"
 
 #ifdef ARDUINO_ARCH_RP2040
+#include "sleep.h"
+
 MbedSPI* SPI0;
 MbedSPI* SPI1;
+#else
+SPIClass *SPI0 = NULL;
+SPIClass *SPI1 = NULL;
 #endif
 
 OpenBookDevice::OpenBookDevice() {
@@ -34,9 +38,33 @@ OpenBookDevice::OpenBookDevice() {
     buttonConfig.lock_pin = 12;
     this->configureButtons(LOW, buttonConfig);
 #else
-    book->configureSD(38, &SPI);
-    book->configureScreen(-1, 39, 40, 41, 42, &SPI, 300, 400);
-    book->configureBabel(44);
+    // enable power to peripherals
+    pinMode(0, OUTPUT);
+    digitalWrite(0, LOW);
+
+    SPI0 = new SPIClass();
+    SPI1 = new SPIClass();
+
+    SPI0->begin(5, 6, 4, -1);
+    SPI1->begin(48, -1, 47, -1);
+
+    this->configureSD(37, SPI0);
+    this->configureScreen(-1, 35, 36, 38, 2, SPI1, 300, 400);
+
+    /// TODO: Stash Babel data in a partition or something
+    this->configureBabel(10, SPI0);
+
+    OpenBookButtonConfig buttonConfig;
+    buttonConfig.left_pin = 11;
+    buttonConfig.down_pin = 13;
+    buttonConfig.up_pin = 12;
+    buttonConfig.right_pin = 21;
+    buttonConfig.select_pin = 14;
+    buttonConfig.previous_pin = 8;
+    buttonConfig.next_pin = 1;
+    buttonConfig.cd_pin = 7;
+    buttonConfig.lock_pin = 0;
+    this->configureButtons(LOW, buttonConfig);
 #endif
 }
 
@@ -137,7 +165,11 @@ bool OpenBookDevice::configureBabel(int8_t bcs, SPIClass *spi) {
 }
 
 bool OpenBookDevice::configureSD(int8_t sdcs, SPIClass *spi) {
+    #ifdef ARDUINO_ARCH_RP2040
     this->sd = new SdFat(spi);
+    #else
+    this->sd = new SdFat();
+    #endif
     this->sdcs = sdcs;
 
     return true;
@@ -184,7 +216,10 @@ void OpenBookDevice::lockDevice() {
 }
 
 void OpenBookDevice::reset() {
+    #if defined(ARDUINO_ARCH_RP2040)
     (*((volatile uint32_t*)(PPB_BASE + 0x0ED0C))) = 0x5FA0004;
+    #endif
+    /// TODO: Reset ESP32-S3
 }
 
 double OpenBookDevice::getSystemVoltage() {
