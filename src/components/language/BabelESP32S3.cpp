@@ -1,9 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright © 2019 Joey Castillo. All rights reserved.
- * Incorporates ideas and code from the Adafruit_GFX library.
- * Copyright (c) 2013 Adafruit Industries.  All rights reserved.
+ * Copyright © 2023 Joey Castillo. All rights reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,32 +22,25 @@
  * THE SOFTWARE.
  */
 
-#ifndef BabelTypesetterGFX_h
-#define BabelTypesetterGFX_h
+#if defined(ARDUINO_ARCH_ESP32)
 
-#include <stdio.h>
-#include <stdint.h>
-#include "Adafruit_GFX.h"
-#include "BabelTypesetter.h"
-#include "BabelSPIFlash.h"
 #include "BabelESP32S3.h"
-#include "BabelFile.h"
-#if BOARD_REQUIRES_BABEL_FILE
-#include "Adafruit_SPIFlash.h"
-#endif
+#include <Arduino.h>
 
-class BabelTypesetterGFX: public BabelTypesetter {
-public:
-    BabelTypesetterGFX(Adafruit_GFX *display, uint8_t cs, SPIClass *spi);
-    BabelTypesetterGFX(Adafruit_GFX *display, const char *partition_label);
-#if BOARD_REQUIRES_BABEL_FILE
-    BabelTypesetterGFX(Adafruit_GFX *display, FatFileSystem *fatfs, char *filename);
-#endif
-    bool begin();
-    void drawPixel(int16_t x, int16_t y, uint16_t color);
-    void drawFillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color);
-    Adafruit_GFX *display;
-private:
-};
+BabelESP32S3::BabelESP32S3(const char *partition_label) {
+    const esp_partition_t *partition = esp_partition_find_first(ESP_PARTITION_TYPE_DATA, ESP_PARTITION_SUBTYPE_ANY, partition_label);
+    this->babel_partition = (esp_partition_t *)partition;
+}
 
-#endif /* BabelTypesetterGFX_h */
+bool BabelESP32S3::begin() {
+    if (this->babel_partition == NULL) {
+        return false;
+    }
+    return BabelDevice::begin();
+}
+
+void BabelESP32S3::read(uint32_t addr, void *data, uint32_t len) {
+    esp_partition_read(this->babel_partition, addr, data, len);
+}
+
+#endif // defined(ARDUINO_ARCH_ESP32)

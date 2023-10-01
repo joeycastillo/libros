@@ -32,6 +32,11 @@ BabelTypesetterGFX::BabelTypesetterGFX(Adafruit_GFX *display, uint8_t cs, SPICla
     this->babelDevice = new BabelSPIFlash(cs, spi);
 }
 
+BabelTypesetterGFX::BabelTypesetterGFX(Adafruit_GFX *display, const char *partition_label) {
+    this->display = display;
+    this->babelDevice = new BabelESP32S3(partition_label);
+}
+
 #if BOARD_REQUIRES_BABEL_FILE
 BabelTypesetterGFX::BabelTypesetterGFX(Adafruit_GFX *display, FatFileSystem *fatfs, char *filename) {
     this->display = display;

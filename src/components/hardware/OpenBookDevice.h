@@ -76,6 +76,7 @@ protected:
     bool configureButtons(int8_t active, OpenBookButtonConfig config);
     bool configureI2CButtons(int8_t active, int8_t interrupt);
     bool configureBabel(int8_t bcs, SPIClass *spi);
+    bool configureBabel(const char *partition_label);
     bool configureSD(int8_t sdcs, SPIClass *spi);
 
     OpenBook_IL0398 *display = NULL;

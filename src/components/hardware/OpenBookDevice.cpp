@@ -51,8 +51,7 @@ OpenBookDevice::OpenBookDevice() {
     this->configureSD(37, SPI0);
     this->configureScreen(-1, 35, 36, 38, 2, SPI1, 300, 400);
 
-    /// TODO: Stash Babel data in a partition or something
-    this->configureBabel(10, SPI0);
+    this->configureBabel("babel");
 
     OpenBookButtonConfig buttonConfig;
     buttonConfig.left_pin = 11;
@@ -159,6 +158,20 @@ bool OpenBookDevice::configureBabel(int8_t bcs, SPIClass *spi) {
     if (this->display == NULL || bcs < 0) return false;
 
     BabelTypesetterGFX *typesetter = new BabelTypesetterGFX(this->display, bcs, spi);
+    this->typesetter = typesetter;
+
+    return true;
+}
+
+/**
+ @brief Configures the Babel language expansion residing at a locaiton in memory.
+        You must call this after configuring the display, as Babel needs a
+        reference to it to function.
+ @param location A pointer to the first byte of the Babel data in memory
+ @returns true if Babel was successfully set up.
+*/
+bool OpenBookDevice::configureBabel(const char *partition_label) {
+    BabelTypesetterGFX *typesetter = new BabelTypesetterGFX(this->display, partition_label);
     this->typesetter = typesetter;
 
     return true;

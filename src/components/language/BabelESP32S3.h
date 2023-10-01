@@ -1,9 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright © 2019 Joey Castillo. All rights reserved.
- * Incorporates ideas and code from the Adafruit_GFX library.
- * Copyright (c) 2013 Adafruit Industries.  All rights reserved.
+ * Copyright © 2023 Joey Castillo. All rights reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,32 +22,25 @@
  * THE SOFTWARE.
  */
 
-#ifndef BabelTypesetterGFX_h
-#define BabelTypesetterGFX_h
+#ifndef BabelESP32S3_h
+#define BabelESP32S3_h
+
+#if defined(ARDUINO_ARCH_ESP32)
 
 #include <stdio.h>
-#include <stdint.h>
-#include "Adafruit_GFX.h"
-#include "BabelTypesetter.h"
-#include "BabelSPIFlash.h"
-#include "BabelESP32S3.h"
-#include "BabelFile.h"
-#if BOARD_REQUIRES_BABEL_FILE
-#include "Adafruit_SPIFlash.h"
-#endif
+#include "SPI.h"
+#include "BabelDevice.h"
+#include "esp_partition.h"
 
-class BabelTypesetterGFX: public BabelTypesetter {
+class BabelESP32S3: public BabelDevice {
 public:
-    BabelTypesetterGFX(Adafruit_GFX *display, uint8_t cs, SPIClass *spi);
-    BabelTypesetterGFX(Adafruit_GFX *display, const char *partition_label);
-#if BOARD_REQUIRES_BABEL_FILE
-    BabelTypesetterGFX(Adafruit_GFX *display, FatFileSystem *fatfs, char *filename);
-#endif
+    BabelESP32S3(const char *partition_label);
     bool begin();
-    void drawPixel(int16_t x, int16_t y, uint16_t color);
-    void drawFillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color);
-    Adafruit_GFX *display;
+    void read(uint32_t addr, void *data, uint32_t len);
 private:
+    esp_partition_t *babel_partition;
 };
 
-#endif /* BabelTypesetterGFX_h */
+#endif // defined(ARDUINO_ARCH_ESP32)
+
+#endif /* BabelESP32S3_h */
