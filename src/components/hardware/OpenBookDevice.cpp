@@ -168,7 +168,7 @@ bool OpenBookDevice::configureSD(int8_t sdcs, SPIClass *spi) {
     #ifdef ARDUINO_ARCH_RP2040
     this->sd = new SdFat(spi);
     #else
-    this->sd = new SdFat();
+    this->sd = new SdFat(spi);
     #endif
     this->sdcs = sdcs;
 
