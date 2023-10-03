@@ -7,6 +7,7 @@
 MbedSPI* SPI0;
 MbedSPI* SPI1;
 #else
+#include "driver/rtc_io.h"
 SPIClass *SPI0 = NULL;
 SPIClass *SPI1 = NULL;
 #endif
@@ -225,6 +226,12 @@ void OpenBookDevice::lockDevice() {
     sleep_run_from_rosc();
     sleep_goto_dormant_until_pin(12, true, false);
     this->reset();
+#endif
+#ifdef ARDUINO_ARCH_ESP32
+    rtc_gpio_pulldown_dis(GPIO_NUM_0);
+    rtc_gpio_pullup_en(GPIO_NUM_0);
+    esp_sleep_enable_ext0_wakeup(GPIO_NUM_0, LOW);
+    esp_deep_sleep_start();
 #endif
 }
 

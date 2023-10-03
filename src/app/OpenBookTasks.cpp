@@ -92,11 +92,17 @@ bool OpenBookLockScreen::run(std::shared_ptr<Application> application) {
         std::shared_ptr<Window> window = application->getWindow();
         OpenBook_IL0398 *display = device->getDisplay();
         std::shared_ptr<BorderedView> lockModal = std::make_shared<BorderedView>(MakeRect(-1, 400-32, 302, 33));
+#ifdef ARDUINO_ARCH_RP2040
         std::shared_ptr<OpenBookLabel> lockLabel = std::make_shared<OpenBookLabel>(MakeRect(6, 8, 300 - 16, 16), "Slide the power switch to continue");
         std::shared_ptr<OpenBookLabel> arrowLabel = std::make_shared<OpenBookLabel>(MakeRect(300-18, 10, 16, 16), "➜");
 
         lockModal->addSubview(lockLabel);
         lockModal->addSubview(arrowLabel);
+#endif
+#ifdef ARDUINO_ARCH_ESP32
+        std::shared_ptr<OpenBookLabel> lockLabel = std::make_shared<OpenBookLabel>(MakeRect(6, 8, 300 - 16, 16), "Press the Lock button to wake the device.");
+        lockModal->addSubview(lockLabel);
+#endif
 
         lockModal->setOpaque(true);
         lockModal->setBackgroundColor(EPD_WHITE);
