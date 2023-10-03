@@ -254,6 +254,15 @@ double OpenBookDevice::getSystemVoltage() {
     
     return 3.3 * 3 * value / 65535;
 #endif
+#ifdef ARDUINO_ARCH_ESP32
+    analogReadResolution(16);
+    pinMode(GPIO_NUM_17, INPUT);     // this pin is VBAT / 2
+    double vbat = 3.3 * 2 * analogRead(GPIO_NUM_17) / 65535;
+    pinMode(GPIO_NUM_18, INPUT);     // this pin is VBUS * 2/3
+    double vbus = 3.3 * 1.5 * analogRead(GPIO_NUM_18) / 65535;
+
+    return max(vbat, vbus);
+#endif
     return 0;
 }
 
