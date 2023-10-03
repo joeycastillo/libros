@@ -65,6 +65,10 @@ OpenBookDevice::OpenBookDevice() {
     buttonConfig.cd_pin = 7;
     buttonConfig.lock_pin = 0;
     this->configureButtons(LOW, buttonConfig);
+
+    // disable the backlight
+    pinMode(46, OUTPUT);
+    digitalWrite(46, LOW);
 #endif
 }
 
