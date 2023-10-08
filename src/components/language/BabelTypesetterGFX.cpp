@@ -32,10 +32,12 @@ BabelTypesetterGFX::BabelTypesetterGFX(Adafruit_GFX *display, uint8_t cs, SPICla
     this->babelDevice = new BabelSPIFlash(cs, spi);
 }
 
+#ifdef ARDUINO_ARCH_ESP32
 BabelTypesetterGFX::BabelTypesetterGFX(Adafruit_GFX *display, const char *partition_label) {
     this->display = display;
     this->babelDevice = new BabelESP32S3(partition_label);
 }
+#endif
 
 #if BOARD_REQUIRES_BABEL_FILE
 BabelTypesetterGFX::BabelTypesetterGFX(Adafruit_GFX *display, FatFileSystem *fatfs, char *filename) {
