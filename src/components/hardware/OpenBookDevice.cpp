@@ -40,8 +40,8 @@ OpenBookDevice::OpenBookDevice() {
     this->configureButtons(LOW, buttonConfig);
 #else
     // enable power to peripherals
-    pinMode(0, OUTPUT);
-    digitalWrite(0, LOW);
+    pinMode(3, OUTPUT);
+    digitalWrite(3, LOW);
 
     SPI0 = new SPIClass();
     SPI1 = new SPIClass();
@@ -95,7 +95,7 @@ OpenBookDevice::OpenBookDevice() {
         * IL0398 Datasheet: https://cdn.sparkfun.com/assets/f/a/9/3/7/4.2in_ePaper_Driver.pdf
 */
 bool OpenBookDevice::configureScreen(int8_t srcs, int8_t ecs, int8_t edc, int8_t erst, int8_t ebsy, SPIClass *spi, int width, int height) {
-    OpenBook_IL0398 *display = new OpenBook_IL0398(width, height, edc, erst, ecs, srcs, ebsy, spi);
+    OPEN_BOOK_EPD *display = new OPEN_BOOK_EPD(width, height, edc, erst, ecs, srcs, ebsy, spi);
     this->display = display;
 
     return true;
@@ -325,7 +325,7 @@ OpenBookSDCardState OpenBookDevice::sdCardState() {
 /**
  @returns a reference to the e-paper display, or NULL if not configured.
 */
-OpenBook_IL0398 * OpenBookDevice::getDisplay() {
+OPEN_BOOK_EPD * OpenBookDevice::getDisplay() {
     return this->display;
 }
 

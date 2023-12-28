@@ -42,7 +42,7 @@ bool OpenBookRawButtonInput::run(std::shared_ptr<Application> application) {
 
 OpenBookDisplay::OpenBookDisplay() {
     OpenBookDevice *device = OpenBookDevice::sharedDevice();
-    OpenBook_IL0398 *display = device->getDisplay();
+    OPEN_BOOK_EPD *display = device->getDisplay();
     // when first initializing the display, clear once in quick mode to reduce ghosting.
     display->setDisplayMode(OPEN_BOOK_DISPLAY_MODE_QUICK);
     display->clearBuffer();
@@ -55,7 +55,7 @@ bool OpenBookDisplay::run(std::shared_ptr<Application> application) {
 
     std::shared_ptr<Window> window = application->getWindow();
     if (window->needsDisplay()) {
-        OpenBook_IL0398 *display = device->getDisplay();
+        OPEN_BOOK_EPD *display = device->getDisplay();
 
         display->clearBuffer();
         window->draw(display, 0, 0);
@@ -90,7 +90,7 @@ bool OpenBookLockScreen::run(std::shared_ptr<Application> application) {
     OpenBookApplication *myApp = (OpenBookApplication *)application.get();
     if (myApp->locked) {
         std::shared_ptr<Window> window = application->getWindow();
-        OpenBook_IL0398 *display = device->getDisplay();
+        OPEN_BOOK_EPD *display = device->getDisplay();
         std::shared_ptr<BorderedView> lockModal = std::make_shared<BorderedView>(MakeRect(-1, 400-32, 302, 33));
 #ifdef ARDUINO_ARCH_RP2040
         std::shared_ptr<OpenBookLabel> lockLabel = std::make_shared<OpenBookLabel>(MakeRect(6, 8, 300 - 16, 16), "Slide the power switch to continue");

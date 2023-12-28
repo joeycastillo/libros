@@ -8,6 +8,7 @@
 
 #include "BabelTypesetterGFX.h"
 #include "OpenBook_IL0398.h"
+#include "OpenBook_SSD1688.h"
 #include "Adafruit_MCP23008.h"
 
 #define OPENBOOK_BUTTONMASK_LEFT (1)
@@ -22,6 +23,12 @@
 #ifdef ARDUINO_ARCH_RP2040
 extern MbedSPI* SPI0;
 extern MbedSPI* SPI1;
+#endif
+
+#ifdef ARDUINO_ARCH_RP2040
+#define OPEN_BOOK_EPD OpenBook_IL0398
+#else
+#define OPEN_BOOK_EPD OpenBook_SSD1688
 #endif
 
 typedef enum {
@@ -63,7 +70,7 @@ public:
 
     uint8_t readButtons();
     OpenBookSDCardState sdCardState();
-    OpenBook_IL0398 *getDisplay();
+    OPEN_BOOK_EPD *getDisplay();
     BabelTypesetterGFX *getTypesetter();
 
     bool fileExists(const char *path);
@@ -79,7 +86,7 @@ protected:
     bool configureBabel(const char *partition_label);
     bool configureSD(int8_t sdcs, SPIClass *spi);
 
-    OpenBook_IL0398 *display = NULL;
+    OPEN_BOOK_EPD *display = NULL;
     BabelTypesetterGFX *typesetter = NULL;
     SdFat *sd;
 

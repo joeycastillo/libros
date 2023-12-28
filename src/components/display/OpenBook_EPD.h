@@ -1,0 +1,13 @@
+#ifndef OpenBook_EPD_H
+#define OpenBook_EPD_H
+
+typedef enum OpenBookDisplayMode {
+    OPEN_BOOK_DISPLAY_MODE_DEFAULT,
+    OPEN_BOOK_DISPLAY_MODE_QUICK,
+    OPEN_BOOK_DISPLAY_MODE_PARTIAL,
+    OPEN_BOOK_DISPLAY_MODE_FASTPARTIAL,
+    OPEN_BOOK_DISPLAY_MODE_GRAYSCALE
+}
+OpenBookDisplayMode;
+
+#endif // OpenBook_EPD_H
