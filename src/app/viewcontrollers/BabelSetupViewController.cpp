@@ -11,6 +11,7 @@ void BabelSetupViewController::createView() {
     this->view->setBackgroundColor(EPD_DARK);
     std::shared_ptr<BorderedView> modal = std::make_shared<BorderedView>(MakeRect(40, 150, 220, 100));
     modal->setOpaque(true);
+#ifdef ARDUINO_ARCH_RP2040
     if (!OpenBookDevice::sharedDevice()->fileExists("babel.bin")) {
         std::shared_ptr<Label> label1 = std::make_shared<Label>(MakeRect(20, 20, 180, 8), "Language chip not initialized.");
         modal->addSubview(label1);
@@ -41,6 +42,16 @@ void BabelSetupViewController::createView() {
         this->view->addSubview(modal);
         this->view->addSubview(this->progressView);
     }
+#else
+    std::shared_ptr<Label> label1 = std::make_shared<Label>(MakeRect(20, 20, 180, 8), "Language data not found!");
+    modal->addSubview(label1);
+    std::shared_ptr<Label> label2 = std::make_shared<Label>(MakeRect(20, 30, 180, 8), "Flash babel.bin to the ESP32-S3");
+    modal->addSubview(label2);
+    std::shared_ptr<Label> label3 = std::make_shared<Label>(MakeRect(20, 40, 180, 8), "using instructions in the README.");
+    modal->addSubview(label3);
+    this->view->setAction(std::bind(&BabelSetupViewController::dismiss, this, std::placeholders::_1), FOCUS_EVENT_BUTTON_TAP);
+    this->view->addSubview(modal);
+#endif
 }
 
 void BabelSetupViewController::dismiss(Event event) {
