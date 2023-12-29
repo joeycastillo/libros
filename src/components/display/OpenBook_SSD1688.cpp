@@ -128,11 +128,19 @@ void OpenBook_SSD1688::update()
 {
   uint8_t buf[5];
 
-  // buf[0] = 0x40; // bypass RED as 0
-  // buf[1] = 0x00; // single chip application
-  // EPD_command(0x21, buf, 2); // Display Update Control
+  switch (this->currentDisplayMode) {
+    case OPEN_BOOK_DISPLAY_MODE_QUICK:
+      buf[0] = 0xC7;
+      break;
+    case OPEN_BOOK_DISPLAY_MODE_PARTIAL:
+    case OPEN_BOOK_DISPLAY_MODE_FASTPARTIAL:
+    case OPEN_BOOK_DISPLAY_MODE_GRAYSCALE:
+    case OPEN_BOOK_DISPLAY_MODE_DEFAULT:
+    default:
+      buf[0] = 0xf7;
+      break;
+  }
 
-  buf[0] = 0xf4;
   EPD_command(0x22, buf, 1);
 
   EPD_command(0x20);
@@ -264,6 +272,13 @@ void OpenBook_SSD1688::init(OpenBookDisplayMode displayMode) {
 
   busy_wait();
 
+  buf[0] = 0x40;
+  buf[1] = 0x00;
+  EPD_command(0x21, buf, 2);
+
+  buf[0] = 0x05;
+  EPD_command(0x3C, buf, 1); // Set border waveform
+
   buf[0] = 0x2B;
   buf[1] = 0x01;
   buf[2] = 0x00;
@@ -282,14 +297,17 @@ void OpenBook_SSD1688::init(OpenBookDisplayMode displayMode) {
   buf[3] = 0x01;
   EPD_command(0x45, buf, 4); // Set ram Y address
 
-  buf[0] = 0x01;
-  EPD_command(0x3C, buf, 1); // Set border waveform
 
   this->setRAMAddress(0, 0);
 
   switch (displayMode) {
     case OPEN_BOOK_DISPLAY_MODE_QUICK:
-        // TODO: Implement quick refresh mode
+        buf[0] = 0x5a;
+        EPD_command(0x1A, buf, 1); // Write to temperature register
+        buf[0] = 0x91;
+        EPD_command(0x22, buf, 1);
+        EPD_command(0x20);
+        busy_wait();
         break;
     case OPEN_BOOK_DISPLAY_MODE_PARTIAL:
         // TODO: Implement partial refresh mode
