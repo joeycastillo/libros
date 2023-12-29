@@ -14,8 +14,8 @@
  *
  */
 
-#ifndef OSO_OpenBook_SSD1688_h
-#define OSO_OpenBook_SSD1688_h
+#ifndef OSO_OpenBook_SSD1683_h
+#define OSO_OpenBook_SSD1683_h
 
 #include <stdint.h>
 #include <Arduino.h>
@@ -29,10 +29,10 @@
     @brief  Class for interfacing with IL0398 EPD drivers
 */
 /**************************************************************************/
-class OpenBook_SSD1688 : public Adafruit_EPD {
+class OpenBook_SSD1683 : public Adafruit_EPD {
  public:
-    OpenBook_SSD1688(int width, int height, int8_t SID, int8_t SCLK, int8_t DC, int8_t RST, int8_t CS, int8_t SRCS, int8_t MISO, int8_t BUSY = -1);
-    OpenBook_SSD1688(int width, int height, int8_t DC, int8_t RST, int8_t CS, int8_t SRCS, int8_t BUSY = -1, SPIClass *spi = &SPI);
+    OpenBook_SSD1683(int width, int height, int8_t SID, int8_t SCLK, int8_t DC, int8_t RST, int8_t CS, int8_t SRCS, int8_t MISO, int8_t BUSY = -1);
+    OpenBook_SSD1683(int width, int height, int8_t DC, int8_t RST, int8_t CS, int8_t SRCS, int8_t BUSY = -1, SPIClass *spi = &SPI);
 
     void begin(bool reset=true);
     void powerUp();
@@ -76,4 +76,4 @@ private:
     static const unsigned char LUT_BB_GRAYSCALE[];
 };
 
-#endif // OSO_OpenBook_SSD1688_h
+#endif // OSO_OpenBook_SSD1683_h

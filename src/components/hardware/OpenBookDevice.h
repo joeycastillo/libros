@@ -8,7 +8,7 @@
 
 #include "BabelTypesetterGFX.h"
 #include "OpenBook_IL0398.h"
-#include "OpenBook_SSD1688.h"
+#include "OpenBook_SSD1683.h"
 #include "Adafruit_MCP23008.h"
 
 #define OPENBOOK_BUTTONMASK_LEFT (1)
@@ -28,7 +28,7 @@ extern MbedSPI* SPI1;
 #ifdef ARDUINO_ARCH_RP2040
 #define OPEN_BOOK_EPD OpenBook_IL0398
 #else
-#define OPEN_BOOK_EPD OpenBook_SSD1688
+#define OPEN_BOOK_EPD OpenBook_SSD1683
 #endif
 
 typedef enum {

@@ -13,7 +13,7 @@
  *
  */
 
-#include "OpenBook_SSD1688.h"
+#include "OpenBook_SSD1683.h"
 
 #define BUSY_WAIT 500
 
@@ -39,7 +39,7 @@
     @param BUSY the busy pin to use
 */
 /**************************************************************************/
-OpenBook_SSD1688::OpenBook_SSD1688(int width, int height, 
+OpenBook_SSD1683::OpenBook_SSD1683(int width, int height, 
 				  int8_t SID, int8_t SCLK, int8_t DC, int8_t RST, 
 				  int8_t CS, int8_t SRCS, int8_t MISO, int8_t BUSY) : 
   Adafruit_EPD(width, height, SID, SCLK, DC, RST, CS, SRCS, MISO, BUSY) {
@@ -71,7 +71,7 @@ OpenBook_SSD1688::OpenBook_SSD1688(int width, int height,
     @param BUSY the busy pin to use
 */
 /**************************************************************************/
-OpenBook_SSD1688::OpenBook_SSD1688(int width, int height, 
+OpenBook_SSD1683::OpenBook_SSD1683(int width, int height, 
 				  int8_t DC, int8_t RST, 
 				  int8_t CS, int8_t SRCS, int8_t BUSY, SPIClass *spi) :
   Adafruit_EPD(width, height, DC, RST, CS, SRCS, BUSY, spi) {
@@ -95,7 +95,7 @@ OpenBook_SSD1688::OpenBook_SSD1688(int width, int height,
     @brief wait for busy signal to end
 */
 /**************************************************************************/
-void OpenBook_SSD1688::busy_wait(void)
+void OpenBook_SSD1683::busy_wait(void)
 {
   if (_busy_pin > -1) {
     do {
@@ -112,7 +112,7 @@ void OpenBook_SSD1688::busy_wait(void)
     @param reset if true the reset pin will be toggled.
 */
 /**************************************************************************/
-void OpenBook_SSD1688::begin(bool reset)
+void OpenBook_SSD1683::begin(bool reset)
 {
   Adafruit_EPD::begin(reset);
   setBlackBuffer(0, true);
@@ -124,7 +124,7 @@ void OpenBook_SSD1688::begin(bool reset)
     @brief signal the display to update
 */
 /**************************************************************************/
-void OpenBook_SSD1688::update()
+void OpenBook_SSD1683::update()
 {
   uint8_t buf[5];
 
@@ -158,13 +158,13 @@ void OpenBook_SSD1688::update()
 */
 /**************************************************************************/
 
-const unsigned char OpenBook_SSD1688::LUT_W[] PROGMEM =
+const unsigned char OpenBook_SSD1683::LUT_W[] PROGMEM =
 {
 };
-const unsigned char OpenBook_SSD1688::LUT_B[] PROGMEM =
+const unsigned char OpenBook_SSD1683::LUT_B[] PROGMEM =
 {
 };
-const unsigned char OpenBook_SSD1688::LUT_VCOM_FULL[] PROGMEM =
+const unsigned char OpenBook_SSD1683::LUT_VCOM_FULL[] PROGMEM =
 {
 };
 
@@ -174,23 +174,23 @@ const unsigned char OpenBook_SSD1688::LUT_VCOM_FULL[] PROGMEM =
 */
 /**************************************************************************/
 
-const unsigned char OpenBook_SSD1688::LUT_WW_PARTIAL[] PROGMEM =
+const unsigned char OpenBook_SSD1683::LUT_WW_PARTIAL[] PROGMEM =
 {
 };
 
-const unsigned char OpenBook_SSD1688::LUT_WB_PARTIAL[] PROGMEM =
+const unsigned char OpenBook_SSD1683::LUT_WB_PARTIAL[] PROGMEM =
 {
 };
 
-const unsigned char OpenBook_SSD1688::LUT_BW_PARTIAL[] PROGMEM =
+const unsigned char OpenBook_SSD1683::LUT_BW_PARTIAL[] PROGMEM =
 {
 };
 
-const unsigned char OpenBook_SSD1688::LUT_BB_PARTIAL[] PROGMEM =
+const unsigned char OpenBook_SSD1683::LUT_BB_PARTIAL[] PROGMEM =
 {
 };
 
-const unsigned char OpenBook_SSD1688::LUT_VCOM_PARTIAL[] PROGMEM =
+const unsigned char OpenBook_SSD1683::LUT_VCOM_PARTIAL[] PROGMEM =
 {
 };
 
@@ -200,23 +200,23 @@ const unsigned char OpenBook_SSD1688::LUT_VCOM_PARTIAL[] PROGMEM =
 */
 /**************************************************************************/
 
-const unsigned char OpenBook_SSD1688::LUT_WW_FASTPARTIAL[] PROGMEM =
+const unsigned char OpenBook_SSD1683::LUT_WW_FASTPARTIAL[] PROGMEM =
 {
 };
 
-const unsigned char OpenBook_SSD1688::LUT_WB_FASTPARTIAL[] PROGMEM =
+const unsigned char OpenBook_SSD1683::LUT_WB_FASTPARTIAL[] PROGMEM =
 {
 };
 
-const unsigned char OpenBook_SSD1688::LUT_BW_FASTPARTIAL[] PROGMEM =
+const unsigned char OpenBook_SSD1683::LUT_BW_FASTPARTIAL[] PROGMEM =
 {
 };
 
-const unsigned char OpenBook_SSD1688::LUT_BB_FASTPARTIAL[] PROGMEM =
+const unsigned char OpenBook_SSD1683::LUT_BB_FASTPARTIAL[] PROGMEM =
 {
 };
 
-const unsigned char OpenBook_SSD1688::LUT_VCOM_FASTPARTIAL[] PROGMEM =
+const unsigned char OpenBook_SSD1683::LUT_VCOM_FASTPARTIAL[] PROGMEM =
 {
 };
 
@@ -226,33 +226,33 @@ const unsigned char OpenBook_SSD1688::LUT_VCOM_FASTPARTIAL[] PROGMEM =
 */
 /**************************************************************************/
 
-const unsigned char OpenBook_SSD1688::LUT_VCOM_GRAYSCALE[] PROGMEM = 
+const unsigned char OpenBook_SSD1683::LUT_VCOM_GRAYSCALE[] PROGMEM = 
 {
 };
 
-const unsigned char OpenBook_SSD1688::LUT_WW_GRAYSCALE[] PROGMEM = 
+const unsigned char OpenBook_SSD1683::LUT_WW_GRAYSCALE[] PROGMEM = 
 {
 };
 
-const unsigned char OpenBook_SSD1688::LUT_WB_GRAYSCALE[] PROGMEM = 
+const unsigned char OpenBook_SSD1683::LUT_WB_GRAYSCALE[] PROGMEM = 
 {
 };
 
-const unsigned char OpenBook_SSD1688::LUT_BW_GRAYSCALE[] PROGMEM = 
+const unsigned char OpenBook_SSD1683::LUT_BW_GRAYSCALE[] PROGMEM = 
 {
 };
 
-const unsigned char OpenBook_SSD1688::LUT_BB_GRAYSCALE[] PROGMEM = 
+const unsigned char OpenBook_SSD1683::LUT_BB_GRAYSCALE[] PROGMEM = 
 {
 };
 
 /**************************************************************************/
 /*!
     @brief start up the display. Same as init, but here for compatibility with
-           Adafruit_EPD; you can call OpenBook_SSD1688::init with more options.
+           Adafruit_EPD; you can call OpenBook_SSD1683::init with more options.
 */
 /**************************************************************************/
-void OpenBook_SSD1688::powerUp() {
+void OpenBook_SSD1683::powerUp() {
     this->init(this->currentDisplayMode);
 }
 
@@ -263,7 +263,7 @@ void OpenBook_SSD1688::powerUp() {
     @warning You always need to do one full refresh before enabling partial mode.
 */
 /**************************************************************************/
-void OpenBook_SSD1688::init(OpenBookDisplayMode displayMode) {
+void OpenBook_SSD1683::init(OpenBookDisplayMode displayMode) {
   uint8_t buf[5];
 
   hardwareReset();
@@ -333,7 +333,7 @@ void OpenBook_SSD1688::init(OpenBookDisplayMode displayMode) {
     @brief wind down the display
 */
 /**************************************************************************/
-void OpenBook_SSD1688::powerDown()
+void OpenBook_SSD1683::powerDown()
 {
   // uint8_t data = 0x01;
   // EPD_command(0x10, &data, 1); // power off
@@ -344,7 +344,7 @@ void OpenBook_SSD1688::powerDown()
     @todo Sets the window for partial refresh.
 */
 /**************************************************************************/
-void OpenBook_SSD1688::setWindow(uint16_t x, uint16_t y, uint16_t w, uint16_t h) {
+void OpenBook_SSD1683::setWindow(uint16_t x, uint16_t y, uint16_t w, uint16_t h) {
 }
 
 /**************************************************************************/
@@ -354,7 +354,7 @@ void OpenBook_SSD1688::setWindow(uint16_t x, uint16_t y, uint16_t w, uint16_t h)
 
 */
 /**************************************************************************/
-void OpenBook_SSD1688::setDisplayMode(OpenBookDisplayMode displayMode) {
+void OpenBook_SSD1683::setDisplayMode(OpenBookDisplayMode displayMode) {
     this->currentDisplayMode = displayMode;
 }
 
@@ -366,7 +366,7 @@ void OpenBook_SSD1688::setDisplayMode(OpenBookDisplayMode displayMode) {
 	@param color the color of the pixel
 */
 /**************************************************************************/
-void OpenBook_SSD1688::drawPixel(int16_t x, int16_t y, uint16_t color) {
+void OpenBook_SSD1683::drawPixel(int16_t x, int16_t y, uint16_t color) {
   if ((x < 0) || (x >= width()) || (y < 0) || (y >= height()))
   return;
       
@@ -431,12 +431,12 @@ void OpenBook_SSD1688::drawPixel(int16_t x, int16_t y, uint16_t color) {
     @brief Updates the full screen.
 */
 /**************************************************************************/
-void OpenBook_SSD1688::display() {
+void OpenBook_SSD1683::display() {
   Adafruit_EPD::display();
   busy_wait();
 }
 
-void OpenBook_SSD1688::displayGrayscale(uint16_t x, uint16_t y, const unsigned char *bitmap, uint16_t w, uint16_t h) {
+void OpenBook_SSD1683::displayGrayscale(uint16_t x, uint16_t y, const unsigned char *bitmap, uint16_t w, uint16_t h) {
     uint16_t byteWidth = (w*2 + 7) / 8;
     uint8_t byte = 0;
     uint16_t color;
@@ -484,7 +484,7 @@ void OpenBook_SSD1688::displayGrayscale(uint16_t x, uint16_t y, const unsigned c
           this with the dirty rect so that the buffer and the screen stay consistent.
 */
 /**************************************************************************/
-void OpenBook_SSD1688::displayPartial(uint16_t x, uint16_t y, uint16_t w, uint16_t h) {
+void OpenBook_SSD1683::displayPartial(uint16_t x, uint16_t y, uint16_t w, uint16_t h) {
   // TODO: Implement partial refresh mode
   this->display();
 }
@@ -497,7 +497,7 @@ void OpenBook_SSD1688::displayPartial(uint16_t x, uint16_t y, uint16_t w, uint16
     @returns The byte that is read from SPI at the same time as sending the command
 */
 /**************************************************************************/
-uint8_t OpenBook_SSD1688::writeRAMCommand(uint8_t index) {
+uint8_t OpenBook_SSD1683::writeRAMCommand(uint8_t index) {
 #ifdef EPD_DEBUG
   Serial.println("  writeRAMCommand");
 #endif
@@ -517,7 +517,7 @@ uint8_t OpenBook_SSD1688::writeRAMCommand(uint8_t index) {
     @param y Y address counter value
 */
 /**************************************************************************/
-void OpenBook_SSD1688::setRAMAddress(uint16_t x, uint16_t y) {
+void OpenBook_SSD1683::setRAMAddress(uint16_t x, uint16_t y) {
   uint8_t buf[2];
 
   buf[0] = 0;
