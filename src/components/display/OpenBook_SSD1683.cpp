@@ -332,8 +332,8 @@ void OpenBook_SSD1683::init(OpenBookDisplayMode displayMode) {
 /**************************************************************************/
 void OpenBook_SSD1683::powerDown()
 {
-  // uint8_t data = 0x01;
-  // EPD_command(0x10, &data, 1); // power off
+  uint8_t data = 0x01;
+  EPD_command(0x10, &data, 1); // power off
 }
 
 /**************************************************************************/
