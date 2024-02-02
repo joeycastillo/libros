@@ -130,10 +130,10 @@ void OpenBook_SSD1683::update()
 
   switch (this->currentDisplayMode) {
     case OPEN_BOOK_DISPLAY_MODE_QUICK:
+    case OPEN_BOOK_DISPLAY_MODE_FASTPARTIAL:
+    case OPEN_BOOK_DISPLAY_MODE_PARTIAL:
       buf[0] = 0xC7;
       break;
-    case OPEN_BOOK_DISPLAY_MODE_PARTIAL:
-    case OPEN_BOOK_DISPLAY_MODE_FASTPARTIAL:
     case OPEN_BOOK_DISPLAY_MODE_GRAYSCALE:
     case OPEN_BOOK_DISPLAY_MODE_DEFAULT:
     default:
@@ -302,18 +302,15 @@ void OpenBook_SSD1683::init(OpenBookDisplayMode displayMode) {
 
   switch (displayMode) {
     case OPEN_BOOK_DISPLAY_MODE_QUICK:
+    case OPEN_BOOK_DISPLAY_MODE_PARTIAL:
+    case OPEN_BOOK_DISPLAY_MODE_FASTPARTIAL:
+        // TODO: Implement partial refresh modes
         buf[0] = 0x5a;
         EPD_command(0x1A, buf, 1); // Write to temperature register
         buf[0] = 0x91;
         EPD_command(0x22, buf, 1);
         EPD_command(0x20);
         busy_wait();
-        break;
-    case OPEN_BOOK_DISPLAY_MODE_PARTIAL:
-        // TODO: Implement partial refresh mode
-        break;
-    case OPEN_BOOK_DISPLAY_MODE_FASTPARTIAL:
-        // TODO: Implement fast partial refresh mode
         break;
     case OPEN_BOOK_DISPLAY_MODE_GRAYSCALE:
         // TODO: Implement grayscale mode
@@ -485,7 +482,7 @@ void OpenBook_SSD1683::displayGrayscale(uint16_t x, uint16_t y, const unsigned c
 */
 /**************************************************************************/
 void OpenBook_SSD1683::displayPartial(uint16_t x, uint16_t y, uint16_t w, uint16_t h) {
-  // TODO: Implement partial refresh mode
+  if (this->currentDisplayMode != OPEN_BOOK_DISPLAY_MODE_PARTIAL && this->currentDisplayMode != OPEN_BOOK_DISPLAY_MODE_FASTPARTIAL) this->init(OPEN_BOOK_DISPLAY_MODE_PARTIAL);
   this->display();
 }
 
