@@ -113,7 +113,7 @@ void View::didBecomeFocused() {
     if (this->superview.lock()) {
         if (std::shared_ptr<Window> window = this->getWindow().lock()) {
             std::shared_ptr<View> shared_this = this->shared_from_this();
-            window->setNeedsDisplayInRect(this->frame, shared_this);
+            shared_this->setNeedsDisplayInRect(this->frame);
         }
     }
 }
@@ -126,7 +126,7 @@ void View::didResignFocus() {
     if (this->superview.lock()) {
         if (std::shared_ptr<Window> window = this->getWindow().lock()) {
             std::shared_ptr<View> shared_this = this->shared_from_this();
-            window->setNeedsDisplayInRect(this->frame, shared_this);
+            shared_this->setNeedsDisplayInRect(this->frame);
         }
     }
 }
@@ -226,7 +226,7 @@ void View::setFrame(Rect frame) {
         dirtyRect.size.width = max(this->frame.origin.x + this->frame.size.width, frame.origin.x + frame.size.width) - dirtyRect.origin.x;
         dirtyRect.size.height = max(this->frame.origin.y + this->frame.size.height, frame.origin.y + frame.size.height) - dirtyRect.origin.y;
         this->frame = frame;
-        window->setNeedsDisplayInRect(dirtyRect, window);
+        this->setNeedsDisplayInRect(dirtyRect);
     }
 }
 
@@ -239,7 +239,7 @@ void View::setOpaque(bool value) {
 
     this->opaque = value;
     if (std::shared_ptr<Window> window = this->getWindow().lock()) {
-        window->setNeedsDisplayInRect(this->frame, window);
+        this->setNeedsDisplayInRect(this->frame);
     }
 }
 
@@ -252,7 +252,7 @@ void View::setHidden(bool value) {
 
     this->hidden = value;
     if (std::shared_ptr<Window> window = this->getWindow().lock()) {
-        window->setNeedsDisplayInRect(this->frame, window);
+        this->setNeedsDisplayInRect(this->frame);
     }
 }
 
@@ -286,6 +286,19 @@ uint16_t View::getDirectionalAffinity() {
 
 void View::setDirectionalAffinity(DirectionalAffinity value) {
     this->affinity = value;
+}
+
+void View::setNeedsDisplayInRect(Rect rect) {
+    std::shared_ptr<View> shared_this = this->shared_from_this();
+    std::shared_ptr<View> superview(shared_this);
+    while(superview = superview->superview.lock()) {
+        rect.origin.x += superview->frame.origin.x;
+        rect.origin.y += superview->frame.origin.y;
+    }
+
+    if (std::shared_ptr<Window> window = this->getWindow().lock()) {
+        window->setNeedsDisplayInRect(rect);
+    }
 }
 
 Control::Control(Rect rect) : View(rect) {
@@ -331,13 +344,7 @@ void Window::setNeedsDisplay(bool needsDisplay) {
     }
 }
 
-void Window::setNeedsDisplayInRect(Rect rect, std::shared_ptr<View> view) {
-    std::shared_ptr<View> superview(view);
-    while(superview = superview->superview.lock()) {
-        rect.origin.x += superview->frame.origin.x;
-        rect.origin.y += superview->frame.origin.y;
-    }
-
+void Window::setNeedsDisplayInRect(Rect rect) {
     Rect finalRect;
     if (this->dirty) {
         finalRect = MakeRect(min(this->dirtyRect.origin.x, rect.origin.x), min(this->dirtyRect.origin.y, rect.origin.y), 0, 0);

@@ -57,24 +57,29 @@ bool OpenBookDatabase::connect() {
     this->numBooks = header.numBooks;
     this->numFields = header.numFields;
 
-    device->removeFile("ernest-hemingway-shorts.pag");
-
     return true;
+}
+
+bool OpenBookDatabase::_fileIsTxt(File entry) {
+    if (entry.isDirectory()) return false;
+
+    uint32_t extension = 0;
+    char filename[128];
+
+    entry.getName(filename, 128);
+    memcpy((byte *)&extension, filename + (strlen(filename) - 4), 4);
+    // return true if file extension is .txt
+    // and first character is not '.'
+    return (extension == 1954051118 && filename[0] != '.');
 }
 
 bool OpenBookDatabase::_fileLooksLikeBook(File entry) {
     uint32_t magic = 0;
-    uint32_t extension = 0;
-    char filename[128];
-
-    if (entry.isDirectory()) return false;
-
-    entry.getName(filename, 128);
-    memcpy((byte *)&extension, filename + (strlen(filename) - 4), 4);
+    entry.seekSet(0);
     entry.read((void *)&magic, sizeof(magic));
-    // return true if file extension is .txt, and
-    // file begins with three hyphens followed by a newline
-    return (extension == 1954051118 && magic == 170732845);
+    entry.seekSet(0);
+    // return true if file begins with three hyphens followed by a newline
+    return (magic == 170732845);
 }
 
 bool OpenBookDatabase::scanForNewBooks() {
@@ -90,7 +95,7 @@ bool OpenBookDatabase::scanForNewBooks() {
     root = device->openFile("/");
     entry = root.openNextFile();
     while (entry) {
-        if (this->_fileLooksLikeBook(entry)) {
+        if (this->_fileIsTxt(entry)) {
             numBooks++;
         }
         entry.close();
@@ -110,72 +115,89 @@ bool OpenBookDatabase::scanForNewBooks() {
     root = device->openFile("/");
     entry = root.openNextFile();
     while (entry) {
-        if (this->_fileLooksLikeBook(entry)) {
-            BookRecord record = {0};
-            entry.getName(record.filename, 128);
+        BookRecord record = {};
+        entry.getName(record.filename, 128);
+        if (this->_fileIsTxt(entry)) {
             hash = sha256(std::string(record.filename));
             memcpy((void *)&record.fileHash, hash.c_str(), sizeof(record.fileHash));
             record.fileSize = entry.size();
             record.currentPosition = 0; // TODO: copy from map
-            uint32_t tag;
-            char c;
-            bool done = false;
-            entry.seekSet(4);
-            while(!done) {
-                entry.read((byte *)&tag, sizeof(tag));
-                if (tag == 170732845) { // ---\n, end of front matter
-                    done = true;
-                    record.textStart = entry.position();
-                    break;
+            if (this->_fileLooksLikeBook(entry)) {
+                // if file is a text file AND it has front matter, parse the front matter.
+                uint32_t tag;
+                char c;
+                bool done = false;
+                entry.seekSet(4);
+                while(!done) {
+                    entry.read((byte *)&tag, sizeof(tag));
+                    if (tag == 170732845) { // ---\n, end of front matter
+                        done = true;
+                        record.textStart = entry.position();
+                        break;
+                    }
+                    do {
+                        c = entry.read();
+                    } while (c != ':');
+                    do {
+                        c = entry.read();
+                    } while (c == ' ');
+                    uint64_t loc = entry.position() - 1;
+                    uint64_t len = 0;
+                    do {
+                        len++;
+                        c = entry.read();
+                    } while (c != '\n');
+                    // len is now the length of the metadata
+                    BookField field;
+                    field.tag = tag;
+                    field.loc = loc;
+                    field.len = len;
+                    switch (tag) {
+                        case 1280592212: // TITL
+                            record.metadata[OPEN_BOOK_TITLE_INDEX] = field;
+                            break;
+                        case 1213486401: // AUTH
+                            record.metadata[OPEN_BOOK_AUTHOR_INDEX] = field;
+                            break;
+                        case 1163021895: // GNRE
+                            record.metadata[OPEN_BOOK_GENRE_INDEX] = field;
+                            break;
+                        case 1129530692: // DESC
+                            record.metadata[OPEN_BOOK_DESCRIPTION_INDEX] = field;
+                            break;
+                        case 1196310860: // LANG
+                            record.metadata[OPEN_BOOK_LANGUAGE_INDEX] = field;
+                            break;
+                        default:
+                            break;
+                    }            
                 }
-                do {
-                    c = entry.read();
-                } while (c != ':');
-                do {
-                    c = entry.read();
-                } while (c == ' ');
-                uint64_t loc = entry.position() - 1;
-                uint64_t len = 0;
-                do {
-                    len++;
-                    c = entry.read();
-                } while (c != '\n');
-                // len is now the length of the metadata
+            } else if (this->_fileIsTxt(entry)) {
+                // if it's just a text file, use the first line as the title.
+                record.fileSize = entry.size();
+                record.currentPosition = 0; // TODO: copy from map
+
                 BookField field;
-                field.tag = tag;
-                field.loc = loc;
-                field.len = len;
-                switch (tag) {
-                    case 1280592212: // TITL
-                        record.metadata[OPEN_BOOK_TITLE_INDEX] = field;
-                        break;
-                    case 1213486401: // AUTH
-                        record.metadata[OPEN_BOOK_AUTHOR_INDEX] = field;
-                        break;
-                    case 1163021895: // GNRE
-                        record.metadata[OPEN_BOOK_GENRE_INDEX] = field;
-                        break;
-                    case 1129530692: // DESC
-                        record.metadata[OPEN_BOOK_DESCRIPTION_INDEX] = field;
-                        break;
-                    case 1196310860: // LANG
-                        record.metadata[OPEN_BOOK_LANGUAGE_INDEX] = field;
-                        break;
-                    default:
-                        break;
+                field.tag = 1280592212; // TITL
+                field.loc = 0;
+                // up to 32 characters
+                field.len = std::min(record.fileSize, (uint64_t)32);
+                entry.seekSet(0);
+                for(int i = 0; i < field.len; i++) {
+                    // but truncate it at the first newline
+                    char c = entry.read();
+                    if ((c == '\r') || c == '\n') field.len = i;
                 }
+                record.metadata[OPEN_BOOK_TITLE_INDEX] = field;
             }
             entry.close();
-
             temp = device->openFile(OPEN_BOOK_WORKING_FILENAME, O_RDWR | O_AT_END);
             temp.write((byte *)&record, sizeof(BookRecord));
             temp.flush();
             temp.close();
         }
-        entry.close();
         entry = root.openNextFile();
     }
-    entry.close();
 
     device->renameFile(OPEN_BOOK_LIBRARY_FILENAME, OPEN_BOOK_BACKUP_FILENAME);
     device->renameFile(OPEN_BOOK_WORKING_FILENAME, OPEN_BOOK_LIBRARY_FILENAME);
@@ -211,6 +233,28 @@ std::string OpenBookDatabase::getBookDescription(BookRecord record) {
     return this->_getMetadataAtIndex(record, OPEN_BOOK_DESCRIPTION_INDEX);
 }
 
+uint32_t OpenBookDatabase::getCurrentPage(BookRecord record) {
+    uint32_t retval = 0;
+    std::string filename = std::string(record.filename);
+
+    filename.replace(strlen(record.filename) - 3, 3, "obp");
+    if (OpenBookDevice::sharedDevice()->fileExists(filename.c_str())) {
+        File f = OpenBookDevice::sharedDevice()->openFile(filename.c_str());
+        f.read((void *)&retval, 4);
+        f.close();
+    }
+
+    return retval;
+}
+
+void OpenBookDatabase::setCurrentPage(BookRecord record, uint32_t page) {
+    std::string filename = std::string(record.filename);
+    filename.replace(strlen(record.filename) - 3, 3, "obp");
+    File f = OpenBookDevice::sharedDevice()->openFile(filename.c_str(), O_CREAT | O_WRITE | O_TRUNC);
+    f.write(&page, 4);
+    f.close();
+}
+
 std::string OpenBookDatabase::_getMetadataAtIndex(BookRecord record, uint16_t i) {
     BookField field = record.metadata[i];
     char *value = (char *)malloc(field.len + 1);
@@ -233,7 +277,7 @@ bool OpenBookDatabase::bookIsPaginated(BookRecord record) {
 
 void OpenBookDatabase::paginateBook(BookRecord record) {
     OpenBookDevice *device = OpenBookDevice::sharedDevice();
-    BookPaginationHeader header;
+    BookPaginationHeader header = {};
     File paginationFile;
     char paginationFilename[128];
 
@@ -249,7 +293,7 @@ void OpenBookDatabase::paginateBook(BookRecord record) {
     paginationFile.close();
 
     // now process the whole file and seek out chapter headings.
-    BookChapter chapter = {0};
+    BookChapter chapter = {};
     File f = device->openFile(record.filename);
     f.seekSet(record.textStart);
     do {
@@ -269,20 +313,27 @@ void OpenBookDatabase::paginateBook(BookRecord record) {
             paginationFile.close();
             f = device->openFile(record.filename);
             f.seekSet(chapter.loc + chapter.len);
-            chapter = {0};
+            chapter = {};
         }
     } while (f.available());
     f.close();
 
-    // if we found chapters, mark the TOC as starting right after the header.
-    if (header.numChapters) header.tocStart = sizeof(BookPaginationHeader);
-
-    header.pageStart = header.tocStart + header.numChapters * sizeof(BookChapter);
+    if (header.numChapters) {
+        // if we found chapters, mark the table of contents as starting right after the header...
+        header.tocStart = sizeof(BookPaginationHeader);
+        // ...and the page index as starting right after that.
+        header.pageStart = header.tocStart + header.numChapters * sizeof(BookChapter);
+    } else {
+        // Otherwise we have no table of contents.
+        header.tocStart = 0;
+        // Mark page index as starting right after the header.
+        header.pageStart = sizeof(BookPaginationHeader);
+    }
 
     // OKAY! Time to do pages. For this we have to traverse the whole file again,
     // but this time we need to simulate actually laying it out.
     BabelDevice *babel = device->getTypesetter()->getBabel();
-    BookPage page = {0};
+    BookPage page = {};
     uint16_t yPos = 0;
     char utf8bytes[128];
     BABEL_CODEPOINT codepoints[127];
@@ -390,7 +441,7 @@ uint32_t OpenBookDatabase::numPages(BookRecord record) {
     return 0;
 }
 
-std::string OpenBookDatabase::getBookPage(BookRecord record, uint32_t page) {
+std::string OpenBookDatabase::getTextForPage(BookRecord record, uint32_t page) {
     char paginationFilename[128];
 
     if (this->_getPaginationFile(record, paginationFilename)) {

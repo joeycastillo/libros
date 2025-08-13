@@ -62,8 +62,12 @@ void ProgressView::draw(Adafruit_GFX *display, int16_t x, int16_t y) {
 void ProgressView::setProgress(float value) {
     this->progress = value;
     if (std::shared_ptr<Window> window = this->getWindow().lock()) {
-        window->setNeedsDisplayInRect(this->frame, window);
+        this->setNeedsDisplayInRect(this->frame);
     }
+}
+
+float ProgressView::getProgress() {
+    return this->progress;
 }
 
 Label::Label(Rect rect, std::string text) : View(rect) {
@@ -80,6 +84,6 @@ void Label::draw(Adafruit_GFX *display, int16_t x, int16_t y) {
 void Label::setText(std::string text) {
     this->text = text;
     if (std::shared_ptr<Window> window = this->getWindow().lock()) {
-        window->setNeedsDisplayInRect(this->frame, window);
+        this->setNeedsDisplayInRect(this->frame);
     }
 }

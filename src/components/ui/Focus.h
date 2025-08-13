@@ -100,6 +100,7 @@ public:
     void setForegroundColor(uint16_t value);
     uint16_t getDirectionalAffinity();
     void setDirectionalAffinity(DirectionalAffinity value);
+    void setNeedsDisplayInRect(Rect rect);
 protected:
     bool focused = false;
     bool opaque = false;
@@ -107,7 +108,7 @@ protected:
     int32_t tag = 0;
     uint16_t backgroundColor = 0;
     uint16_t foregroundColor = 1;
-    Rect frame = {0};
+    Rect frame = {};
     DirectionalAffinity affinity = DirectionalAffinityVertical;
     std::vector<std::shared_ptr<View>> subviews;
     std::map<int32_t, Action> actions;
@@ -135,8 +136,8 @@ public:
     bool canBecomeFocused() override;
     bool needsDisplay();
     void setNeedsDisplay(bool needsDisplay);
-    void setNeedsDisplayInRect(Rect rect, std::shared_ptr<View> view);
     Rect getDirtyRect();
+    void setNeedsDisplayInRect(Rect rect);
     std::weak_ptr<View> getFocusedView();
     std::weak_ptr<View>getSuperview() override;
     std::weak_ptr<Window> getWindow() override;

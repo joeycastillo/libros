@@ -40,13 +40,22 @@ bool OpenBookRawButtonInput::run(std::shared_ptr<Application> application) {
     return false;
 }
 
+OpenBookDisplay::OpenBookDisplay() {
+    OpenBookDevice *device = OpenBookDevice::sharedDevice();
+    OPEN_BOOK_EPD *display = device->getDisplay();
+    // when first initializing the display, clear once in quick mode to reduce ghosting.
+    display->setDisplayMode(OPEN_BOOK_DISPLAY_MODE_QUICK);
+    display->clearBuffer();
+    display->display();
+}
+
 bool OpenBookDisplay::run(std::shared_ptr<Application> application) {
     OpenBookDevice *device = OpenBookDevice::sharedDevice();
     OpenBookApplication *myApp = (OpenBookApplication *)application.get();
 
     std::shared_ptr<Window> window = application->getWindow();
     if (window->needsDisplay()) {
-        OpenBook_IL0398 *display = device->getDisplay();
+        OPEN_BOOK_EPD *display = device->getDisplay();
 
         display->clearBuffer();
         window->draw(display, 0, 0);
@@ -81,11 +90,19 @@ bool OpenBookLockScreen::run(std::shared_ptr<Application> application) {
     OpenBookApplication *myApp = (OpenBookApplication *)application.get();
     if (myApp->locked) {
         std::shared_ptr<Window> window = application->getWindow();
-        OpenBook_IL0398 *display = device->getDisplay();
-        std::shared_ptr<BorderedView> lockModal = std::make_shared<BorderedView>(MakeRect(10, 168, 300 - 20, 68));
-        std::shared_ptr<OpenBookLabel> lockLabel = std::make_shared<OpenBookLabel>(MakeRect(2, 2, 300 - 24, 64), "\n  Open Book is in low power mode.\n  Press the lock button to wake.");
+        OPEN_BOOK_EPD *display = device->getDisplay();
+        std::shared_ptr<BorderedView> lockModal = std::make_shared<BorderedView>(MakeRect(-1, 400-32, 302, 33));
+#ifdef ARDUINO_ARCH_RP2040
+        std::shared_ptr<OpenBookLabel> lockLabel = std::make_shared<OpenBookLabel>(MakeRect(6, 8, 300 - 16, 16), "Slide the power switch to continue");
+        std::shared_ptr<OpenBookLabel> arrowLabel = std::make_shared<OpenBookLabel>(MakeRect(300-18, 10, 16, 16), "➜");
 
         lockModal->addSubview(lockLabel);
+        lockModal->addSubview(arrowLabel);
+#endif
+#ifdef ARDUINO_ARCH_ESP32
+        std::shared_ptr<OpenBookLabel> lockLabel = std::make_shared<OpenBookLabel>(MakeRect(6, 8, 300 - 16, 16), "Press the Lock button to wake the device.");
+        lockModal->addSubview(lockLabel);
+#endif
 
         lockModal->setOpaque(true);
         lockModal->setBackgroundColor(EPD_WHITE);

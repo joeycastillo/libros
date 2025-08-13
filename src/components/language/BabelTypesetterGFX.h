@@ -32,6 +32,7 @@
 #include "Adafruit_GFX.h"
 #include "BabelTypesetter.h"
 #include "BabelSPIFlash.h"
+#include "BabelESP32S3.h"
 #include "BabelFile.h"
 #if BOARD_REQUIRES_BABEL_FILE
 #include "Adafruit_SPIFlash.h"
@@ -40,6 +41,7 @@
 class BabelTypesetterGFX: public BabelTypesetter {
 public:
     BabelTypesetterGFX(Adafruit_GFX *display, uint8_t cs, SPIClass *spi);
+    BabelTypesetterGFX(Adafruit_GFX *display, const char *partition_label);
 #if BOARD_REQUIRES_BABEL_FILE
     BabelTypesetterGFX(Adafruit_GFX *display, FatFileSystem *fatfs, char *filename);
 #endif

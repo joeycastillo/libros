@@ -1,10 +1,15 @@
 #include "OpenBookDevice.h"
 #include "OpenBook_IL0398.h"
-#include "sleep.h"
 
 #ifdef ARDUINO_ARCH_RP2040
+#include "sleep.h"
+
 MbedSPI* SPI0;
 MbedSPI* SPI1;
+#else
+#include "driver/rtc_io.h"
+SPIClass *SPI0 = NULL;
+SPIClass *SPI1 = NULL;
 #endif
 
 OpenBookDevice::OpenBookDevice() {
@@ -23,10 +28,10 @@ OpenBookDevice::OpenBookDevice() {
     this->configureBabel(1, SPI0);
 
     OpenBookButtonConfig buttonConfig;
-    buttonConfig.left_pin = 13;
+    buttonConfig.left_pin = 20;
     buttonConfig.down_pin = 21;
     buttonConfig.up_pin = 19;
-    buttonConfig.right_pin = 20;
+    buttonConfig.right_pin = 13;
     buttonConfig.select_pin = 14;
     buttonConfig.previous_pin = 18;
     buttonConfig.next_pin = 15;
@@ -34,9 +39,36 @@ OpenBookDevice::OpenBookDevice() {
     buttonConfig.lock_pin = 12;
     this->configureButtons(LOW, buttonConfig);
 #else
-    book->configureSD(38, &SPI);
-    book->configureScreen(-1, 39, 40, 41, 42, &SPI, 300, 400);
-    book->configureBabel(44);
+    // enable power to peripherals
+    pinMode(3, OUTPUT);
+    digitalWrite(3, LOW);
+
+    SPI0 = new SPIClass();
+    SPI1 = new SPIClass();
+
+    SPI0->begin(5, 6, 4, -1);
+    SPI1->begin(48, -1, 47, -1);
+
+    this->configureSD(37, SPI0);
+    this->configureScreen(-1, 35, 36, 38, 2, SPI1, 300, 400);
+
+    this->configureBabel("babel");
+
+    OpenBookButtonConfig buttonConfig;
+    buttonConfig.left_pin = 11;
+    buttonConfig.down_pin = 13;
+    buttonConfig.up_pin = 12;
+    buttonConfig.right_pin = 21;
+    buttonConfig.select_pin = 14;
+    buttonConfig.previous_pin = 8;
+    buttonConfig.next_pin = 1;
+    buttonConfig.cd_pin = 7;
+    buttonConfig.lock_pin = 0;
+    this->configureButtons(LOW, buttonConfig);
+
+    // disable the backlight
+    pinMode(46, OUTPUT);
+    digitalWrite(46, LOW);
 #endif
 }
 
@@ -63,7 +95,7 @@ OpenBookDevice::OpenBookDevice() {
         * IL0398 Datasheet: https://cdn.sparkfun.com/assets/f/a/9/3/7/4.2in_ePaper_Driver.pdf
 */
 bool OpenBookDevice::configureScreen(int8_t srcs, int8_t ecs, int8_t edc, int8_t erst, int8_t ebsy, SPIClass *spi, int width, int height) {
-    OpenBook_IL0398 *display = new OpenBook_IL0398(width, height, edc, erst, ecs, srcs, ebsy, spi);
+    OPEN_BOOK_EPD *display = new OPEN_BOOK_EPD(width, height, edc, erst, ecs, srcs, ebsy, spi);
     this->display = display;
 
     return true;
@@ -136,8 +168,26 @@ bool OpenBookDevice::configureBabel(int8_t bcs, SPIClass *spi) {
     return true;
 }
 
+/**
+ @brief Configures the Babel language expansion residing at a locaiton in memory.
+        You must call this after configuring the display, as Babel needs a
+        reference to it to function.
+ @param location A pointer to the first byte of the Babel data in memory
+ @returns true if Babel was successfully set up.
+*/
+bool OpenBookDevice::configureBabel(const char *partition_label) {
+    BabelTypesetterGFX *typesetter = new BabelTypesetterGFX(this->display, partition_label);
+    this->typesetter = typesetter;
+
+    return true;
+}
+
 bool OpenBookDevice::configureSD(int8_t sdcs, SPIClass *spi) {
+    #ifdef ARDUINO_ARCH_RP2040
     this->sd = new SdFat(spi);
+    #else
+    this->sd = new SdFat(spi);
+    #endif
     this->sdcs = sdcs;
 
     return true;
@@ -181,18 +231,48 @@ void OpenBookDevice::lockDevice() {
     sleep_goto_dormant_until_pin(12, true, false);
     this->reset();
 #endif
+#ifdef ARDUINO_ARCH_ESP32
+    rtc_gpio_pulldown_dis(GPIO_NUM_0);
+    rtc_gpio_pullup_en(GPIO_NUM_0);
+    esp_sleep_enable_ext0_wakeup(GPIO_NUM_0, LOW);
+    esp_deep_sleep_start();
+#endif
 }
 
 void OpenBookDevice::reset() {
+    #if defined(ARDUINO_ARCH_RP2040)
     (*((volatile uint32_t*)(PPB_BASE + 0x0ED0C))) = 0x5FA0004;
+    #endif
+    /// TODO: Reset ESP32-S3
 }
 
 double OpenBookDevice::getSystemVoltage() {
 #ifdef ARDUINO_ARCH_RP2040
     analogReadResolution(16);
-    pinMode(29, INPUT);
+    pinMode(A3, INPUT);     // this pin is VSYS / 3
     int32_t value = analogRead(A3);
+    if (value < 2048) {
+        // on Pico W, the wifi chip holds this line low.
+        // pin 25 is wifi chip select
+        pinMode(25, OUTPUT);
+        // set it high to disable wifi and allow pin A3 to float
+        digitalWrite(25, HIGH);
+        // then read A3 again
+        value = analogRead(A3);
+        // and restore wifi chip select to its original state (?)
+        digitalWrite(25, LOW);
+    }
+    
     return 3.3 * 3 * value / 65535;
+#endif
+#ifdef ARDUINO_ARCH_ESP32
+    analogReadResolution(16);
+    pinMode(GPIO_NUM_17, INPUT);     // this pin is VBAT / 2
+    double vbat = 3.3 * 2 * analogRead(GPIO_NUM_17) / 65535;
+    pinMode(GPIO_NUM_18, INPUT);     // this pin is VBUS * 2/3
+    double vbus = 3.3 * 1.5 * analogRead(GPIO_NUM_18) / 65535;
+
+    return max(vbat, vbus);
 #endif
     return 0;
 }
@@ -245,7 +325,7 @@ OpenBookSDCardState OpenBookDevice::sdCardState() {
 /**
  @returns a reference to the e-paper display, or NULL if not configured.
 */
-OpenBook_IL0398 * OpenBookDevice::getDisplay() {
+OPEN_BOOK_EPD * OpenBookDevice::getDisplay() {
     return this->display;
 }
 

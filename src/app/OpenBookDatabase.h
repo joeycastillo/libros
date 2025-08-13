@@ -68,7 +68,7 @@ typedef struct {
         uint16_t isChapterSeparator : 1;    // 1 if this is a chapter separator page
         uint16_t activeShifts : 2;          // 0-3 for number of format shifts
         uint16_t reserved : 13;             // Reserved for future use
-    } flags = {0};
+    } flags = {};
 } BookPage;
 
 class OpenBookDatabase {
@@ -89,13 +89,19 @@ public:
     std::string getBookAuthor(BookRecord record);
     std::string getBookDescription(BookRecord record);
 
+    // These should work within _LIBRARY or the main database,
+    // but use a sidecar file for now
+    uint32_t getCurrentPage(BookRecord record);
+    void setCurrentPage(BookRecord record, uint32_t page);
+
     // Methods for dealing with .pag sidecar files
     bool bookIsPaginated(BookRecord record);
     void paginateBook(BookRecord record);
     uint32_t numPages(BookRecord record);
 
-    std::string getBookPage(BookRecord record, uint32_t page);
+    std::string getTextForPage(BookRecord record, uint32_t page);
 protected:
+    bool _fileIsTxt(File entry);
     bool _fileLooksLikeBook(File entry);
     std::string _getMetadataAtIndex(BookRecord record, uint16_t i);
     bool _getPaginationFile(BookRecord record, char *outFilename);
