@@ -21,15 +21,14 @@
 #include <Arduino.h>
 #include <SPI.h>
 
-#include "Adafruit_EPD.h"
 #include "OpenBook_EPD.h"
 
 /**************************************************************************/
 /*!
-    @brief  Class for interfacing with IL0398 EPD drivers
+    @brief  Class for interfacing with SSD1683 EPD drivers
 */
 /**************************************************************************/
-class OpenBook_SSD1683 : public Adafruit_EPD {
+class OpenBook_SSD1683 : public OpenBook_EPD {
  public:
     OpenBook_SSD1683(int width, int height, int8_t SID, int8_t SCLK, int8_t DC, int8_t RST, int8_t CS, int8_t SRCS, int8_t MISO, int8_t BUSY = -1);
     OpenBook_SSD1683(int width, int height, int8_t DC, int8_t RST, int8_t CS, int8_t SRCS, int8_t BUSY = -1, SPIClass *spi = &SPI);

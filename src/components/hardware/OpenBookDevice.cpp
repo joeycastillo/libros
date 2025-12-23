@@ -1,5 +1,6 @@
 #include "OpenBookDevice.h"
 #include "OpenBook_IL0398.h"
+#include "OpenBook_SSD1683.h"
 
 #ifdef ARDUINO_ARCH_RP2040
 #include "sleep.h"
@@ -73,9 +74,28 @@ OpenBookDevice::OpenBookDevice() {
 }
 
 /**
- @brief Configures the e-ink screen.
+ @brief Configures the e-ink screen with automatic display type detection.
  @param srcs Chip select pin for the SRAM. Pass in OPENBOOK_NOT_PRESENT if you
              have omitted this chip.
+ @param ecs Chip select pin for the e-ink screen.
+ @param edc Data/command pin for the e-ink screen.
+ @param erst Reset pin for the e-ink screen.
+ @param ebsy Busy pin for the e-ink screen.
+ @param spi Address of the SPI bus for the screen and SRAM chip.
+ @param width Native width of the display
+ @param height Native height of the display
+ @returns always returns true for now
+ @note This version uses OPEN_BOOK_DISPLAY_TYPE_DEFAULT which will be resolved
+       at runtime based on platform defaults or automatic screen detection
+*/
+bool OpenBookDevice::configureScreen(int8_t srcs, int8_t ecs, int8_t edc, int8_t erst, int8_t ebsy, SPIClass *spi, int width, int height) {
+    return this->configureScreen(OPEN_BOOK_DISPLAY_TYPE_DEFAULT, srcs, ecs, edc, erst, ebsy, spi, width, height);
+}
+
+/**
+ @brief Configures the e-ink screen with specified display type.
+ @param displayType The type of display driver to use (IL0398, SSD1683, or DEFAULT for auto-detect)
+ @param srcs Chip select pin for the SRAM. Pass in -1 if you have omitted this chip.
  @param ecs Chip select pin for the e-ink screen.
  @param edc Data/command pin for the e-ink screen.
  @param erst Reset pin for the e-ink screen.
@@ -94,8 +114,21 @@ OpenBookDevice::OpenBookDevice() {
         * GxEPD2: https://github.com/ZinggJM/GxEPD2
         * IL0398 Datasheet: https://cdn.sparkfun.com/assets/f/a/9/3/7/4.2in_ePaper_Driver.pdf
 */
-bool OpenBookDevice::configureScreen(int8_t srcs, int8_t ecs, int8_t edc, int8_t erst, int8_t ebsy, SPIClass *spi, int width, int height) {
-    OPEN_BOOK_EPD *display = new OPEN_BOOK_EPD(width, height, edc, erst, ecs, srcs, ebsy, spi);
+bool OpenBookDevice::configureScreen(OpenBookDisplayType displayType, int8_t srcs, int8_t ecs, int8_t edc, int8_t erst, int8_t ebsy, SPIClass *spi, int width, int height) {
+    // If DEFAULT is specified, detect the display type by probing the hardware
+    if (displayType == OPEN_BOOK_DISPLAY_TYPE_DEFAULT) {
+        displayType = this->detectDisplayType(erst, ebsy);
+    }
+
+    // Create the appropriate display driver
+    OpenBook_EPD *display = NULL;
+    if (displayType == OPEN_BOOK_DISPLAY_TYPE_SSD1683) {
+        display = new OpenBook_SSD1683(width, height, edc, erst, ecs, srcs, ebsy, spi);
+    } else {
+        // Default to IL0398
+        display = new OpenBook_IL0398(width, height, edc, erst, ecs, srcs, ebsy, spi);
+    }
+
     this->display = display;
 
     return true;
@@ -325,7 +358,7 @@ OpenBookSDCardState OpenBookDevice::sdCardState() {
 /**
  @returns a reference to the e-paper display, or NULL if not configured.
 */
-OPEN_BOOK_EPD * OpenBookDevice::getDisplay() {
+OpenBook_EPD * OpenBookDevice::getDisplay() {
     return this->display;
 }
 
@@ -350,4 +383,59 @@ bool OpenBookDevice::renameFile(const char *oldPath, const char *newPath) {
 
 bool OpenBookDevice::removeFile(const char *path) {
     return this->sd->remove(path);
+}
+
+/**
+ @brief Detects the display type by probing the hardware
+ @param erst Reset pin for the e-ink screen
+ @param ebsy Busy pin for the e-ink screen
+ @returns the detected display type
+ @note This works by checking the busy pin polarity after a hardware reset.
+       The IL0398 uses busy=LOW to indicate busy, HIGH to indicate ready.
+       The SSD1683 uses busy=HIGH to indicate busy, LOW to indicate ready.
+       After a hardware reset, once the display is ready:
+       - IL0398: busy pin will be HIGH
+       - SSD1683: busy pin will be LOW
+*/
+OpenBookDisplayType OpenBookDevice::detectDisplayType(int8_t erst, int8_t ebsy) {
+    // Set up the pins for detection
+    if (erst >= 0) {
+        pinMode(erst, OUTPUT);
+    }
+    if (ebsy >= 0) {
+        pinMode(ebsy, INPUT);
+    }
+
+    // Perform a hardware reset sequence
+    if (erst >= 0) {
+        digitalWrite(erst, HIGH);
+        delay(10);
+        digitalWrite(erst, LOW);
+        delay(10);
+        digitalWrite(erst, HIGH);
+        delay(100);  // Give the display time to initialize
+    }
+
+    // Check the busy pin state to determine display type
+    // IL0398: busy=HIGH when ready (waits for HIGH in busy_wait)
+    // SSD1683: busy=LOW when ready (waits for LOW in busy_wait)
+    if (ebsy >= 0) {
+        // Read the busy pin state after reset
+        bool busyState = digitalRead(ebsy);
+
+        if (busyState == HIGH) {
+            // Busy pin is HIGH after reset - this is IL0398 (ready state)
+            return OPEN_BOOK_DISPLAY_TYPE_IL0398;
+        } else {
+            // Busy pin is LOW after reset - this is SSD1683 (ready state)
+            return OPEN_BOOK_DISPLAY_TYPE_SSD1683;
+        }
+    }
+
+    // If no busy pin, fall back to platform default
+    #ifdef ARDUINO_ARCH_RP2040
+    return OPEN_BOOK_DISPLAY_TYPE_IL0398;
+    #else
+    return OPEN_BOOK_DISPLAY_TYPE_SSD1683;
+    #endif
 }

@@ -9,7 +9,7 @@ void setup() {
     OpenBookDevice::sharedDevice()->startDisplay();
 
     // before initializing the window system, display the splash screen with a full refresh.
-    Adafruit_EPD *display = OpenBookDevice::sharedDevice()->getDisplay();
+    OpenBook_EPD *display = OpenBookDevice::sharedDevice()->getDisplay();
     display->drawBitmap(0, 0, OpenBookSplash, 300, 400, EPD_BLACK);
     display->display();
 

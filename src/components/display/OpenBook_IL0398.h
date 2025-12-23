@@ -21,7 +21,6 @@
 #include <Arduino.h>
 #include <SPI.h>
 
-#include "Adafruit_EPD.h"
 #include "OpenBook_EPD.h"
 
 /**************************************************************************/
@@ -29,7 +28,7 @@
     @brief  Class for interfacing with IL0398 EPD drivers
 */
 /**************************************************************************/
-class OpenBook_IL0398 : public Adafruit_EPD {
+class OpenBook_IL0398 : public OpenBook_EPD {
  public:
     OpenBook_IL0398(int width, int height, int8_t SID, int8_t SCLK, int8_t DC, int8_t RST, int8_t CS, int8_t SRCS, int8_t MISO, int8_t BUSY = -1);
     OpenBook_IL0398(int width, int height, int8_t DC, int8_t RST, int8_t CS, int8_t SRCS, int8_t BUSY = -1, SPIClass *spi = &SPI);

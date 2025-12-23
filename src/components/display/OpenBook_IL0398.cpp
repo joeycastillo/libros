@@ -40,10 +40,10 @@
     @param BUSY the busy pin to use
 */
 /**************************************************************************/
-OpenBook_IL0398::OpenBook_IL0398(int width, int height, 
-				 int8_t SID, int8_t SCLK, int8_t DC, int8_t RST, 
-				 int8_t CS, int8_t SRCS, int8_t MISO, int8_t BUSY) : 
-  Adafruit_EPD(width, height, SID, SCLK, DC, RST, CS, SRCS, MISO, BUSY) {
+OpenBook_IL0398::OpenBook_IL0398(int width, int height,
+				 int8_t SID, int8_t SCLK, int8_t DC, int8_t RST,
+				 int8_t CS, int8_t SRCS, int8_t MISO, int8_t BUSY) :
+  OpenBook_EPD(width, height, SID, SCLK, DC, RST, CS, SRCS, MISO, BUSY) {
 
   buffer1_size = ((uint32_t)width * (uint32_t)height) / 8;
   buffer2_size = buffer1_size;
@@ -72,10 +72,10 @@ OpenBook_IL0398::OpenBook_IL0398(int width, int height,
     @param BUSY the busy pin to use
 */
 /**************************************************************************/
-OpenBook_IL0398::OpenBook_IL0398(int width, int height, 
-				 int8_t DC, int8_t RST, 
+OpenBook_IL0398::OpenBook_IL0398(int width, int height,
+				 int8_t DC, int8_t RST,
 				 int8_t CS, int8_t SRCS, int8_t BUSY, SPIClass *spi) :
-  Adafruit_EPD(width, height, DC, RST, CS, SRCS, BUSY, spi) {
+  OpenBook_EPD(width, height, DC, RST, CS, SRCS, BUSY, spi) {
 
   buffer1_size = ((uint32_t)width * (uint32_t)height) / 8;
   buffer2_size = buffer1_size;
@@ -626,6 +626,16 @@ void OpenBook_IL0398::setWindow(uint16_t x, uint16_t y, uint16_t w, uint16_t h) 
 /**************************************************************************/
 void OpenBook_IL0398::setDisplayMode(OpenBookDisplayMode displayMode) {
     this->init(displayMode);
+}
+
+/**************************************************************************/
+/*!
+    @brief get the current display mode
+    @returns the current display mode
+*/
+/**************************************************************************/
+OpenBookDisplayMode OpenBook_IL0398::getDisplayMode() {
+    return this->currentDisplayMode;
 }
 
 /**************************************************************************/

@@ -7,8 +7,7 @@
 #include <SdFat.h>
 
 #include "BabelTypesetterGFX.h"
-#include "OpenBook_IL0398.h"
-#include "OpenBook_SSD1683.h"
+#include "OpenBook_EPD.h"
 #include "Adafruit_MCP23008.h"
 
 #define OPENBOOK_BUTTONMASK_LEFT (1)
@@ -25,11 +24,11 @@ extern MbedSPI* SPI0;
 extern MbedSPI* SPI1;
 #endif
 
-#ifdef ARDUINO_ARCH_RP2040
-#define OPEN_BOOK_EPD OpenBook_IL0398
-#else
-#define OPEN_BOOK_EPD OpenBook_SSD1683
-#endif
+typedef enum {
+    OPEN_BOOK_DISPLAY_TYPE_IL0398,
+    OPEN_BOOK_DISPLAY_TYPE_SSD1683,
+    OPEN_BOOK_DISPLAY_TYPE_DEFAULT,
+} OpenBookDisplayType;
 
 typedef enum {
     OPEN_BOOK_SD_CARD_PRESENT,
@@ -70,7 +69,7 @@ public:
 
     uint8_t readButtons();
     OpenBookSDCardState sdCardState();
-    OPEN_BOOK_EPD *getDisplay();
+    OpenBook_EPD *getDisplay();
     BabelTypesetterGFX *getTypesetter();
 
     bool fileExists(const char *path);
@@ -80,13 +79,15 @@ public:
 
 protected:
     bool configureScreen(int8_t srcs, int8_t ecs, int8_t edc, int8_t erst, int8_t ebsy, SPIClass *spi, int width, int height);
+    bool configureScreen(OpenBookDisplayType displayType, int8_t srcs, int8_t ecs, int8_t edc, int8_t erst, int8_t ebsy, SPIClass *spi, int width, int height);
     bool configureButtons(int8_t active, OpenBookButtonConfig config);
     bool configureI2CButtons(int8_t active, int8_t interrupt);
     bool configureBabel(int8_t bcs, SPIClass *spi);
     bool configureBabel(const char *partition_label);
     bool configureSD(int8_t sdcs, SPIClass *spi);
+    OpenBookDisplayType detectDisplayType(int8_t erst, int8_t ebsy);
 
-    OPEN_BOOK_EPD *display = NULL;
+    OpenBook_EPD *display = NULL;
     BabelTypesetterGFX *typesetter = NULL;
     SdFat *sd;
 
