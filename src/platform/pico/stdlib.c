@@ -4,7 +4,6 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-#include "pico/stdlib.h"
 #include "hardware/pll.h"
 #include "hardware/clocks.h"
 #if LIB_PICO_STDIO_UART
